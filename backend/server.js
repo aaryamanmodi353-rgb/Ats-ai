@@ -9,12 +9,14 @@ import jdRoutes from './routes/jobDescriptions.js';
 import scoreRoutes from './routes/score.js';
 import aiRoutes from './routes/ai.js';
 import appRoutes from './routes/applications.js';
+import authRoutes from './routes/auth.js';
 
 import Resume from './models/Resume.js';
 import ResumeVersion from './models/ResumeVersion.js';
 import JobDescription from './models/JobDescription.js';
 import ScoreReport from './models/ScoreReport.js';
 import Application from './models/Application.js';
+import User from './models/User.js';
 import { ScoringService } from './services/scoringService.js';
 
 dotenv.config();
@@ -32,6 +34,7 @@ app.use('/api', jdRoutes);
 app.use('/api', scoreRoutes);
 app.use('/api', aiRoutes);
 app.use('/api', appRoutes);
+app.use('/api', authRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -68,6 +71,16 @@ async function connectDBAndSeed() {
 
     await mongoose.connect(mongoUri);
     console.log('Connected to MongoDB database successfully.');
+
+    const userCount = await User.countDocuments();
+    if (userCount === 0) {
+      console.log('Seeding initial Alex Morgan demo user account...');
+      await User.create({
+        fullName: 'Alex Morgan',
+        email: 'alex.morgan@dev-portfolio.com',
+        password: 'password123',
+      });
+    }
 
     // Auto-seed demo data if empty
     const resumeCount = await Resume.countDocuments();

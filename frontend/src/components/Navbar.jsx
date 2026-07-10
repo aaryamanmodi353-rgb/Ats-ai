@@ -1,10 +1,18 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { FileCheck, Sparkles, Kanban, Settings, LayoutDashboard, Plus } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { FileCheck, Sparkles, Kanban, Settings, LayoutDashboard, Plus, LogIn, LogOut, User } from 'lucide-react';
+import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Navbar() {
   const location = useLocation();
   const path = location.pathname;
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleSignOut = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur-md">
@@ -65,14 +73,49 @@ export default function Navbar() {
           </Link>
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <Link
             to="/resume/new"
-            className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md shadow-blue-500/20 flex items-center gap-1.5 transition-all hover:scale-105"
+            className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md shadow-blue-500/20 flex items-center gap-1.5 transition-all hover:scale-105"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">New Audit Scan</span>
+            <span className="hidden sm:inline">New Scan</span>
           </Link>
+
+          {user ? (
+            <div className="flex items-center gap-2 pl-2 border-l border-border/60">
+              <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-secondary/80 border border-border/60 text-xs font-semibold text-foreground">
+                <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center text-[10px] text-white font-bold uppercase">
+                  {user.fullName ? user.fullName.charAt(0) : 'U'}
+                </div>
+                <span className="hidden sm:inline max-w-[100px] truncate">{user.fullName}</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleSignOut}
+                title="Sign Out"
+                className="p-2 rounded-xl bg-secondary/40 hover:bg-destructive/10 text-muted-foreground hover:text-destructive border border-border/40 transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 pl-2 border-l border-border/60">
+              <Link
+                to="/login"
+                className="px-3 py-1.5 rounded-xl text-xs font-bold text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Sign In</span>
+              </Link>
+              <Link
+                to="/signup"
+                className="px-3.5 py-1.5 rounded-xl bg-secondary hover:bg-secondary/80 text-foreground font-bold text-xs border border-border/80 transition-all shadow-sm"
+              >
+                Sign Up
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </header>

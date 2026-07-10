@@ -9,6 +9,9 @@ import ScoreReport from './pages/ScoreReport.jsx';
 import ResumeEditor from './pages/ResumeEditor.jsx';
 import Applications from './pages/Applications.jsx';
 import Settings from './pages/Settings.jsx';
+import Login from './pages/Login.jsx';
+import Signup from './pages/Signup.jsx';
+import { AuthProvider } from './context/AuthContext.jsx';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -56,21 +59,25 @@ class ErrorBoundary extends React.Component {
 export default function App() {
   return (
     <ErrorBoundary>
-      <div className="min-h-screen flex flex-col bg-background text-foreground">
-        <Navbar />
-        <main className="flex-1 flex flex-col">
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/resume/new" element={<NewScan />} />
-            <Route path="/resume/:id/score/:reportId" element={<ScoreReport />} />
-            <Route path="/resume/:id/editor" element={<ResumeEditor />} />
-            <Route path="/applications" element={<Applications />} />
-            <Route path="/settings" element={<Settings />} />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
+      <AuthProvider>
+        <div className="min-h-screen flex flex-col bg-background text-foreground">
+          <Navbar />
+          <main className="flex-1 flex flex-col">
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/resume/new" element={<NewScan />} />
+              <Route path="/resume/:id/score/:reportId" element={<ScoreReport />} />
+              <Route path="/resume/:id/editor" element={<ResumeEditor />} />
+              <Route path="/applications" element={<Applications />} />
+              <Route path="/settings" element={<Settings />} />
+            </Routes>
+          </main>
+          <Footer />
+        </div>
+      </AuthProvider>
     </ErrorBoundary>
   );
 }
