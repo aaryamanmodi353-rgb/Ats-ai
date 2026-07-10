@@ -1,0 +1,15 @@
+{
+  "name": "resumeiq-mern-platform",
+  "version": "1.0.0",
+  "description": "ResumeIQ MERN Stack (MongoDB, Express.js, React, Node.js) Master Workspace",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n \"BACKEND,FRONTEND\" -c \"blue,green\" \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "test": "npm --prefix backend test"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
