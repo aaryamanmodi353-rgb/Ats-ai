@@ -75,7 +75,7 @@ export default function Navbar() {
 
         <div className="flex items-center gap-2.5">
           <Link
-            to="/resume/new"
+            to={user ? '/resume/new' : '/login'}
             className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-md shadow-blue-500/20 flex items-center gap-1.5 transition-all hover:scale-105"
           >
             <Plus className="w-3.5 h-3.5" />
