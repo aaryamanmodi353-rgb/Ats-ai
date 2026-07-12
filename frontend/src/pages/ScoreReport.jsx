@@ -26,6 +26,7 @@ export default function ScoreReport() {
   const [loading, setLoading] = useState(true);
   const [injecting, setInjecting] = useState(false);
   const [downloadingLatex, setDownloadingLatex] = useState(false);
+  const [optimizingWords, setOptimizingWords] = useState(false);
 
   useEffect(() => {
     async function loadReport() {
@@ -113,24 +114,30 @@ export default function ScoreReport() {
     const missingTools = breakdown?.keywordMatch?.missingTools || [];
     const allMissing = [...missingReq, ...missingPref, ...missingTools];
 
-    if (allMissing.length === 0) {
-      toast.info('No missing keywords to inject! You already match 100% of exact terms.');
-      return;
-    }
-
     setInjecting(true);
     try {
+      // 1. First run word/verb optimization API
+      let currentResumeData = resumeData;
+      const optRes = await axios.post('/api/optimize-bullets', {
+        resumeVersionId: latestVer._id || latestVer.id,
+        jobDescriptionId: report.jobDescriptionId || null,
+      });
+      if (optRes.data.success && optRes.data.updatedResumeData) {
+        currentResumeData = optRes.data.updatedResumeData;
+      }
+
+      // 2. Add missing skills into hardSkills & tools
       const updatedSkills = {
-        ...resumeData.skills,
-        hardSkills: Array.from(new Set([...(resumeData.skills?.hardSkills || []), ...missingReq, ...missingPref])),
-        tools: Array.from(new Set([...(resumeData.skills?.tools || []), ...missingTools])),
+        ...currentResumeData.skills,
+        hardSkills: Array.from(new Set([...(currentResumeData.skills?.hardSkills || []), ...missingReq, ...missingPref])),
+        tools: Array.from(new Set([...(currentResumeData.skills?.tools || []), ...missingTools])),
       };
-      const updatedResumeData = { ...resumeData, skills: updatedSkills };
+      const updatedResumeData = { ...currentResumeData, skills: updatedSkills };
 
       await axios.put(`/api/resume-versions/${latestVer._id || latestVer.id}`, {
-        versionLabel: `${latestVer.versionLabel || 'v1.0'} + Pro Keywords`,
+        versionLabel: `${latestVer.versionLabel || 'v1.0'} + Pro Optimized & Keywords`,
         contentJson: JSON.stringify(updatedResumeData),
-        atsScore: Math.min(100, compositeScore + missingReq.length * 8 + missingPref.length * 3),
+        atsScore: Math.min(100, compositeScore + missingReq.length * 8 + missingPref.length * 3 + (optRes.data.changesCount > 0 ? 10 : 0)),
       });
 
       if (report.jobDescriptionId) {
@@ -141,17 +148,50 @@ export default function ScoreReport() {
         if (recalc.data.success) {
           const freshRep = await axios.get(`/api/score/${recalc.data.reportId}`);
           setReport(freshRep.data);
-          toast.success(`⚡ Auto-injected ${allMissing.length} Pro hard skills! Score recalculated.`);
+          toast.success(`⚡ Auto-injected skills & optimized ${optRes.data?.changesCount || 0} verbs/repeated words!`);
           return;
         }
       }
-      toast.success('Injected missing keywords into resume profile successfully!');
+      toast.success('Injected missing keywords & optimized vocabulary successfully!');
       window.location.reload();
     } catch (e) {
       console.error(e);
-      toast.error('Failed to auto-inject keywords.');
+      toast.error('Failed to auto-inject keywords and optimize verbs.');
     } finally {
       setInjecting(false);
+    }
+  };
+
+  const handleOptimizeVerbsAndWords = async () => {
+    if (!latestVer || !resumeData) return;
+    setOptimizingWords(true);
+    try {
+      const res = await axios.post('/api/optimize-bullets', {
+        resumeVersionId: latestVer._id || latestVer.id,
+        jobDescriptionId: report.jobDescriptionId || null,
+      });
+
+      if (res.data.success && res.data.changesCount > 0) {
+        if (report.jobDescriptionId) {
+          const recalc = await axios.post('/api/score', {
+            resumeVersionId: latestVer._id || latestVer.id,
+            jobDescriptionId: report.jobDescriptionId,
+          });
+          if (recalc.data.success) {
+            const freshRep = await axios.get(`/api/score/${recalc.data.reportId}`);
+            setReport(freshRep.data);
+          }
+        }
+        toast.success(`✨ Auto-Optimized! Relocated verbs & removed ${res.data.changesCount} repeated/weak words!`);
+        setTimeout(() => window.location.reload(), 1200);
+      } else {
+        toast.info('Your resume bullets already have elite action verbs and zero word repetition!');
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to optimize vocabulary & verbs.');
+    } finally {
+      setOptimizingWords(false);
     }
   };
 
@@ -164,20 +204,28 @@ export default function ScoreReport() {
 
     setDownloadingLatex(true);
     try {
-      const updatedSkills = {
-        ...resumeData.skills,
-        hardSkills: Array.from(new Set([...(resumeData.skills?.hardSkills || []), ...missingReq, ...missingPref])),
-        tools: Array.from(new Set([...(resumeData.skills?.tools || []), ...missingTools])),
-      };
-      const updatedResumeData = { ...resumeData, skills: updatedSkills };
-
-      if (allMissing.length > 0) {
-        await axios.put(`/api/resume-versions/${latestVer._id || latestVer.id}`, {
-          versionLabel: `${latestVer.versionLabel || 'v1.0'} + LaTeX Injected`,
-          contentJson: JSON.stringify(updatedResumeData),
-          atsScore: Math.min(100, compositeScore + missingReq.length * 8 + missingPref.length * 3),
-        });
+      // 1. Optimize verbs & repeated words first
+      let currentResumeData = resumeData;
+      const optRes = await axios.post('/api/optimize-bullets', {
+        resumeVersionId: latestVer._id || latestVer.id,
+        jobDescriptionId: report.jobDescriptionId || null,
+      });
+      if (optRes.data.success && optRes.data.updatedResumeData) {
+        currentResumeData = optRes.data.updatedResumeData;
       }
+
+      const updatedSkills = {
+        ...currentResumeData.skills,
+        hardSkills: Array.from(new Set([...(currentResumeData.skills?.hardSkills || []), ...missingReq, ...missingPref])),
+        tools: Array.from(new Set([...(currentResumeData.skills?.tools || []), ...missingTools])),
+      };
+      const updatedResumeData = { ...currentResumeData, skills: updatedSkills };
+
+      await axios.put(`/api/resume-versions/${latestVer._id || latestVer.id}`, {
+        versionLabel: `${latestVer.versionLabel || 'v1.0'} + LaTeX & Pro Words`,
+        contentJson: JSON.stringify(updatedResumeData),
+        atsScore: Math.min(100, compositeScore + missingReq.length * 8 + missingPref.length * 3 + 10),
+      });
 
       const res = await axios.post(`/api/resume-versions/${latestVer._id || latestVer.id}/export`, {
         format: 'latex',
@@ -186,17 +234,15 @@ export default function ScoreReport() {
       const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/x-tex' }));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `${resumeData.contact?.fullName?.replace(/\s+/g, '_') || 'Candidate'}_Injected_ATS_Resume.tex`);
+      link.setAttribute('download', `${resumeData.contact?.fullName?.replace(/\s+/g, '_') || 'Candidate'}_Optimized_ATS_Resume.tex`);
       document.body.appendChild(link);
       link.click();
       link.remove();
-      toast.success('⚡ Auto-Injected skills & downloaded Overleaf LaTeX (.tex) resume!');
-      if (allMissing.length > 0) {
-        setTimeout(() => window.location.reload(), 1500);
-      }
+      toast.success('⚡ Auto-optimized verbs/words, injected skills & downloaded LaTeX (.tex) resume!');
+      setTimeout(() => window.location.reload(), 1500);
     } catch (e) {
       console.error(e);
-      toast.error('Failed to generate LaTeX resume.');
+      toast.error('Failed to generate optimized LaTeX resume.');
     } finally {
       setDownloadingLatex(false);
     }
@@ -352,6 +398,14 @@ export default function ScoreReport() {
                 >
                   {injecting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
                   <span>⚡ Auto-Inject Missing Skills</span>
+                </button>
+                <button
+                  onClick={handleOptimizeVerbsAndWords}
+                  disabled={optimizingWords}
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xs shadow-md flex items-center gap-2 transition-all disabled:opacity-50"
+                >
+                  {optimizingWords ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                  <span>✨ Auto-Optimize Verbs & Repeated Words</span>
                 </button>
                 <button
                   onClick={handleInjectAndDownloadLatex}

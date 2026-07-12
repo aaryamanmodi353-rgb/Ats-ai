@@ -118,4 +118,117 @@ Output ONLY a valid JSON object matching this schema:
       ],
     };
   }
+
+  static optimizeBulletsVocabularyAndVerbs(resumeData, jdKeywords = null) {
+    if (!resumeData || !resumeData.workExperience || !Array.isArray(resumeData.workExperience)) {
+      return { updatedResumeData: resumeData, changesCount: 0, log: [] };
+    }
+
+    const updatedResumeData = JSON.parse(JSON.stringify(resumeData));
+    const log = [];
+    let changesCount = 0;
+
+    // Synonym maps for repeated words
+    const synonymMap = {
+      developed: ['engineered', 'formulated', 'constructed', 'architected', 'spearheaded'],
+      managed: ['directed', 'orchestrated', 'supervised', 'steered', 'guided'],
+      built: ['constructed', 'assembled', 'fabricated', 'established'],
+      created: ['established', 'originated', 'pioneered', 'instituted'],
+      implemented: ['deployed', 'executed', 'integrated', 'enacted'],
+      designed: ['architected', 'modelled', 'crafted', 'structured'],
+      used: ['utilized', 'leveraged', 'harnessed', 'applied'],
+      worked: ['collaborated', 'operated', 'engaged', 'contributed'],
+      improved: ['enhanced', 'optimized', 'boosted', 'elevated'],
+      supported: ['bolstered', 'assisted', 'facilitated', 'upheld'],
+      led: ['commanded', 'steered', 'directed', 'spearheaded'],
+      maintained: ['sustained', 'preserved', 'managed', 'administered'],
+    };
+
+    // Tracking frequencies across all bullets
+    const wordOccurrences = {};
+
+    updatedResumeData.workExperience.forEach((work) => {
+      if (!work.bullets || !Array.isArray(work.bullets)) return;
+
+      work.bullets = work.bullets.map((bullet, idx) => {
+        let cleanBullet = bullet.trim();
+        let bulletChanged = false;
+
+        // 1. Fix weak/passive starters & relocate action verb to accurate 1st position
+        const weakStarters = [
+          { pattern: /^responsible for\s+([a-z]+ing)\b/i, replacement: (m, p1) => p1.replace(/ing$/i, 'ed') },
+          { pattern: /^responsible for\s+([a-z]+e)ing\b/i, replacement: (m, p1) => p1 + 'd' },
+          { pattern: /^responsible for\s+/i, replacement: 'Engineered ' },
+          { pattern: /^helped with\s+([a-z]+ing)\b/i, replacement: (m, p1) => 'Spearheaded ' + p1.replace(/ing$/i, 'ed') },
+          { pattern: /^helped with\s+/i, replacement: 'Spearheaded ' },
+          { pattern: /^worked on\s+([a-z]+ing)\b/i, replacement: (m, p1) => 'Orchestrated ' + p1.replace(/ing$/i, 'ed') },
+          { pattern: /^worked on\s+/i, replacement: 'Orchestrated ' },
+          { pattern: /^assisted in\s+/i, replacement: 'Collaborated on ' },
+          { pattern: /^in charge of\s+/i, replacement: 'Directly managed ' },
+          { pattern: /^tasked with\s+/i, replacement: 'Executed ' },
+          { pattern: /^did\s+/i, replacement: 'Executed ' },
+        ];
+
+        for (const rule of weakStarters) {
+          if (rule.pattern.test(cleanBullet)) {
+            const oldText = cleanBullet.slice(0, 35) + '...';
+            if (typeof rule.replacement === 'function') {
+              cleanBullet = cleanBullet.replace(rule.pattern, rule.replacement);
+            } else {
+              cleanBullet = cleanBullet.replace(rule.pattern, rule.replacement);
+            }
+            cleanBullet = cleanBullet.charAt(0).toUpperCase() + cleanBullet.slice(1);
+            bulletChanged = true;
+            changesCount++;
+            log.push(`Verb Relocation: Replaced weak passive starter inside "${oldText}" with elite active verb starter "${cleanBullet.split(' ')[0]}"`);
+            break;
+          }
+        }
+
+        // Check if starts with lower case or -ing (gerund relocation)
+        const firstWordMatch = cleanBullet.match(/^([A-Za-z]+)\b/);
+        if (firstWordMatch) {
+          const firstWord = firstWordMatch[1].toLowerCase();
+          if (firstWord.endsWith('ing') && firstWord.length > 4) {
+            const baseVerb = firstWord.replace(/ing$/, 'ed').charAt(0).toUpperCase() + firstWord.replace(/ing$/, 'ed').slice(1);
+            cleanBullet = baseVerb + cleanBullet.slice(firstWordMatch[0].length);
+            bulletChanged = true;
+            changesCount++;
+            log.push(`Verb Relocation: Converted gerund starter '${firstWordMatch[1]}' to strong past-tense verb '${baseVerb.split(' ')[0]}' at accurate 1st position`);
+          }
+        }
+
+        // 2. Eliminate word repetition across all bullets
+        const words = cleanBullet.split(/\s+/);
+        for (let i = 0; i < words.length; i++) {
+          const rawWord = words[i].replace(/[^a-zA-Z]/g, '').toLowerCase();
+          if (synonymMap[rawWord]) {
+            wordOccurrences[rawWord] = (wordOccurrences[rawWord] || 0) + 1;
+            if (wordOccurrences[rawWord] > 1) {
+              const synonyms = synonymMap[rawWord];
+              const synIdx = (wordOccurrences[rawWord] - 2) % synonyms.length;
+              let chosenSynonym = synonyms[synIdx];
+              if (words[i].charAt(0) === words[i].charAt(0).toUpperCase()) {
+                chosenSynonym = chosenSynonym.charAt(0).toUpperCase() + chosenSynonym.slice(1);
+              }
+              const oldW = words[i];
+              words[i] = words[i].replace(new RegExp(`\\b${rawWord}\\b`, 'i'), chosenSynonym);
+              bulletChanged = true;
+              changesCount++;
+              log.push(`Repetition Removal: Replaced repeated word '${oldW}' (${wordOccurrences[rawWord]}x occurrence) with varied synonym '${chosenSynonym}' inside "${work.title || 'Role'}" bullet #${idx + 1}`);
+            }
+          }
+        }
+
+        if (bulletChanged) {
+          cleanBullet = words.join(' ');
+          cleanBullet = cleanBullet.charAt(0).toUpperCase() + cleanBullet.slice(1);
+        }
+
+        return cleanBullet;
+      });
+    });
+
+    return { updatedResumeData, changesCount, log };
+  }
 }
