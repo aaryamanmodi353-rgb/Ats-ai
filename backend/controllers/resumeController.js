@@ -42,21 +42,29 @@ export const uploadAndParseResume = async (req, res) => {
     let filename = req.file?.originalname || 'Paste_Resume.txt';
 
     if (req.file && !rawText) {
-      // If file uploaded, convert buffer to string or heuristic text
-      rawText = req.file.buffer.toString('utf-8');
-      if (rawText.includes('%PDF') || rawText.includes('PK')) {
-        // Fallback simulation text if binary PDF/DOCX uploaded without text extraction
-        rawText = `Alex Morgan | alex.morgan@example.com | San Francisco, CA | (555) 019-2834
-Summary: Senior Software Engineer with 6+ years building high-concurrency Node.js and React web applications.
-Work Experience:
-CloudScale Technologies | Senior Software Engineer | 2022-Present
-- Architected high-concurrency microservices in Node.js and TypeScript, reducing API response latency by 35%.
-- Spearheaded migration of frontend client to React 18 and Vite, accelerating page load speeds by 40%.
-- Responsible for daily code reviews, CI/CD pipeline optimization with Docker, and mentoring junior engineers.
-NextGen Solutions | Full Stack Developer | 2019-2022
-- Developed interactive web applications using React, Express.js, and MongoDB serving 250,000 monthly active users.
-- Helped with database query indexing and caching strategies using Redis, improving dashboard load time by 50%.
-Skills: React, TypeScript, Node.js, PostgreSQL, MongoDB, Docker, AWS, Git, Redis`;
+      if (filename.toLowerCase().endsWith('.pdf') || req.file.mimetype === 'application/pdf') {
+        try {
+          const pdfParse = (await import('pdf-parse')).default;
+          const pdfData = await pdfParse(req.file.buffer);
+          rawText = pdfData.text || '';
+        } catch (pdfErr) {
+          console.error('Error parsing PDF buffer:', pdfErr);
+        }
+      } else if (filename.toLowerCase().endsWith('.docx') || req.file.mimetype.includes('wordprocessingml')) {
+        try {
+          const mammoth = (await import('mammoth')).default;
+          const result = await mammoth.extractRawText({ buffer: req.file.buffer });
+          rawText = result.value || '';
+        } catch (docxErr) {
+          console.error('Error parsing DOCX buffer:', docxErr);
+        }
+      } else {
+        rawText = req.file.buffer.toString('utf-8');
+      }
+
+      // If text extraction yielded nothing or almost nothing, create a clean empty baseline structure rather than static mock data
+      if (!rawText || rawText.trim().length < 20) {
+        rawText = `Candidate Resume | ${filename}\nSummary: [Please edit your professional summary in the Live Editor below]\nWork Experience:\nCompany Name | Role Title | 2023-Present\n- Add your quantifiable achievements and impact bullets here.\nSkills: Professional Skills, Tools`;
       }
     }
 

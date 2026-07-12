@@ -16,6 +16,8 @@ const scoreReportSchema = new mongoose.Schema(
     formatScore: { type: Number, required: true },
     quantificationScore: { type: Number, required: true },
     actionVerbScore: { type: Number, required: true },
+    seniorityScore: { type: Number, default: 80 },
+    readabilityScore: { type: Number, default: 85 },
     compositeScore: { type: Number, required: true },
     breakdownJson: { type: String, required: true },
   },

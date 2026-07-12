@@ -43,13 +43,14 @@ app.get('/api/health', (req, res) => {
 
 // Welcome endpoint for root /
 app.get('/', (req, res) => {
+  const uiUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
   res.send(`
     <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 60px auto; padding: 40px; border-radius: 16px; background: #0f172a; color: #f8fafc; border: 1px solid #334155; text-align: center;">
       <h1 style="color: #38bdf8; margin-bottom: 16px;">🚀 ResumeIQ Backend API Running</h1>
-      <p style="color: #94a3b8; font-size: 16px; line-height: 1.6;">You have connected to the Express.js + MongoDB API server on Port <strong>5000</strong>.</p>
+      <p style="color: #94a3b8; font-size: 16px; line-height: 1.6;">You have connected to the Express.js + MongoDB API server on Port <strong>${PORT}</strong>.</p>
       <div style="margin: 30px 0; padding: 20px; border-radius: 12px; background: #1e293b; border: 1px solid #475569;">
         <p style="margin: 0; font-size: 14px; color: #cbd5e1;">To access the visual candidate platform and live editor, open the React UI at:</p>
-        <a href="http://localhost:5173" style="display: inline-block; margin-top: 12px; font-size: 18px; font-weight: bold; color: #38bdf8; text-decoration: none;">👉 http://localhost:5173</a>
+        <a href="${uiUrl}" style="display: inline-block; margin-top: 12px; font-size: 18px; font-weight: bold; color: #38bdf8; text-decoration: none;">👉 ${uiUrl}</a>
       </div>
       <p style="font-size: 12px; color: #64748b;">API endpoints are mounted at <code>/api/*</code></p>
     </div>

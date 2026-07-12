@@ -32,6 +32,8 @@ export const calculateScore = async (req, res) => {
       formatScore: scoreResult.formatScore,
       quantificationScore: scoreResult.quantificationScore,
       actionVerbScore: scoreResult.actionVerbScore,
+      seniorityScore: scoreResult.seniorityScore || 80,
+      readabilityScore: scoreResult.readabilityScore || 85,
       compositeScore: scoreResult.compositeScore,
       breakdownJson: JSON.stringify(scoreResult.breakdown),
     });
@@ -67,6 +69,8 @@ export const getScoreReportById = async (req, res) => {
       formatScore: report.formatScore,
       quantificationScore: report.quantificationScore,
       actionVerbScore: report.actionVerbScore,
+      seniorityScore: report.seniorityScore || 80,
+      readabilityScore: report.readabilityScore || 85,
       compositeScore: report.compositeScore,
       breakdown: JSON.parse(report.breakdownJson),
       createdAt: report.createdAt,

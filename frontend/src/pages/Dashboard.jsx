@@ -40,25 +40,28 @@ export default function Dashboard() {
 
   const totalResumes = resumes.length;
   const latestResume = resumes[0];
-  const latestScore = latestResume?.versions?.[0]?.atsScore ?? 68;
+  const latestScore = latestResume?.versions?.[0]?.atsScore ?? null;
 
   const totalApps = applications.length;
   const interviews = applications.filter((a) => a.status === 'interview' || a.status === 'offer').length;
-  const interviewRate = totalApps > 0 ? Math.round((interviews / totalApps) * 100) : 33;
+  const interviewRate = totalApps > 0 ? Math.round((interviews / totalApps) * 100) : 0;
 
   const getScoreColor = (score) => {
+    if (score === null || score === undefined) return 'text-muted-foreground';
     if (score >= 80) return 'text-emerald-400';
     if (score >= 65) return 'text-amber-400';
     return 'text-rose-400';
   };
 
   const getScoreBadgeClass = (score) => {
+    if (score === null || score === undefined) return 'bg-secondary text-muted-foreground border-border';
     if (score >= 80) return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30';
     if (score >= 65) return 'bg-amber-500/15 text-amber-400 border-amber-500/30';
     return 'bg-rose-500/15 text-rose-400 border-rose-500/30';
   };
 
   const getScoreLabel = (score) => {
+    if (score === null || score === undefined) return 'Pending ATS Scan against Job Description';
     if (score >= 80) return 'ATS Ready (High Match)';
     if (score >= 65) return 'Moderate Risk';
     return 'High Auto-Rejection Risk';
@@ -100,12 +103,12 @@ export default function Dashboard() {
             <Sparkles className="w-4 h-4 text-blue-400" />
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={`text-4xl font-black ${getScoreColor(latestScore)}`}>{latestScore}</span>
+            <span className={`text-4xl font-black ${getScoreColor(latestScore)}`}>{latestScore !== null ? latestScore : '-'}</span>
             <span className="text-sm text-muted-foreground">/ 100</span>
           </div>
-          <div className="mt-3 flex items-center gap-1.5 text-xs text-emerald-400 font-semibold">
-            <TrendingUp className="w-3.5 h-3.5" />
-            <span>+14 pts from baseline</span>
+          <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground font-semibold">
+            <TrendingUp className="w-3.5 h-3.5 text-blue-400" />
+            <span>{latestScore !== null ? 'ATS audit score calculated' : 'Upload resume to scan'}</span>
           </div>
         </div>
 
@@ -116,11 +119,11 @@ export default function Dashboard() {
             <FileText className="w-4 h-4 text-purple-400" />
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black text-foreground">{totalResumes || 1}</span>
+            <span className="text-4xl font-black text-foreground">{totalResumes}</span>
             <span className="text-sm text-muted-foreground">Active Profiles</span>
           </div>
           <p className="mt-3 text-xs text-muted-foreground truncate">
-            {latestResume ? `Latest: ${latestResume.originalFilename}` : 'Alex_Morgan_Resume.pdf'}
+            {latestResume ? `Latest: ${latestResume.originalFilename}` : 'No resumes uploaded yet'}
           </p>
         </div>
 
@@ -131,11 +134,11 @@ export default function Dashboard() {
             <Kanban className="w-4 h-4 text-indigo-400" />
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black text-foreground">{totalApps || 4}</span>
+            <span className="text-4xl font-black text-foreground">{totalApps}</span>
             <span className="text-sm text-muted-foreground">Active Roles</span>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            Average score at submission: <span className="text-foreground font-semibold">74/100</span>
+            {totalApps > 0 ? 'Role tracking active' : 'No applications tracked yet'}
           </p>
         </div>
 
@@ -195,7 +198,7 @@ export default function Dashboard() {
             <div className="space-y-4">
               {resumes.map((r) => {
                 const latestVer = r.versions?.[0];
-                const score = latestVer?.atsScore ?? 68;
+                const score = latestVer?.atsScore ?? null;
                 return (
                   <div
                     key={r._id || r.id}
@@ -224,7 +227,7 @@ export default function Dashboard() {
                         <div className="flex items-center gap-1.5">
                           <span className="text-xs font-semibold text-muted-foreground">ATS Score:</span>
                           <span className={`px-2.5 py-1 rounded-lg border text-sm font-black ${getScoreBadgeClass(score)}`}>
-                            {score}/100
+                            {score !== null ? `${score}/100` : '- / 100'}
                           </span>
                         </div>
                         <span className="text-[10px] text-muted-foreground">{getScoreLabel(score)}</span>
