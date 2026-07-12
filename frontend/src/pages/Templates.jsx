@@ -497,9 +497,10 @@ Results-driven ${targetRole.title} specializing in building high-concurrency, sc
         contentJson: JSON.stringify(initialResumeData),
       });
 
-      if (res.data && (res.data._id || res.data.id)) {
+      const targetId = res.data && (res.data._id || res.data.id || res.data.resumeId);
+      if (targetId && targetId !== 'undefined') {
         toast.success(`⚡ Created fresh ${targetRole.title} profile! Opening Overleaf Code Studio...`);
-        navigate(`/resume/${res.data._id || res.data.id}/editor?mode=overleaf&template=${template.id}`);
+        navigate(`/resume/${targetId}/editor?mode=overleaf&template=${template.id}`);
       } else {
         toast.success('Profile created!');
         navigate('/dashboard');

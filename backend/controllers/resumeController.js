@@ -68,26 +68,38 @@ export const uploadAndParseResume = async (req, res) => {
       }
     }
 
-    const structuredData = await ParserService.parseTextToStructuredData(rawText, filename);
+    let structuredData;
+    if (req.body?.contentJson) {
+      try {
+        structuredData = typeof req.body.contentJson === 'string' ? JSON.parse(req.body.contentJson) : req.body.contentJson;
+      } catch (e) {
+        console.error('Error parsing req.body.contentJson:', e);
+      }
+    }
+    if (!structuredData) {
+      structuredData = await ParserService.parseTextToStructuredData(rawText, filename);
+    }
 
     // Create Resume record
     const resume = await Resume.create({
       originalFilename: filename,
-      rawText: structuredData.rawText,
-      contactJson: JSON.stringify(structuredData.contact),
+      rawText: structuredData.rawText || rawText,
+      contactJson: JSON.stringify(structuredData.contact || {}),
       layoutRisksJson: JSON.stringify(structuredData.layoutRiskWarnings || []),
     });
 
     // Create initial Version snapshot
     const version = await ResumeVersion.create({
       resumeId: resume._id,
-      versionLabel: 'v1.0 - Initial Upload',
+      versionLabel: req.body?.title || 'v1.0 - Initial Upload',
       contentJson: JSON.stringify(structuredData),
       atsScore: null,
     });
 
     res.status(201).json({
       success: true,
+      _id: resume._id,
+      id: resume._id,
       resumeId: resume._id,
       versionId: version._id,
       structuredData,
