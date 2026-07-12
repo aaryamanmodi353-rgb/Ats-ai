@@ -134,15 +134,20 @@ export const exportResumeVersion = async (req, res) => {
     if (format === 'docx') {
       const buffer = await ExportService.generateSingleColumnDocx(resumeData);
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-      res.setHeader('Content-Disposition', `attachment; filename="${resumeData.contact.fullName.replace(/\s+/g, '_')}_ATS_Resume.docx"`);
+      res.setHeader('Content-Disposition', `attachment; filename="${resumeData.contact?.fullName?.replace(/\s+/g, '_') || 'Candidate'}_ATS_Resume.docx"`);
       return res.send(buffer);
+    } else if (format === 'latex' || format === 'tex') {
+      const latexString = ExportService.generateProfessionalLatex(resumeData);
+      res.setHeader('Content-Type', 'application/x-tex');
+      res.setHeader('Content-Disposition', `attachment; filename="${resumeData.contact?.fullName?.replace(/\s+/g, '_') || 'Candidate'}_ATS_Resume.tex"`);
+      return res.send(latexString);
     } else {
       // PDF or TXT clean stream
-      const textStream = `${resumeData.contact.fullName.toUpperCase()}\n${resumeData.contact.email} | ${resumeData.contact.phone} | ${resumeData.contact.location}\n\nSUMMARY:\n${resumeData.summary}\n\nSKILLS:\nHard Skills: ${resumeData.skills.hardSkills.join(', ')}\nTools: ${resumeData.skills.tools.join(', ')}\n\nEXPERIENCE:\n` +
-        resumeData.workExperience.map((w) => `${w.title} at ${w.company} (${w.startDate} - ${w.current ? 'Present' : w.endDate})\n` + w.bullets.map((b) => `* ${b}`).join('\n')).join('\n\n');
+      const textStream = `${resumeData.contact?.fullName?.toUpperCase() || 'CANDIDATE NAME'}\n${resumeData.contact?.email || ''} | ${resumeData.contact?.phone || ''} | ${resumeData.contact?.location || ''}\n\nSUMMARY:\n${resumeData.summary || ''}\n\nSKILLS:\nHard Skills: ${(resumeData.skills?.hardSkills || []).join(', ')}\nTools: ${(resumeData.skills?.tools || []).join(', ')}\n\nEXPERIENCE:\n` +
+        (resumeData.workExperience || []).map((w) => `${w.title} at ${w.company} (${w.startDate} - ${w.current ? 'Present' : w.endDate})\n` + (w.bullets || []).map((b) => `* ${b}`).join('\n')).join('\n\n');
 
       res.setHeader('Content-Type', 'text/plain');
-      res.setHeader('Content-Disposition', `attachment; filename="${resumeData.contact.fullName.replace(/\s+/g, '_')}_ATS_Resume.txt"`);
+      res.setHeader('Content-Disposition', `attachment; filename="${resumeData.contact?.fullName?.replace(/\s+/g, '_') || 'Candidate'}_ATS_Resume.txt"`);
       return res.send(textStream);
     }
   } catch (error) {

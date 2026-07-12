@@ -11,6 +11,9 @@ import {
   Edit3,
   Loader2,
   FileText,
+  Activity,
+  ExternalLink,
+  Download,
 } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -22,6 +25,7 @@ export default function ScoreReport() {
   const [resume, setResume] = useState(null);
   const [loading, setLoading] = useState(true);
   const [injecting, setInjecting] = useState(false);
+  const [downloadingLatex, setDownloadingLatex] = useState(false);
 
   useEffect(() => {
     async function loadReport() {
@@ -148,6 +152,53 @@ export default function ScoreReport() {
       toast.error('Failed to auto-inject keywords.');
     } finally {
       setInjecting(false);
+    }
+  };
+
+  const handleInjectAndDownloadLatex = async () => {
+    if (!latestVer || !resumeData) return;
+    const missingReq = breakdown?.keywordMatch?.missingRequired || [];
+    const missingPref = breakdown?.keywordMatch?.missingPreferred || [];
+    const missingTools = breakdown?.keywordMatch?.missingTools || [];
+    const allMissing = [...missingReq, ...missingPref, ...missingTools];
+
+    setDownloadingLatex(true);
+    try {
+      const updatedSkills = {
+        ...resumeData.skills,
+        hardSkills: Array.from(new Set([...(resumeData.skills?.hardSkills || []), ...missingReq, ...missingPref])),
+        tools: Array.from(new Set([...(resumeData.skills?.tools || []), ...missingTools])),
+      };
+      const updatedResumeData = { ...resumeData, skills: updatedSkills };
+
+      if (allMissing.length > 0) {
+        await axios.put(`/api/resume-versions/${latestVer._id || latestVer.id}`, {
+          versionLabel: `${latestVer.versionLabel || 'v1.0'} + LaTeX Injected`,
+          contentJson: JSON.stringify(updatedResumeData),
+          atsScore: Math.min(100, compositeScore + missingReq.length * 8 + missingPref.length * 3),
+        });
+      }
+
+      const res = await axios.post(`/api/resume-versions/${latestVer._id || latestVer.id}/export`, {
+        format: 'latex',
+      }, { responseType: 'blob' });
+
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/x-tex' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${resumeData.contact?.fullName?.replace(/\s+/g, '_') || 'Candidate'}_Injected_ATS_Resume.tex`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      toast.success('⚡ Auto-Injected skills & downloaded Overleaf LaTeX (.tex) resume!');
+      if (allMissing.length > 0) {
+        setTimeout(() => window.location.reload(), 1500);
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to generate LaTeX resume.');
+    } finally {
+      setDownloadingLatex(false);
     }
   };
 
@@ -293,14 +344,24 @@ export default function ScoreReport() {
                   Extracted directly from the target Job Description against your parsed resume text.
                 </p>
               </div>
-              <button
-                onClick={handleAutoInjectKeywords}
-                disabled={injecting || (breakdown?.keywordMatch?.missingRequired?.length === 0 && breakdown?.keywordMatch?.missingPreferred?.length === 0)}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-md flex items-center gap-2 transition-all disabled:opacity-50 shrink-0"
-              >
-                {injecting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
-                <span>⚡ Auto-Inject Missing Skills</span>
-              </button>
+              <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                <button
+                  onClick={handleAutoInjectKeywords}
+                  disabled={injecting || (breakdown?.keywordMatch?.missingRequired?.length === 0 && breakdown?.keywordMatch?.missingPreferred?.length === 0)}
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-md flex items-center gap-2 transition-all disabled:opacity-50"
+                >
+                  {injecting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
+                  <span>⚡ Auto-Inject Missing Skills</span>
+                </button>
+                <button
+                  onClick={handleInjectAndDownloadLatex}
+                  disabled={downloadingLatex}
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md flex items-center gap-2 transition-all disabled:opacity-50"
+                >
+                  {downloadingLatex ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+                  <span>📥 Auto-Inject & Download LaTeX (.tex)</span>
+                </button>
+              </div>
             </div>
 
             <div className="space-y-5">
@@ -361,6 +422,73 @@ export default function ScoreReport() {
               </div>
             </div>
           </div>
+
+          {/* Deep Diagnostic Audit Card */}
+          {breakdown?.deepDiagnosticAudit && (
+            <div className="p-6 sm:p-8 rounded-2xl bg-card border border-border/60 shadow-lg space-y-6">
+              <div className="border-b border-border/40 pb-4">
+                <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-purple-400" />
+                  <span>Deep Diagnostic & Why Your Score is Low</span>
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Comprehensive 5-Point Audit covering action verbs, repetition, missing structural sections, domain alignment, and URL links.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 rounded-xl bg-secondary/50 border border-border/60 space-y-2">
+                  <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-purple-400">
+                    <Sparkles className="w-4 h-4" /> Action Verbs & Vocabulary
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {breakdown.deepDiagnosticAudit.actionVerbAdvice}
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-secondary/50 border border-border/60 space-y-2">
+                  <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-blue-400">
+                    <Activity className="w-4 h-4" /> Word Repetition & Redundancy
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {breakdown.deepDiagnosticAudit.wordRepetitionAdvice}
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-secondary/50 border border-border/60 space-y-2">
+                  <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-amber-400">
+                    <AlertTriangle className="w-4 h-4" /> Structural Section Completeness
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {breakdown.deepDiagnosticAudit.componentAdvice}
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-secondary/50 border border-border/60 space-y-2">
+                  <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-emerald-400">
+                    <CheckCircle2 className="w-4 h-4" /> Project & JD Domain Alignment
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {breakdown.deepDiagnosticAudit.domainMatch}
+                  </p>
+                </div>
+
+                <div className="md:col-span-2 p-4 rounded-xl bg-secondary/50 border border-border/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-indigo-400">
+                      <ExternalLink className="w-4 h-4" /> URL & Link Health Verification
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      {breakdown.deepDiagnosticAudit.linkAdvice}
+                    </p>
+                  </div>
+                  <span className={`px-3 py-1 rounded-lg border text-xs font-bold shrink-0 ${breakdown.deepDiagnosticAudit.urlsVerifiedCount > 0 ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/15 text-amber-400 border-amber-500/30'}`}>
+                    {breakdown.deepDiagnosticAudit.urlsVerifiedCount > 0 ? `${breakdown.deepDiagnosticAudit.urlsVerifiedCount} Link(s) Active` : 'No URLs Found'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Formatting & Layout Audit */}
           <div className="p-6 sm:p-8 rounded-2xl bg-card border border-border/60 shadow-lg space-y-6">
