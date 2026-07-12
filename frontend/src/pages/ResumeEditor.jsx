@@ -75,8 +75,9 @@ export default function ResumeEditor() {
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [liveScore, setLiveScore] = useState(85);
-  const [versionLabel, setVersionLabel] = useState('');
   const [optimizingCode, setOptimizingCode] = useState(false);
+  const [recompiling, setRecompiling] = useState(false);
+  const [autoRecompile, setAutoRecompile] = useState(true);
 
   useEffect(() => {
     async function loadResume() {
@@ -189,7 +190,102 @@ ${eduLatex}
     }
 
     setLiveScore(Math.min(100, Math.max(10, Math.round(base))));
-  }, [latexCode]);
+
+    if (autoRecompile) {
+      const timer = setTimeout(() => {
+        handleRecompileLatex(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [latexCode, autoRecompile]);
+
+  const handleRecompileLatex = (showToast = true) => {
+    if (!latexCode) return;
+    if (showToast) setRecompiling(true);
+    try {
+      const parsed = { ...resumeData };
+
+      // Extract Full Name from \Huge \scshape or \begin{center}
+      const nameMatch = latexCode.match(/\\Huge\s+\\scshape\s+([^}\\\n]+)/i) || latexCode.match(/\\center[\s\S]*?\\Huge[^{]*{([^}]+)}/i);
+      if (nameMatch && nameMatch[1]) {
+        parsed.contact = { ...parsed.contact, fullName: nameMatch[1].replace(/\\scshape\s*/g, '').trim() };
+      }
+
+      // Extract Email & Phone
+      const emailMatch = latexCode.match(/\\href{mailto:([^}]+)}/i);
+      if (emailMatch && emailMatch[1]) {
+        parsed.contact = { ...parsed.contact, email: emailMatch[1].trim() };
+      }
+      const phoneMatch = latexCode.match(/\\small\s+([+0-9\s-()]+)\s+\$\|\$/i) || latexCode.match(/([+0-9]{1,4}[-\s.][0-9]{3}[-\s.][0-9]{4})/);
+      if (phoneMatch && phoneMatch[1]) {
+        parsed.contact = { ...parsed.contact, phone: phoneMatch[1].trim() };
+      }
+
+      // Extract Summary from \section{Professional Summary} until next \section
+      const summaryMatch = latexCode.match(/\\section{\s*Professional Summary\s*}[\s\S]*?\n([\s\S]*?)(?=\n\\section|\n\\end{document}|$)/i);
+      if (summaryMatch && summaryMatch[1]) {
+        const cleanSummary = summaryMatch[1].replace(/%.*/g, '').replace(/\\noindent/g, '').trim();
+        if (cleanSummary) parsed.summary = cleanSummary;
+      }
+
+      // Extract Core Competencies & Infrastructure/Tools from \section{Technical Skills & Tools}
+      const coreSkillsMatch = latexCode.match(/\\textbf{Core Competencies}{:([^}\\]+)/i);
+      if (coreSkillsMatch && coreSkillsMatch[1]) {
+        parsed.skills = { ...parsed.skills, hardSkills: coreSkillsMatch[1].split(',').map(s => s.trim()).filter(Boolean) };
+      }
+      const toolsMatch = latexCode.match(/\\textbf{(?:Infrastructure \\& Tools|Systems \\& Frameworks|Infrastructure|Tools)}{:([^}\\]+)/i);
+      if (toolsMatch && toolsMatch[1]) {
+        parsed.skills = { ...parsed.skills, tools: toolsMatch[1].split(',').map(s => s.trim()).filter(Boolean) };
+      }
+
+      // Extract Professional Experience blocks
+      const expSectionMatch = latexCode.match(/\\section{\s*Professional Experience\s*}[\s\S]*?\n([\s\S]*?)(?=\n\\section|\n\\end{document}|$)/i);
+      if (expSectionMatch && expSectionMatch[1]) {
+        const expText = expSectionMatch[1];
+        const blocks = expText.split(/\\noindent\s*\\textbf{/i).filter(Boolean);
+        const extractedWorks = [];
+        blocks.forEach((b, idx) => {
+          const titleMatch = b.match(/^([^}\\]+)/);
+          const dateMatch = b.match(/\\hfill\s*{([^}]+)}/);
+          const compMatch = b.match(/\\textit{([^}]+)}/);
+          const locMatch = b.match(/\\textit{[^}]+}\s*\\hfill\s*{([^}]+)}/);
+
+          const bulletMatches = [];
+          const itemRegex = /\\item\s+([^\n\\]+(?:\\[^\n\\]+)*)/g;
+          let match;
+          while ((match = itemRegex.exec(b)) !== null) {
+            bulletMatches.push(match[1].replace(/\\%/g, '%').trim());
+          }
+
+          if (titleMatch || compMatch) {
+            extractedWorks.push({
+              id: `work-${idx + 1}`,
+              title: titleMatch ? titleMatch[1].trim() : 'Software Engineer',
+              company: compMatch ? compMatch[1].trim() : 'Enterprise Corp',
+              startDate: dateMatch ? dateMatch[1].split('--')[0]?.trim() : '2022',
+              endDate: dateMatch ? dateMatch[1].split('--')[1]?.trim() : 'Present',
+              current: dateMatch ? dateMatch[1].toLowerCase().includes('present') : true,
+              location: locMatch ? locMatch[1].trim() : 'Remote',
+              bullets: bulletMatches.length > 0 ? bulletMatches : ['Spearheaded core engineering workflows and optimizations.'],
+            });
+          }
+        });
+        if (extractedWorks.length > 0) {
+          parsed.workExperience = extractedWorks;
+        }
+      }
+
+      setResumeData(parsed);
+      if (showToast) {
+        toast.success('🔄 Overleaf Document Recompiled! Visual Preview & ATS Score Synchronized!');
+      }
+    } catch (e) {
+      console.error(e);
+      if (showToast) toast.error('Failed to parse and recompile LaTeX code.');
+    } finally {
+      if (showToast) setRecompiling(false);
+    }
+  };
 
   const handleRunAiAutoFixCode = async () => {
     setOptimizingCode(true);
@@ -435,14 +531,33 @@ ${eduLatex}
           {/* RIGHT COLUMN: LIVE OVERLEAF DOCUMENT PREVIEW & ATS DIAGNOSTIC CHECKS */}
           <div className="p-6 sm:p-8 rounded-3xl bg-card border border-border/80 shadow-2xl space-y-6 h-[680px] overflow-y-auto flex flex-col justify-between">
             <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-border/40 pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border/40 pb-3.5 gap-3">
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-400">
-                  <Eye className="w-4 h-4" />
-                  <span>Real-Time Overleaf Document Rendering Preview</span>
+                  <Eye className="w-4 h-4 shrink-0" />
+                  <span>Real-Time Document Preview</span>
                 </div>
-                <span className="px-2.5 py-1 rounded-md bg-purple-500/15 border border-purple-500/30 text-purple-300 text-[11px] font-bold">
-                  Letterpaper 8.5" x 11"
-                </span>
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <label className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={autoRecompile}
+                      onChange={(e) => setAutoRecompile(e.target.checked)}
+                      className="rounded bg-secondary border-border text-emerald-500 focus:ring-0 w-3.5 h-3.5"
+                    />
+                    <span>Auto-Recompile</span>
+                  </label>
+                  <button
+                    onClick={() => handleRecompileLatex(true)}
+                    disabled={recompiling}
+                    className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-md flex items-center gap-1.5 transition-all disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${recompiling ? 'animate-spin' : ''}`} />
+                    <span>🔄 Recompile Preview</span>
+                  </button>
+                  <span className="px-2 py-1 rounded-md bg-purple-500/15 border border-purple-500/30 text-purple-300 text-[10px] font-bold shrink-0 hidden xl:inline">
+                    Letterpaper 8.5" x 11"
+                  </span>
+                </div>
               </div>
 
               {/* Document Rendering Box (Visual approximation of single-column LaTeX) */}
