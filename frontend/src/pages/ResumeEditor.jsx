@@ -367,6 +367,212 @@ ${eduLatex}
     }
   };
 
+  const renderOverleafDocumentPreview = (code) => {
+    if (!code || !code.trim()) {
+      return <div className="text-gray-400 italic text-center py-10">Document buffer is empty. Type LaTeX code on the left to begin...</div>;
+    }
+
+    // Strip document wrapper boilerplate for clean visual parsing
+    let cleanCode = code
+      .replace(/\\documentclass[^}]*}/gi, '')
+      .replace(/\\usepackage[^}]*}/gi, '')
+      .replace(/\\begin{document}/gi, '')
+      .replace(/\\end{document}/gi, '')
+      .replace(/%.*/g, '') // strip comments
+      .trim();
+
+    const sections = cleanCode.split(/\\section\s*{([^}]+)}/i);
+    const renderedElements = [];
+
+    // Header / Pre-header text
+    const headerBlock = sections[0]?.trim();
+    if (headerBlock) {
+      let headerName = '';
+      const nameMatch = headerBlock.match(/\\Huge\s+\\scshape\s+([^}\\\n]+)/i) || headerBlock.match(/\\scshape\s+([^}\\\n]+)/i);
+      if (nameMatch) {
+        headerName = nameMatch[1].replace(/\\[a-z]+/gi, '').replace(/[{}]/g, '').trim();
+      }
+
+      let contactText = headerBlock
+        .replace(/\\begin{center}/gi, '')
+        .replace(/\\end{center}/gi, '')
+        .replace(/\\Huge\s+\\scshape\s+[^}\\\n]+/i, '')
+        .replace(/\\scshape\s+[^}\\\n]+/i, '')
+        .replace(/\\small/gi, '')
+        .replace(/\\href\s*{[^}]*}\s*{\\underline{([^}]+)}}/gi, '$1')
+        .replace(/\\href\s*{[^}]*}\s*{([^}]+)}/gi, '$1')
+        .replace(/\\\\[0-9pt]+/gi, ' | ')
+        .replace(/\\\\/g, ' | ')
+        .replace(/\$\|\$/g, ' | ')
+        .replace(/[{}]/g, '')
+        .trim();
+
+      if (headerName || contactText) {
+        renderedElements.push(
+          <div key="header" className="text-center pb-3 border-b-2 border-gray-800 mb-4">
+            {headerName && <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-wider text-gray-900 font-serif">{headerName}</h2>}
+            {contactText && <div className="text-[11px] sm:text-xs text-gray-700 mt-1 font-sans leading-relaxed">{contactText}</div>}
+          </div>
+        );
+      } else {
+        renderedElements.push(
+          <div key="pre-header" className="text-gray-900 font-sans text-sm mb-4 leading-relaxed whitespace-pre-wrap">
+            {headerBlock.replace(/\\[a-z]+(\s*\[[^\]]*\])?(\s*{[^}]*})?/gi, '').trim() || headerBlock}
+          </div>
+        );
+      }
+    }
+
+    // Sections and section items
+    for (let i = 1; i < sections.length; i += 2) {
+      const sectionTitle = sections[i]?.trim();
+      const sectionContent = sections[i + 1]?.trim() || '';
+      if (!sectionTitle && !sectionContent) continue;
+
+      const sectionItems = [];
+      const lines = sectionContent.split(/\n+/);
+      let currentList = null;
+
+      lines.forEach((line, lineIdx) => {
+        const trimmed = line.trim();
+        if (!trimmed) return;
+
+        if (trimmed.toLowerCase().includes('\\begin{itemize}')) {
+          currentList = [];
+          return;
+        }
+        if (trimmed.toLowerCase().includes('\\end{itemize}')) {
+          if (currentList && currentList.length > 0) {
+            sectionItems.push(
+              <ul key={`list-${lineIdx}`} className="list-disc pl-5 space-y-1 text-gray-800 my-1.5 font-sans text-xs sm:text-sm leading-snug">
+                {currentList.map((itemText, idx) => (
+                  <li key={idx}>{itemText}</li>
+                ))}
+              </ul>
+            );
+          }
+          currentList = null;
+          return;
+        }
+
+        if (trimmed.startsWith('\\item')) {
+          const itemText = trimmed
+            .replace(/^\\item\s*/i, '')
+            .replace(/\\textbf\s*{([^}]+)}/gi, '$1')
+            .replace(/\\textit\s*{([^}]+)}/gi, '$1')
+            .replace(/\\%/g, '%')
+            .replace(/\\[a-z]+/gi, '')
+            .replace(/[{}]/g, '')
+            .trim();
+
+          if (currentList !== null) {
+            currentList.push(itemText);
+          } else {
+            sectionItems.push(
+              <div key={`item-${lineIdx}`} className="flex items-start gap-2 text-gray-800 text-xs sm:text-sm font-sans my-1">
+                <span className="font-bold shrink-0">•</span>
+                <span>{itemText}</span>
+              </div>
+            );
+          }
+          return;
+        }
+
+        if (trimmed.includes('\\textbf{') || trimmed.includes('\\noindent') || trimmed.includes('\\hfill')) {
+          let leftBold = '';
+          let rightText = '';
+          let leftItalic = '';
+          let rightSubText = '';
+
+          const titleMatch = trimmed.match(/\\textbf\s*{([^}]+)}/i);
+          if (titleMatch) leftBold = titleMatch[1];
+
+          const hfillMatches = [...trimmed.matchAll(/\\hfill\s*{([^}]+)}/gi)];
+          if (hfillMatches.length > 0) rightText = hfillMatches[0][1];
+          if (hfillMatches.length > 1) rightSubText = hfillMatches[1][1];
+
+          const italicMatch = trimmed.match(/\\textit\s*{([^}]+)}/i);
+          if (italicMatch) leftItalic = italicMatch[1];
+
+          if (!leftBold && !leftItalic) {
+            const cleanLine = trimmed
+              .replace(/\\noindent/gi, '')
+              .replace(/\\textbf\s*{([^}]+)}/gi, '$1')
+              .replace(/\\textit\s*{([^}]+)}/gi, '$1')
+              .replace(/\\hfill\s*{([^}]+)}/gi, ' — $1')
+              .replace(/\\\\\[[^\]]*\]/g, '')
+              .replace(/\\\\/g, '')
+              .replace(/\\%/g, '%')
+              .replace(/[{}]/g, '')
+              .trim();
+
+            sectionItems.push(
+              <div key={`line-${lineIdx}`} className="text-gray-800 text-xs sm:text-sm font-sans my-1 leading-snug">
+                {cleanLine}
+              </div>
+            );
+          } else {
+            sectionItems.push(
+              <div key={`block-${lineIdx}`} className="my-2 font-sans text-xs sm:text-sm">
+                <div className="flex items-center justify-between font-bold text-gray-900 flex-wrap gap-x-2">
+                  <span>{leftBold}</span>
+                  <span>{rightText}</span>
+                </div>
+                {(leftItalic || rightSubText) && (
+                  <div className="flex items-center justify-between italic text-gray-700 text-[11px] sm:text-xs mt-0.5 flex-wrap gap-x-2">
+                    <span>{leftItalic}</span>
+                    <span>{rightSubText}</span>
+                  </div>
+                )}
+              </div>
+            );
+          }
+          return;
+        }
+
+        const cleanLine = trimmed
+          .replace(/\\noindent/gi, '')
+          .replace(/\\textbf\s*{([^}]+)}/gi, '$1')
+          .replace(/\\textit\s*{([^}]+)}/gi, '$1')
+          .replace(/\\small\s*{([^}]+)}/gi, '$1')
+          .replace(/\\%/g, '%')
+          .replace(/\\\\[0-9pt]+/gi, '')
+          .replace(/\\\\/g, '')
+          .replace(/[{}]/g, '')
+          .trim();
+
+        if (cleanLine) {
+          sectionItems.push(
+            <p key={`p-${lineIdx}`} className="text-gray-800 text-xs sm:text-sm font-sans my-1.5 leading-snug">
+              {cleanLine}
+            </p>
+          );
+        }
+      });
+
+      if (currentList && currentList.length > 0) {
+        sectionItems.push(
+          <ul key={`list-end`} className="list-disc pl-5 space-y-1 text-gray-800 my-1.5 font-sans text-xs sm:text-sm leading-snug">
+            {currentList.map((itemText, idx) => (
+              <li key={idx}>{itemText}</li>
+            ))}
+          </ul>
+        );
+      }
+
+      renderedElements.push(
+        <div key={`section-${i}`} className="mb-4">
+          <h3 className="font-bold text-xs sm:text-sm uppercase tracking-wider border-b border-gray-400 pb-0.5 mb-2 text-gray-900 font-sans">
+            {sectionTitle}
+          </h3>
+          <div className="space-y-1">{sectionItems}</div>
+        </div>
+      );
+    }
+
+    return <div className="space-y-4">{renderedElements}</div>;
+  };
+
   const handleRunAiAutoFixCode = async () => {
     setOptimizingCode(true);
     try {
@@ -640,88 +846,9 @@ ${eduLatex}
                 </div>
               </div>
 
-              {/* Document Rendering Box (Visual approximation of single-column LaTeX) */}
-              <div className="p-6 rounded-2xl bg-white text-black font-serif border border-gray-300 shadow-md space-y-5 text-xs sm:text-sm leading-relaxed max-h-[460px] overflow-y-auto selection:bg-blue-200">
-                <div className="text-center pb-2 border-b-2 border-gray-800">
-                  <h2 className="text-xl font-bold uppercase tracking-wide">
-                    {resumeData?.contact?.fullName || 'Your Full Name'}
-                  </h2>
-                  <div className="text-[11px] text-gray-700 mt-1 flex items-center justify-center flex-wrap gap-2 font-sans">
-                    <span>{resumeData?.contact?.phone || '+1-555-019-9832'}</span> |
-                    <span className="underline">{resumeData?.contact?.email || 'you@example.com'}</span> |
-                    <span className="underline">{resumeData?.contact?.linkedinUrl || 'linkedin.com/in/yourprofile'}</span> |
-                    <span className="underline">{resumeData?.contact?.githubUrl || 'github.com/yourprofile'}</span>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-bold text-xs uppercase tracking-wider border-b border-gray-400 pb-0.5 mb-1 text-gray-900 font-sans">
-                    Professional Summary
-                  </h3>
-                  <p className="text-gray-800 leading-snug">
-                    {resumeData?.summary || 'Experienced technical professional specialized in building high-concurrency, scalable systems and data-driven solutions with quantifiable engineering impact.'}
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="font-bold text-xs uppercase tracking-wider border-b border-gray-400 pb-0.5 mb-1 text-gray-900 font-sans">
-                    Technical Skills & Tools
-                  </h3>
-                  <div className="space-y-1 text-gray-800">
-                    <div>
-                      <span className="font-bold">Core Competencies:</span>{' '}
-                      {Array.isArray(resumeData?.skills?.hardSkills) ? resumeData.skills.hardSkills.join(', ') : 'React, TypeScript, Node.js, Next.js, PostgreSQL, Docker, AWS'}
-                    </div>
-                    <div>
-                      <span className="font-bold">Infrastructure & Tools:</span>{' '}
-                      {Array.isArray(resumeData?.skills?.tools) ? resumeData.skills.tools.join(', ') : 'Git, Kubernetes, CI/CD, Redis, GraphQL'}
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-bold text-xs uppercase tracking-wider border-b border-gray-400 pb-0.5 mb-1.5 text-gray-900 font-sans">
-                    Professional Experience
-                  </h3>
-                  <div className="space-y-3">
-                    {Array.isArray(resumeData?.workExperience) && resumeData.workExperience.length > 0 ? (
-                      resumeData.workExperience.map((w, idx) => (
-                        <div key={idx} className="space-y-1">
-                          <div className="flex items-center justify-between font-bold text-gray-900">
-                            <span>{w.title || 'Senior Engineer'}</span>
-                            <span>{w.startDate || '2022'} — {w.current ? 'Present' : w.endDate || '2024'}</span>
-                          </div>
-                          <div className="flex items-center justify-between italic text-gray-700 text-[11px]">
-                            <span>{w.company || 'Enterprise Corp'}</span>
-                            <span>{w.location || 'Remote'}</span>
-                          </div>
-                          <ul className="list-disc pl-5 space-y-1 text-gray-800 pt-0.5">
-                            {Array.isArray(w.bullets) && w.bullets.length > 0 ? (
-                              w.bullets.map((b, bIdx) => <li key={bIdx}>{b}</li>)
-                            ) : (
-                              <li>Spearheaded system architecture and deployment pipelines.</li>
-                            )}
-                          </ul>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between font-bold text-gray-900">
-                          <span>Senior Software Engineer</span>
-                          <span>Jan 2024 — Present</span>
-                        </div>
-                        <div className="flex items-center justify-between italic text-gray-700 text-[11px]">
-                          <span>Enterprise Systems Corp</span>
-                          <span>San Francisco, CA</span>
-                        </div>
-                        <ul className="list-disc pl-5 space-y-1 text-gray-800 pt-0.5">
-                          <li>Spearheaded the architectural migration of core modules utilizing Node.js and Docker, reducing average latency by 42%.</li>
-                          <li>Engineered high-concurrency PostgreSQL queries and automated caching strategies with Redis, handling 15,000+ QPS.</li>
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </div>
+              {/* Document Rendering Box (Real-Time Overleaf LaTeX Engine) */}
+              <div className="p-6 sm:p-8 rounded-2xl bg-white text-black font-serif border border-gray-300 shadow-md text-xs sm:text-sm leading-relaxed max-h-[460px] overflow-y-auto selection:bg-blue-200">
+                {renderOverleafDocumentPreview(latexCode)}
               </div>
             </div>
 
