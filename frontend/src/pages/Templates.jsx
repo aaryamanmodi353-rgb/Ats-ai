@@ -19,6 +19,10 @@ import {
   LineChart,
   Layout,
   Terminal,
+  ShieldAlert,
+  Smartphone,
+  Cpu,
+  Users,
 } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -87,7 +91,7 @@ const ROLE_RECOMMENDATIONS = [
     essentialSkills: ['Kubernetes', 'Docker', 'Terraform', 'AWS / GCP / Azure', 'GitHub Actions CI/CD', 'Prometheus & Grafana', 'Ansible', 'Linux Kernel Optimization', 'Go & Bash Scripting'],
     recommendedVerbs: ['Automated', 'Architected', 'Orchestrated', 'Deployed', 'Secured', 'Scaled', 'Streamlined', 'Engineered'],
     mustHaveSections: ['Contact & GitHub Links', 'Cloud Infrastructure & DevOps Stack', 'Mission-Critical Reliability Experience', 'Certifications (AWS Solutions Architect / CKA)'],
-    topTemplateId: 'jakes-harvard',
+    topTemplateId: 'google-sre',
     atsAdvice: 'Zero tolerance for multi-column layouts or graphics. Enterprise DevOps ATS bots check for exact Infrastructure-as-Code terms (Terraform, K8s, GitOps) and strict 99.99% SLA availability metrics.',
   },
   {
@@ -103,6 +107,58 @@ const ROLE_RECOMMENDATIONS = [
     topTemplateId: 'modern-minimalist',
     atsAdvice: 'While visual appeal matters for human recruiters, your PDF upload MUST remain single-column text without embedded raster images or hidden text tables so legacy workday parsers can read every Figma and UX competency cleanly.',
   },
+  {
+    id: 'cybersecurity',
+    title: 'Offensive Security & Cloud Infosec Engineer',
+    category: 'Cybersecurity & Security',
+    icon: ShieldAlert,
+    badgeColor: 'from-red-600 to-rose-600',
+    description: 'Targeted for Security Engineers, Penetration Testers, SOC Analysts, and Cloud Infosec Specialists.',
+    essentialSkills: ['Network Security', 'Penetration Testing (Burp Suite/Metasploit)', 'Cloud IAM & Zero Trust', 'SIEM (Splunk/CrowdStrike)', 'Vulnerability Remediation (CVEs)', 'ISO 27001 / SOC 2 Compliance', 'Python & Bash Scripting', 'OSINT & Threat Hunting'],
+    recommendedVerbs: ['Secured', 'Architected', 'Remediated', 'Mitigated', 'Investigated', 'Orchestrated', 'Hardened', 'Formulated'],
+    mustHaveSections: ['Contact & LinkedIn/GitHub', 'Security Clearance & Certifications (CISSP/OSCP/CEH)', 'Core Infosec & Penetration Stack', 'Quantified Incident Defense & Vulnerability Work Experience', 'Education'],
+    topTemplateId: 'cyber-defense',
+    atsAdvice: 'Security ATS bots scan for exact compliance frameworks (NIST, ISO 27001, SOC 2) alongside quantifiable attack surface reductions (e.g. "Mitigated 100% of P1/P2 vulnerabilities within 24 hours of disclosure").',
+  },
+  {
+    id: 'mobiledev',
+    title: 'Mobile Systems Architect (iOS/Android)',
+    category: 'Mobile Engineering',
+    icon: Smartphone,
+    badgeColor: 'from-indigo-600 to-blue-600',
+    description: 'Engineered for iOS Developers (Swift), Android Engineers (Kotlin), and React Native Cross-Platform Architects.',
+    essentialSkills: ['Swift & SwiftUI', 'Kotlin & Jetpack Compose', 'React Native & Expo', 'Mobile CI/CD (Fastlane)', 'CoreData & Realm', 'Memory Optimization & Instruments', 'App Store / Play Store Deployment', 'GraphQL & REST APIs'],
+    recommendedVerbs: ['Architected', 'Engineered', 'Spearheaded', 'Optimized', 'Deployed', 'Constructed', 'Orchestrated', 'Refactored'],
+    mustHaveSections: ['Contact & App Store/Play Store Links', 'Mobile Tech Stack Grid', 'High-Scale Native App Experience', 'App Launch Metrics & Crash-Free Session Stats', 'Education'],
+    topTemplateId: 'apple-mobile',
+    atsAdvice: 'Highlight your crash-free user session rate (e.g. "Maintained 99.85% crash-free sessions across 1.2M daily active mobile users") and exact memory footprint reduction percentage in bullet #1.',
+  },
+  {
+    id: 'dataengineer',
+    title: 'Big Data & Distributed Systems Engineer',
+    category: 'Data Engineering',
+    icon: Cpu,
+    badgeColor: 'from-teal-600 to-emerald-600',
+    description: 'Tailored for Data Engineers, ETL/ELT Pipeline Architects, Snowflake Specialists, and Spark Engineers.',
+    essentialSkills: ['Apache Spark & PySpark', 'Snowflake & BigQuery', 'Apache Kafka & Flink', 'Airflow & dbt', 'Python & Scala', 'PostgreSQL & NoSQL', 'Data Warehousing & Dimensional Modeling', 'AWS EMR & S3'],
+    recommendedVerbs: ['Engineered', 'Architected', 'Orchestrated', 'Formulated', 'Streamlined', 'Constructed', 'Synthesized', 'Scaled'],
+    mustHaveSections: ['Contact & GitHub Links', 'Distributed Data Stack & Warehouses', 'Petabyte-Scale Pipeline Work Experience', 'Data Pipeline Architecture Projects', 'Education'],
+    topTemplateId: 'data-pipeline',
+    atsAdvice: 'Always quantify data pipeline volume (e.g. "Engineered daily ETL pipelines processing 4.5 TB of real-time event telemetry with 0% data loss") to bypass enterprise data team filters.',
+  },
+  {
+    id: 'engmanager',
+    title: 'Engineering Manager & VP of Engineering',
+    category: 'Executive Tech Leadership',
+    icon: Users,
+    badgeColor: 'from-orange-600 to-amber-600',
+    description: 'Built for Engineering Managers (EM), Directors of Engineering, Principal Staff Engineers, and Tech Leads.',
+    essentialSkills: ['Engineering Team Scaling (15-50+ engineers)', 'Technical Strategy & Roadmap', 'Agile & DORA Metrics', 'System Architecture Oversight', 'Budget & Vendor Management', 'Cross-functional Executive Mentorship', 'Hiring & Performance Reviews'],
+    recommendedVerbs: ['Directed', 'Spearheaded', 'Orchestrated', 'Steered', 'Commanded', 'Formulated', 'Grew', 'Mentored'],
+    mustHaveSections: ['Contact & LinkedIn URL', 'Executive Summary & Leadership Scope', 'Team Leadership & Strategic Work Experience', 'Quantified DORA & Velocity Improvements', 'Education & Patents'],
+    topTemplateId: 'eng-leadership',
+    atsAdvice: 'ATS engines for executive leadership scan for team size scaling numbers and DORA metrics (e.g. "Directed 35+ engineers across 5 cross-functional squads, cutting deployment cycle time by 55%").',
+  },
 ];
 
 const FAMOUS_TEMPLATES = [
@@ -110,7 +166,7 @@ const FAMOUS_TEMPLATES = [
     id: 'jakes-harvard',
     name: "Jake's Resume / Harvard Single-Column Tech Standard",
     badge: '#1 Most Famous Overleaf Template',
-    targetRoles: 'Software Engineers, DevOps, SRE & Technical Roles',
+    targetRoles: 'Software Engineers, Full-Stack Developers, DevOps & Technical Roles',
     atsScore: '100 / 100 ATS Parseability',
     description: 'The industry-standard, world-famous Overleaf single-column LaTeX resume template. Clean serif/sans-serif typography with distinct section dividers (`\\titlerule`), strict right-aligned date tabs, and zero table/box leaks.',
     previewFeatures: ['100% Single-Column Linear Parsing', 'Exact Overleaf Letterpaper Geometry', 'Strict N-Gram Keyword Prominence', 'Optimal 0.5-inch Margins'],
@@ -120,6 +176,20 @@ const FAMOUS_TEMPLATES = [
 \\usepackage{titlesec}
 \\usepackage{hyperref}
 \\titleformat{\\section}{\\vspace{-4pt}\\scshape\\raggedright\\large}{}{0em}{}[\\color{black}\\titlerule\\vspace{-5pt}]`,
+  },
+  {
+    id: 'deedy-resume',
+    name: 'Deedy-Resume Tech & Systems Academic Minimal',
+    badge: 'Famous CS Graduate Benchmark',
+    targetRoles: 'CS Graduates, Systems Engineers, Competitive Programmers & Core Backend',
+    atsScore: '100 / 100 ATS Parseability',
+    description: 'The legendary Deedy format adapted into a 100% ATS-perfect single-column linear layout. Highly favored by university graduates and competitive algorithm developers targeting FAANG entry & mid-level roles.',
+    previewFeatures: ['Linear Single-Column ATS Adaptation', 'Prominent Education & GPA Placement', 'Concise Technical Grid Highlighting', 'Crisp Minimalist Font Weighting'],
+    latexSnippet: `\\documentclass[letterpaper,10pt]{article}
+\\usepackage{amsmath}
+\\usepackage{amssymb}
+\\usepackage{fullpage}
+\\section*{Education \\& Competitive Programming Competencies}`,
   },
   {
     id: 'stanford-ai',
@@ -136,10 +206,24 @@ const FAMOUS_TEMPLATES = [
 \\section*{Core Technical Competencies & AI Stack}`,
   },
   {
+    id: 'mit-cs',
+    name: 'MIT Computer Science & Quantitative Systems Standard',
+    badge: 'Elite Concurrency & Systems Standard',
+    targetRoles: 'Backend Architects, High-Frequency Trading (HFT) Engineers & Core C++/Rust Developers',
+    atsScore: '100 / 100 ATS Parseability',
+    description: 'Designed for systems engineers who build distributed databases, kernel modules, and low-latency financial systems. Emphasizes microsecond latency optimization and multi-threading concurrency.',
+    previewFeatures: ['Microsecond Latency Metric Prominence', 'Systems Language Grid (C++/Rust/Go)', 'High-Throughput Architectural Layout', 'Strict Single-Column Clean ATS Tabs'],
+    latexSnippet: `\\documentclass[letterpaper,11pt]{article}
+\\usepackage{charter}
+\\usepackage{titlesec}
+\\titleformat{\\section}{\\large\\bfseries}{}{0pt}{}[\\hrule]
+\\section*{Distributed Systems \\& High-Frequency Architecture}`,
+  },
+  {
     id: 'faang-exec',
     name: 'FAANG Executive & Senior Leadership Standard',
-    badge: 'Best for PMs & Engineering Managers',
-    targetRoles: 'Product Managers, Engineering Directors, Senior Staff & C-Suite',
+    badge: 'Best for PMs & Group Leads',
+    targetRoles: 'Product Managers, Engineering Directors, Technical Program Managers (TPMs) & Senior Staff',
     atsScore: '99 / 100 ATS Parseability',
     description: 'Prioritizes executive summaries, quantifiable business outcomes ($/%), roadmap direction, and cross-functional leadership. Uses bold header accents and crisp executive spacing.',
     previewFeatures: ['Executive Competency Grid', 'Strategic KRs & Revenue Impact Focus', 'Leadership & Mentorship Highlights', 'Crisp Enterprise Scannability'],
@@ -147,6 +231,33 @@ const FAMOUS_TEMPLATES = [
 \\usepackage{enumitem}
 \\setlist[itemize]{noitemsep, topsep=0pt}
 \\section*{Executive Summary & Strategic Impact}`,
+  },
+  {
+    id: 'mckinsey-consulting',
+    name: 'McKinsey / Ivy League Management Consulting Standard',
+    badge: 'Top Strategy & Finance Benchmark',
+    targetRoles: 'Business Analysts, Financial Analysts, Strategy Leads & Operations Managers',
+    atsScore: '100 / 100 ATS Parseability',
+    description: 'The definitive serif/sans-serif linear format used by management consultants at McKinsey, BCG, and Bain. Highlights revenue generation ($), EBITDA expansion, and quantitative case study results.',
+    previewFeatures: ['Classic Serif Executive Typography', 'Revenue & EBITDA Expansion Prominence', 'Strategic Framework Bullet Structure', '100% Linear Taleo/Workday Compatibility'],
+    latexSnippet: `\\documentclass[letterpaper,11pt]{article}
+\\usepackage{mathptmx} % Garamond/Times Executive font
+\\usepackage{titlesec}
+\\titleformat{\\section}{\\scshape\\bfseries\\large}{}{0pt}{}[\\titlerule]
+\\section*{Consulting Case Studies \\& Financial Outcomes}`,
+  },
+  {
+    id: 'google-sre',
+    name: 'Google SRE & Cloud Systems Reliability Standard',
+    badge: 'Gold Standard for DevOps & SRE',
+    targetRoles: 'Site Reliability Engineers (SRE), Cloud Systems Architects & Platform Engineers',
+    atsScore: '100 / 100 ATS Parseability',
+    description: 'Tailored strictly around Infrastructure-as-Code (`Terraform/Kubernetes`), 99.99% availability metrics, automated incident remediation, and multi-region AWS/GCP cloud deployments.',
+    previewFeatures: ['99.99% Uptime & SLA Prominence', 'Infrastructure-as-Code Stack Groupings', 'Automated CI/CD Pipeline Blueprint', 'Strict Linear Parsing Geometry'],
+    latexSnippet: `\\documentclass[letterpaper,10pt]{article}
+\\usepackage{fullpage}
+\\usepackage{enumitem}
+\\section*{Cloud Infrastructure \\& Reliability Engineering}`,
   },
   {
     id: 'modern-minimalist',
@@ -162,6 +273,56 @@ const FAMOUS_TEMPLATES = [
 \\definecolor{darkblue}{RGB}{15,32,67}
 \\section*{\\color{darkblue}Professional Experience}`,
   },
+  {
+    id: 'cyber-defense',
+    name: 'Offensive Security & Cyber Defense Standard',
+    badge: 'Top InfoSec & SOC Benchmark',
+    targetRoles: 'Security Engineers, Ethical Hackers, SOC Analysts & Penetration Testers',
+    atsScore: '100 / 100 ATS Parseability',
+    description: 'Structured around vulnerability mitigation (`CVEs`), penetration testing methodologies, Zero Trust cloud architectures, and strict SOC 2 / ISO 27001 regulatory compliance tracking.',
+    previewFeatures: ['Security Clearance & Certification Header', 'Attack Surface Mitigation Prominence', 'Penetration & SIEM Tool Grid', 'Zero Table or Text-Box Leaks'],
+    latexSnippet: `\\documentclass[letterpaper,11pt]{article}
+\\usepackage{titlesec}
+\\usepackage{fullpage}
+\\section*{Security Certifications \\& Cyber Defense Competencies}`,
+  },
+  {
+    id: 'apple-mobile',
+    name: 'Apple iOS & Android Mobile Systems Architect Standard',
+    badge: 'Top Mobile & Native Benchmark',
+    targetRoles: 'iOS Developers (Swift), Android Engineers (Kotlin) & React Native Architects',
+    atsScore: '100 / 100 ATS Parseability',
+    description: 'Built specifically for high-scale mobile engineers. Emphasizes App Store / Google Play rating stability, crash-free session statistics (`99.8%+`), and native memory instrumentation.',
+    previewFeatures: ['App Store Launch & MAU Metrics', 'Native Swift/Kotlin & Expo Stack Grid', 'Memory & Battery Optimization Focus', 'Clean Linear Single-Column Flow'],
+    latexSnippet: `\\documentclass[letterpaper,11pt]{article}
+\\usepackage{helvet}
+\\renewcommand{\\familydefault}{\\sfdefault}
+\\section*{Mobile Systems Architecture \\& App Store Achievements}`,
+  },
+  {
+    id: 'data-pipeline',
+    name: 'Data Systems & Big Data Engineering Standard',
+    badge: 'Benchmark for Snowflake & Spark',
+    targetRoles: 'Data Engineers, Big Data Pipeline Architects, ETL Specialists & BI Engineers',
+    atsScore: '100 / 100 ATS Parseability',
+    description: 'Optimized for petabyte-scale data engineering. Highlights real-time Spark/Kafka telemetry throughput, Snowflake schema optimization, and zero-data-loss pipeline reliability.',
+    previewFeatures: ['Petabyte / Terabyte Throughput Metrics', 'Warehouse & Pipeline Stack Categorization', 'ETL/ELT Latency Reduction Focus', '100% Linear ATS Readability'],
+    latexSnippet: `\\documentclass[letterpaper,11pt]{article}
+\\usepackage{fullpage}
+\\section*{Distributed Data Architecture \\& Pipeline Engineering}`,
+  },
+  {
+    id: 'eng-leadership',
+    name: 'Engineering Manager & VP of Engineering Standard',
+    badge: 'Top Executive Leadership Standard',
+    targetRoles: 'Engineering Managers (EM), Directors of Engineering & Principal Staff Leads',
+    atsScore: '99 / 100 ATS Parseability',
+    description: 'Showcases cross-functional team scaling (`managed 35+ engineers`), DORA metrics acceleration, sprint cycle reduction (`-50%`), and multimillion-dollar cloud budget oversight.',
+    previewFeatures: ['Team Scaling & Budget Management Scope', 'DORA Metric & Release Velocity Focus', 'Engineering Strategy & Roadmap Layout', 'Crisp Executive Section Dividers'],
+    latexSnippet: `\\documentclass[letterpaper,11pt]{article}
+\\usepackage{titlesec}
+\\section*{Leadership Scope \\& Engineering Management Experience}`,
+  },
 ];
 
 export default function Templates() {
@@ -171,19 +332,27 @@ export default function Templates() {
   const [downloadingTemplateId, setDownloadingTemplateId] = useState(null);
   const [creatingProfileId, setCreatingProfileId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('All');
 
-  const filteredRoles = ROLE_RECOMMENDATIONS.filter((r) =>
-    r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    r.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    r.essentialSkills.some((s) => s.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const categories = ['All', ...Array.from(new Set(ROLE_RECOMMENDATIONS.map((r) => r.category)))];
+
+  const filteredRoles = ROLE_RECOMMENDATIONS.filter((r) => {
+    const matchesQuery =
+      r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.essentialSkills.some((s) => s.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesCat = selectedCategoryFilter === 'All' || r.category === selectedCategoryFilter;
+    return matchesQuery && matchesCat;
+  });
 
   const handleDownloadLatexTemplate = (template) => {
     setDownloadingTemplateId(template.id);
     try {
+      const targetRole = selectedRole || ROLE_RECOMMENDATIONS[0];
       const latexContent = `${template.latexSnippet}
 % --------------------------------------------------------
 % ${template.name} - Overleaf & ATS Source
+% Target Career Role: ${targetRole.title}
 % Generated by ResumeIQ MERN Intelligence
 % --------------------------------------------------------
 \\begin{document}
@@ -196,39 +365,39 @@ export default function Templates() {
 \\end{center}
 
 \\section{Professional Summary}
-Senior Professional specializing in building high-concurrency, scalable systems and data-driven solutions. Proven track record of spearheading cross-functional technical initiatives and delivering verified measurable impact ahead of schedule.
+Results-driven ${targetRole.title} specializing in building high-concurrency, scalable systems and delivering data-driven solutions. Proven track record of spearheading cross-functional technical initiatives, optimizing architecture, and delivering verified measurable impact ahead of schedule.
 
 \\section{Technical Skills \\& Tools}
 \\begin{itemize}[leftmargin=0.15in, label={}]
     \\small{\\item{
-     \\textbf{Programming Languages}{: TypeScript, Python, JavaScript, SQL, Go, HTML5/CSS3} \\\\[2pt]
-     \\textbf{Frameworks \\& Libraries}{: React, Next.js, Node.js, Express, GraphQL, PyTorch, LangChain} \\\\[2pt]
-     \\textbf{Cloud \\& DevOps}{: Docker, Kubernetes, AWS (EC2, S3, RDS), CI/CD Pipelines, PostgreSQL, Redis}
+     \\textbf{Core Competencies}{: ${targetRole.essentialSkills.slice(0, 5).join(', ')}} \\\\[2pt]
+     \\textbf{Systems \\& Frameworks}{: ${targetRole.essentialSkills.slice(5).join(', ') || 'Docker, Kubernetes, AWS CI/CD'}} \\\\[2pt]
+     \\textbf{Action Leadership Verbs}{: ${targetRole.recommendedVerbs.slice(0, 6).join(', ')}}
     }}
 \\end{itemize}
 
 \\section{Professional Experience}
 \\noindent
-\\textbf{Senior Tech Leader} \\hfill {Jan 2024 -- Present} \\\\[1pt]
+\\textbf{Senior ${targetRole.title}} \\hfill {Jan 2024 -- Present} \\\\[1pt]
 \\textit{Enterprise Systems Corp} \\hfill {San Francisco, CA}
 \\begin{itemize}[leftmargin=0.25in]
-    \\item Spearheaded the architectural migration of core monolith modules to scalable microservices utilizing Node.js and Docker, reducing average response latency by 42\\%.
-    \\item Engineered high-concurrency PostgreSQL queries and automated caching strategies with Redis, scaling system throughput to handle over 15,000 queries per second during peak hours.
-    \\item Formulated automated CI/CD deployment pipelines via GitHub Actions, decreasing weekly engineering release overhead by 12 hours.
+    \\item ${targetRole.recommendedVerbs[0] || 'Spearheaded'} the architectural design and deployment of core engineering infrastructure utilizing ${targetRole.essentialSkills[0] || 'React'} and ${targetRole.essentialSkills[1] || 'Node.js'}, reducing average response latency by 42\\%.
+    \\item ${targetRole.recommendedVerbs[1] || 'Architected'} high-concurrency workflows and data pipelines with ${targetRole.essentialSkills[2] || 'PostgreSQL'}, scaling platform throughput to support over 150,000 daily requests during peak operations.
+    \\item ${targetRole.recommendedVerbs[2] || 'Formulated'} automated testing and deployment pipelines via CI/CD, saving the engineering team 14 hours weekly and eliminating deployment rollback errors.
 \\end{itemize}
 
 \\noindent
-\\textbf{Software Engineer} \\hfill {Jun 2021 -- Dec 2023} \\\\[1pt]
+\\textbf{Technical Specialist / Engineer} \\hfill {Jun 2021 -- Dec 2023} \\\\[1pt]
 \\textit{CloudScale Technologies} \\hfill {New York, NY}
 \\begin{itemize}[leftmargin=0.25in]
-    \\item Architected and deployed interactive frontend dashboards using React and TypeScript, boosting user engagement by 28\\% across 250,000 monthly active users.
-    \\item Collaborated with product managers and UX designers to launch real-time analytics features on time and 15\\% under budget.
+    \\item ${targetRole.recommendedVerbs[3] || 'Engineered'} interactive frontend dashboards and backend services using ${targetRole.essentialSkills[3] || 'TypeScript'}, boosting user engagement by 28\\% across 250,000 monthly active users.
+    \\item Collaborated with product managers and cross-functional teams to launch real-time analytics features on time and 15\\% under budget.
 \\end{itemize}
 
 \\section{Education}
 \\noindent
-\\textbf{Bachelor of Science in Computer Science} \\hfill {2017 -- 2021} \\\\[1pt]
-\\textit{Top Tier University} \\hfill {GPA: 3.9 / 4.0}
+\\textbf{Bachelor of Science in Computer Science} \\hfill {2018 -- 2022} \\\\[1pt]
+\\textit{University of Engineering \\& Technology} \\hfill {GPA: 3.9 / 4.0}
 
 \\end{document}
 `;
@@ -236,7 +405,7 @@ Senior Professional specializing in building high-concurrency, scalable systems 
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `${template.id}_ATS_Perfect_Template.tex`);
+      link.setAttribute('download', `${template.id}_${targetRole.id}_ATS_Template.tex`);
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -258,7 +427,7 @@ Senior Professional specializing in building high-concurrency, scalable systems 
 
     setCreatingProfileId(template.id);
     try {
-      const targetRole = roleData || selectedRole;
+      const targetRole = roleData || selectedRole || ROLE_RECOMMENDATIONS[0];
       const initialResumeData = {
         contact: {
           fullName: user?.fullName || 'Your Name',
@@ -283,9 +452,21 @@ Senior Professional specializing in building high-concurrency, scalable systems 
             endDate: 'Present',
             current: true,
             bullets: [
-              `Spearheaded the design and deployment of core engineering infrastructure utilizing ${targetRole.essentialSkills[0] || 'React'} and ${targetRole.essentialSkills[1] || 'Node.js'}, reducing system latency by 38%.`,
-              `Architected high-concurrency workflows and data pipelines with ${targetRole.essentialSkills[2] || 'PostgreSQL'}, scaling platform throughput to support 150,000+ daily requests.`,
-              `Formulated automated testing and deployment pipelines via CI/CD, saving the engineering team 14 hours weekly.`,
+              `${targetRole.recommendedVerbs[0] || 'Spearheaded'} the design and deployment of core engineering infrastructure utilizing ${targetRole.essentialSkills[0] || 'React'} and ${targetRole.essentialSkills[1] || 'Node.js'}, reducing system latency by 38%.`,
+              `${targetRole.recommendedVerbs[1] || 'Architected'} high-concurrency workflows and data pipelines with ${targetRole.essentialSkills[2] || 'PostgreSQL'}, scaling platform throughput to support 150,000+ daily requests.`,
+              `${targetRole.recommendedVerbs[2] || 'Formulated'} automated testing and deployment pipelines via CI/CD, saving the engineering team 14 hours weekly.`,
+            ],
+          },
+          {
+            id: 'work-2',
+            company: 'CloudScale Technologies',
+            title: `Junior / Mid ${targetRole.title.split(' ')[1] || 'Engineer'}`,
+            startDate: 'Jun 2021',
+            endDate: 'Dec 2023',
+            current: false,
+            bullets: [
+              `${targetRole.recommendedVerbs[3] || 'Engineered'} scalable features and enterprise modules using ${targetRole.essentialSkills[3] || 'TypeScript'}, boosting customer satisfaction by 28%.`,
+              `Collaborated across squads to deliver mission-critical software releases 2 weeks ahead of schedule.`,
             ],
           },
         ],
@@ -303,9 +484,9 @@ Senior Professional specializing in building high-concurrency, scalable systems 
         projects: [
           {
             id: 'proj-1',
-            name: 'High-Performance Analytics Module',
+            name: `${targetRole.title.split(' ')[0]} High-Performance Architecture Project`,
             technologies: targetRole.essentialSkills.slice(0, 4).join(', '),
-            description: `Engineered a full-stack real-time monitoring dashboard leveraging ${targetRole.essentialSkills[0] || 'TypeScript'}, boosting operational visibility by 45%.`,
+            description: `Engineered a full-stack real-time monitoring and analytics module leveraging ${targetRole.essentialSkills[0] || 'TypeScript'}, boosting operational visibility by 45%.`,
           },
         ],
       };
@@ -349,8 +530,8 @@ Senior Professional specializing in building high-concurrency, scalable systems 
             World-Famous ATS Templates & <span className="gradient-text">Role-Based AI Guide</span>
           </h1>
 
-          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Create authentic Overleaf-ready LaTeX (`.tex`) resumes using templates trusted by engineers at Google, Meta, and Stanford. Discover exact hard skills, leadership verbs, and quantified metrics tailored for your target role.
+          <p className="text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            Create authentic Overleaf-ready LaTeX (`.tex`) resumes using 12+ industry-benchmark templates trusted by engineers at FAANG, Ivy League consultancies, and top AI labs. Explore exact hard skills, leadership verbs, and quantified metrics tailored for all 10 major career tracks.
           </p>
         </div>
       </section>
@@ -366,10 +547,10 @@ Senior Professional specializing in building high-concurrency, scalable systems 
                 <span>Job Role Intelligence</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground">
-                Role-Based ATS Recommendations & Checklist
+                Role-Based ATS Recommendations & Checklist ({ROLE_RECOMMENDATIONS.length} Roles)
               </h2>
               <p className="text-sm text-muted-foreground mt-1">
-                Select your target career path to unlock recommended hard skills, elite action verbs, and section blueprints.
+                Select your target career path below to unlock recommended hard skills, elite action verbs, and section blueprints.
               </p>
             </div>
 
@@ -386,8 +567,25 @@ Senior Professional specializing in building high-concurrency, scalable systems 
             </div>
           </div>
 
+          {/* Category Filter Pills */}
+          <div className="flex flex-wrap items-center gap-2">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategoryFilter(cat)}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+                  selectedCategoryFilter === cat
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20'
+                    : 'bg-secondary/60 text-muted-foreground hover:bg-secondary hover:text-foreground border border-border/60'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
           {/* Role Selector Tabs */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {filteredRoles.map((role) => {
               const Icon = role.icon || Briefcase;
               const isSelected = selectedRole?.id === role.id;
@@ -434,10 +632,10 @@ Senior Professional specializing in building high-concurrency, scalable systems 
                   <button
                     onClick={() => handleCreateProfileFromTemplate(FAMOUS_TEMPLATES[0], selectedRole)}
                     disabled={creatingProfileId !== null}
-                    className="px-5 py-3 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold text-xs shadow-lg shadow-blue-500/25 flex items-center gap-2 transition-all hover:scale-105"
+                    className="px-5 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold text-xs shadow-lg shadow-blue-500/25 flex items-center gap-2 transition-all hover:scale-105"
                   >
                     <Plus className="w-4 h-4" />
-                    <span>Create Pre-Filled {selectedRole.title.split(' ')[0]} Profile</span>
+                    <span>Create & Edit {selectedRole.title.split(' ')[0]} Profile Now</span>
                   </button>
                 </div>
               </div>
@@ -532,13 +730,13 @@ Senior Professional specializing in building high-concurrency, scalable systems 
           <div className="border-b border-border/40 pb-6">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-purple-400 mb-1">
               <FileText className="w-4 h-4" />
-              <span>Overleaf & ATS Benchmarks</span>
+              <span>Overleaf & ATS Benchmarks ({FAMOUS_TEMPLATES.length} World-Class Layouts)</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground">
               Famous 100% ATS-Verified Templates Library
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Used by thousands of successful applicants to land interviews at FAANG, Fortune 500, and top research institutions.
+              Select any of our 12 world-renowned templates below to instantly create and customize your live resume profile or download Overleaf `.tex` source code tailored to your target job role.
             </p>
           </div>
 
@@ -573,7 +771,7 @@ Senior Professional specializing in building high-concurrency, scalable systems 
 
                   <div className="grid grid-cols-2 gap-2 pt-2">
                     {tpl.previewFeatures.map((feat, idx) => (
-                      <div key={idx} className="flex items-center gap-2 text-xs font-semibold text-foreground/90 bg-secondary/50 p-2 rounded-xl border border-border/50">
+                      <div key={idx} className="flex items-center gap-2 text-xs font-semibold text-foreground/90 bg-secondary/50 p-2.5 rounded-xl border border-border/50">
                         <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                         <span className="truncate">{feat}</span>
                       </div>
@@ -581,8 +779,8 @@ Senior Professional specializing in building high-concurrency, scalable systems 
                   </div>
 
                   {/* Code preview snippet */}
-                  <div className="p-3 rounded-xl bg-black/50 border border-border/40 font-mono text-[11px] text-muted-foreground overflow-x-auto">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-purple-400 mb-1 flex items-center gap-1">
+                  <div className="p-3.5 rounded-xl bg-black/60 border border-border/40 font-mono text-[11px] text-muted-foreground overflow-x-auto">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-purple-400 mb-1.5 flex items-center gap-1">
                       <Code className="w-3 h-3" /> Overleaf LaTeX Source Header (`.tex`)
                     </div>
                     <pre className="whitespace-pre-wrap text-emerald-400/90 leading-tight">
@@ -593,21 +791,21 @@ Senior Professional specializing in building high-concurrency, scalable systems 
 
                 <div className="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-border/40">
                   <button
-                    onClick={() => handleDownloadLatexTemplate(tpl)}
-                    disabled={downloadingTemplateId === tpl.id}
-                    className="w-full sm:w-1/2 px-4 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                    onClick={() => handleCreateProfileFromTemplate(tpl, selectedRole)}
+                    disabled={creatingProfileId === tpl.id}
+                    className="w-full sm:w-1/2 px-4 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 transition-all disabled:opacity-50 hover:scale-[1.02]"
                   >
-                    <Download className="w-4 h-4" />
-                    <span>Download Overleaf (`.tex`)</span>
+                    <Plus className="w-4 h-4" />
+                    <span>⚡ Create & Edit With Template</span>
                   </button>
 
                   <button
-                    onClick={() => handleCreateProfileFromTemplate(tpl, selectedRole)}
-                    disabled={creatingProfileId === tpl.id}
-                    className="w-full sm:w-1/2 px-4 py-3 rounded-2xl bg-secondary hover:bg-secondary/80 text-foreground font-bold text-xs border border-border/80 flex items-center justify-center gap-2 transition-all shadow-sm"
+                    onClick={() => handleDownloadLatexTemplate(tpl)}
+                    disabled={downloadingTemplateId === tpl.id}
+                    className="w-full sm:w-1/2 px-4 py-3.5 rounded-2xl bg-secondary hover:bg-secondary/80 text-foreground font-bold text-xs border border-border/80 flex items-center justify-center gap-2 transition-all shadow-sm hover:border-purple-500/40"
                   >
-                    <Plus className="w-4 h-4 text-blue-400" />
-                    <span>Use Template & Customize</span>
+                    <Download className="w-4 h-4 text-purple-400" />
+                    <span>Download Overleaf (`.tex`)</span>
                   </button>
                 </div>
               </div>
