@@ -89,13 +89,21 @@ export default function LandingPage() {
             Entry-level candidates and career switchers submit dozens of applications with zero callbacks. Not because you’re unqualified, but because Applicant Tracking Systems filter out multi-column layouts, missing exact n-gram keywords, and unquantified bullets.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
+          <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-4 max-w-2xl mx-auto">
             <Link
               to={user ? '/resume/new' : '/signup'}
               className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold text-base shadow-xl shadow-blue-500/25 flex items-center justify-center gap-2.5 transition-all hover:scale-[1.03] active:scale-[0.98]"
             >
               <span>{user ? 'Scan Your Resume Now' : 'Create Account to Scan'}</span>
               <ArrowRight className="w-5 h-5" />
+            </Link>
+
+            <Link
+              to="/templates"
+              className="w-full sm:w-auto px-6 py-4 rounded-2xl bg-gradient-to-r from-purple-600/20 via-indigo-600/20 to-blue-600/20 hover:from-purple-600/30 hover:to-blue-600/30 border border-purple-500/40 text-purple-300 font-bold text-base flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
+            >
+              <Sparkles className="w-5 h-5 text-purple-400" />
+              <span>Explore Famous Templates & Roles</span>
             </Link>
 
             <button

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FileCheck, Sparkles, Kanban, Settings, LayoutDashboard, Plus, LogIn, LogOut, User } from 'lucide-react';
+import { FileCheck, Sparkles, Kanban, Settings, LayoutDashboard, Plus, LogIn, LogOut, User, FileText, BookOpen, Menu, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Navbar() {
@@ -8,6 +8,7 @@ export default function Navbar() {
   const path = location.pathname;
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   const handleSignOut = () => {
     logout();
@@ -31,10 +32,10 @@ export default function Navbar() {
           </div>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-1.5 bg-secondary/40 border border-border/50 rounded-full p-1.5 px-3">
+        <nav className="hidden lg:flex items-center gap-1 bg-secondary/40 border border-border/50 rounded-full p-1.5 px-3">
           <Link
             to="/dashboard"
-            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 ${
               path === '/dashboard' ? 'bg-primary text-white shadow-md' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
@@ -44,7 +45,7 @@ export default function Navbar() {
 
           <Link
             to="/resume/new"
-            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 ${
               path.startsWith('/resume') ? 'bg-primary text-white shadow-md' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
@@ -53,18 +54,28 @@ export default function Navbar() {
           </Link>
 
           <Link
+            to="/templates"
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 ${
+              path === '/templates' ? 'bg-primary text-white shadow-md' : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <BookOpen className="w-3.5 h-3.5 text-purple-400" />
+            <span>Famous Templates</span>
+          </Link>
+
+          <Link
             to="/applications"
-            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 ${
               path === '/applications' ? 'bg-primary text-white shadow-md' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             <Kanban className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Application Tracker</span>
+            <span>Tracker</span>
           </Link>
 
           <Link
             to="/settings"
-            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 ${
               path === '/settings' ? 'bg-primary text-white shadow-md' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
@@ -116,8 +127,72 @@ export default function Navbar() {
               </Link>
             </div>
           )}
+
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden p-2 rounded-xl bg-secondary/60 hover:bg-secondary border border-border/60 text-foreground transition-colors"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
         </div>
       </div>
+
+      {/* Mobile Navigation Menu */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden border-t border-border/60 bg-background/95 backdrop-blur-xl px-4 py-3 space-y-2 shadow-xl animate-in slide-in-from-top duration-200">
+          <Link
+            to="/dashboard"
+            onClick={() => setMobileMenuOpen(false)}
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold ${
+              path === '/dashboard' ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground'
+            }`}
+          >
+            <LayoutDashboard className="w-4 h-4" />
+            <span>Dashboard</span>
+          </Link>
+          <Link
+            to="/resume/new"
+            onClick={() => setMobileMenuOpen(false)}
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold ${
+              path.startsWith('/resume') ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground'
+            }`}
+          >
+            <Sparkles className="w-4 h-4 text-blue-400" />
+            <span>ATS Scan & Score</span>
+          </Link>
+          <Link
+            to="/templates"
+            onClick={() => setMobileMenuOpen(false)}
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold ${
+              path === '/templates' ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground'
+            }`}
+          >
+            <BookOpen className="w-4 h-4 text-purple-400" />
+            <span>Famous Templates & Role Guide</span>
+          </Link>
+          <Link
+            to="/applications"
+            onClick={() => setMobileMenuOpen(false)}
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold ${
+              path === '/applications' ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground'
+            }`}
+          >
+            <Kanban className="w-4 h-4 text-indigo-400" />
+            <span>Application Tracker</span>
+          </Link>
+          <Link
+            to="/settings"
+            onClick={() => setMobileMenuOpen(false)}
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold ${
+              path === '/settings' ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground'
+            }`}
+          >
+            <Settings className="w-4 h-4" />
+            <span>Settings</span>
+          </Link>
+        </div>
+      )}
     </header>
   );
 }

@@ -9,6 +9,7 @@ import ScoreReport from './pages/ScoreReport.jsx';
 import ResumeEditor from './pages/ResumeEditor.jsx';
 import Applications from './pages/Applications.jsx';
 import Settings from './pages/Settings.jsx';
+import Templates from './pages/Templates.jsx';
 import Login from './pages/Login.jsx';
 import Signup from './pages/Signup.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
@@ -81,6 +82,7 @@ export default function App() {
           <main className="flex-1 flex flex-col">
             <Routes>
               <Route path="/" element={<LandingPage />} />
+              <Route path="/templates" element={<Templates />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route
