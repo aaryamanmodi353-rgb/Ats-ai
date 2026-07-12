@@ -369,208 +369,119 @@ ${eduLatex}
 
   const renderOverleafDocumentPreview = (code) => {
     if (!code || !code.trim()) {
-      return <div className="text-gray-400 italic text-center py-10">Document buffer is empty. Type LaTeX code on the left to begin...</div>;
+      return <div className="text-gray-400 italic text-center py-10">Document buffer is empty. Type code on the left to begin...</div>;
     }
 
-    // Strip document wrapper boilerplate for clean visual parsing
-    let cleanCode = code
+    // 1. Strip document wrapper boilerplate (\documentclass, \usepackage, \begin{document}, etc.)
+    let clean = code
       .replace(/\\documentclass[^}]*}/gi, '')
       .replace(/\\usepackage[^}]*}/gi, '')
       .replace(/\\begin{document}/gi, '')
       .replace(/\\end{document}/gi, '')
-      .replace(/%.*/g, '') // strip comments
+      .replace(/%.*/g, '') // strip LaTeX comments
       .trim();
 
-    const sections = cleanCode.split(/\\section\s*{([^}]+)}/i);
-    const renderedElements = [];
-
-    // Header / Pre-header text
-    const headerBlock = sections[0]?.trim();
-    if (headerBlock) {
-      let headerName = '';
-      const nameMatch = headerBlock.match(/\\Huge\s+\\scshape\s+([^}\\\n]+)/i) || headerBlock.match(/\\scshape\s+([^}\\\n]+)/i);
-      if (nameMatch) {
-        headerName = nameMatch[1].replace(/\\[a-z]+/gi, '').replace(/[{}]/g, '').trim();
-      }
-
-      let contactText = headerBlock
-        .replace(/\\begin{center}/gi, '')
-        .replace(/\\end{center}/gi, '')
-        .replace(/\\Huge\s+\\scshape\s+[^}\\\n]+/i, '')
-        .replace(/\\scshape\s+[^}\\\n]+/i, '')
+    // 2. Convert center blocks & headers (\begin{center} ... \end{center})
+    clean = clean.replace(/\\begin{center}([\s\S]*?)\\end{center}/gi, (match, inner) => {
+      let headerContent = inner
+        .replace(/\\Huge\s+\\scshape\s+([^}\\\n]+)/i, '<h1 class="text-xl sm:text-2xl font-bold uppercase tracking-wider text-gray-900 font-serif mb-1">$1</h1>')
+        .replace(/\\scshape\s+([^}\\\n]+)/i, '<h1 class="text-xl sm:text-2xl font-bold uppercase tracking-wider text-gray-900 font-serif mb-1">$1</h1>')
         .replace(/\\small/gi, '')
-        .replace(/\\href\s*{[^}]*}\s*{\\underline{([^}]+)}}/gi, '$1')
-        .replace(/\\href\s*{[^}]*}\s*{([^}]+)}/gi, '$1')
-        .replace(/\\\\[0-9pt]+/gi, ' | ')
-        .replace(/\\\\/g, ' | ')
-        .replace(/\$\|\$/g, ' | ')
-        .replace(/[{}]/g, '')
-        .trim();
+        .replace(/\\href\s*{[^}]*}\s*{\\underline{([^}]+)}}/gi, '<a href="#" class="text-blue-700 underline mx-1">$1</a>')
+        .replace(/\\href\s*{[^}]*}\s*{([^}]+)}/gi, '<a href="#" class="text-blue-700 underline mx-1">$1</a>')
+        .replace(/\$\|\$/g, '<span class="mx-1 text-gray-400 font-bold">|</span>')
+        .replace(/\\\\[0-9pt]+/gi, '<br />')
+        .replace(/\\\\/g, '<br />')
+        .replace(/[{}]/g, '');
+      return `<div class="text-center pb-3 border-b-2 border-gray-800 mb-4 font-sans text-xs sm:text-sm leading-relaxed">${headerContent}</div>`;
+    });
 
-      if (headerName || contactText) {
-        renderedElements.push(
-          <div key="header" className="text-center pb-3 border-b-2 border-gray-800 mb-4">
-            {headerName && <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-wider text-gray-900 font-serif">{headerName}</h2>}
-            {contactText && <div className="text-[11px] sm:text-xs text-gray-700 mt-1 font-sans leading-relaxed">{contactText}</div>}
-          </div>
-        );
-      } else {
-        renderedElements.push(
-          <div key="pre-header" className="text-gray-900 font-sans text-sm mb-4 leading-relaxed whitespace-pre-wrap">
-            {headerBlock.replace(/\\[a-z]+(\s*\[[^\]]*\])?(\s*{[^}]*})?/gi, '').trim() || headerBlock}
-          </div>
-        );
-      }
-    }
+    // 3. Convert \section{...} into styled section headings
+    clean = clean.replace(/\\section\s*{([^}]+)}/gi, '<h3 class="font-bold text-xs sm:text-sm uppercase tracking-wider border-b border-gray-400 pb-0.5 mt-5 mb-2 text-gray-900 font-sans">$1</h3>');
 
-    // Sections and section items
-    for (let i = 1; i < sections.length; i += 2) {
-      const sectionTitle = sections[i]?.trim();
-      const sectionContent = sections[i + 1]?.trim() || '';
-      if (!sectionTitle && !sectionContent) continue;
+    // 4. Convert \begin{itemize} ... \end{itemize} and \item
+    clean = clean.replace(/\\begin{itemize}[^\]]*\]/gi, '<ul class="list-disc pl-5 space-y-1 text-gray-800 my-1.5 font-sans text-xs sm:text-sm leading-snug">');
+    clean = clean.replace(/\\begin{itemize}/gi, '<ul class="list-disc pl-5 space-y-1 text-gray-800 my-1.5 font-sans text-xs sm:text-sm leading-snug">');
+    clean = clean.replace(/\\end{itemize}/gi, '</ul>');
+    clean = clean.replace(/\\item\s+([^\n\\]+(?:\\[^\n\\]+)*)/gi, '<li>$1</li>');
 
-      const sectionItems = [];
-      const lines = sectionContent.split(/\n+/);
-      let currentList = null;
+    // 5. Convert flex blocks (\noindent \textbf{...} \hfill {Date} \\ \textit{...} \hfill {Location})
+    const lines = clean.split('\n');
+    const processedLines = lines.map((line) => {
+      let trimmed = line.trim();
+      if (!trimmed) return '';
 
-      lines.forEach((line, lineIdx) => {
-        const trimmed = line.trim();
-        if (!trimmed) return;
-
-        if (trimmed.toLowerCase().includes('\\begin{itemize}')) {
-          currentList = [];
-          return;
-        }
-        if (trimmed.toLowerCase().includes('\\end{itemize}')) {
-          if (currentList && currentList.length > 0) {
-            sectionItems.push(
-              <ul key={`list-${lineIdx}`} className="list-disc pl-5 space-y-1 text-gray-800 my-1.5 font-sans text-xs sm:text-sm leading-snug">
-                {currentList.map((itemText, idx) => (
-                  <li key={idx}>{itemText}</li>
-                ))}
-              </ul>
-            );
-          }
-          currentList = null;
-          return;
-        }
-
-        if (trimmed.startsWith('\\item')) {
-          const itemText = trimmed
-            .replace(/^\\item\s*/i, '')
-            .replace(/\\textbf\s*{([^}]+)}/gi, '$1')
-            .replace(/\\textit\s*{([^}]+)}/gi, '$1')
-            .replace(/\\%/g, '%')
-            .replace(/\\[a-z]+/gi, '')
-            .replace(/[{}]/g, '')
-            .trim();
-
-          if (currentList !== null) {
-            currentList.push(itemText);
-          } else {
-            sectionItems.push(
-              <div key={`item-${lineIdx}`} className="flex items-start gap-2 text-gray-800 text-xs sm:text-sm font-sans my-1">
-                <span className="font-bold shrink-0">•</span>
-                <span>{itemText}</span>
-              </div>
-            );
-          }
-          return;
-        }
-
-        if (trimmed.includes('\\textbf{') || trimmed.includes('\\noindent') || trimmed.includes('\\hfill')) {
-          let leftBold = '';
-          let rightText = '';
-          let leftItalic = '';
-          let rightSubText = '';
-
-          const titleMatch = trimmed.match(/\\textbf\s*{([^}]+)}/i);
-          if (titleMatch) leftBold = titleMatch[1];
-
-          const hfillMatches = [...trimmed.matchAll(/\\hfill\s*{([^}]+)}/gi)];
-          if (hfillMatches.length > 0) rightText = hfillMatches[0][1];
-          if (hfillMatches.length > 1) rightSubText = hfillMatches[1][1];
-
-          const italicMatch = trimmed.match(/\\textit\s*{([^}]+)}/i);
-          if (italicMatch) leftItalic = italicMatch[1];
-
-          if (!leftBold && !leftItalic) {
-            const cleanLine = trimmed
-              .replace(/\\noindent/gi, '')
-              .replace(/\\textbf\s*{([^}]+)}/gi, '$1')
-              .replace(/\\textit\s*{([^}]+)}/gi, '$1')
-              .replace(/\\hfill\s*{([^}]+)}/gi, ' — $1')
-              .replace(/\\\\\[[^\]]*\]/g, '')
-              .replace(/\\\\/g, '')
-              .replace(/\\%/g, '%')
-              .replace(/[{}]/g, '')
-              .trim();
-
-            sectionItems.push(
-              <div key={`line-${lineIdx}`} className="text-gray-800 text-xs sm:text-sm font-sans my-1 leading-snug">
-                {cleanLine}
-              </div>
-            );
-          } else {
-            sectionItems.push(
-              <div key={`block-${lineIdx}`} className="my-2 font-sans text-xs sm:text-sm">
-                <div className="flex items-center justify-between font-bold text-gray-900 flex-wrap gap-x-2">
-                  <span>{leftBold}</span>
-                  <span>{rightText}</span>
-                </div>
-                {(leftItalic || rightSubText) && (
-                  <div className="flex items-center justify-between italic text-gray-700 text-[11px] sm:text-xs mt-0.5 flex-wrap gap-x-2">
-                    <span>{leftItalic}</span>
-                    <span>{rightSubText}</span>
-                  </div>
-                )}
-              </div>
-            );
-          }
-          return;
-        }
-
-        const cleanLine = trimmed
-          .replace(/\\noindent/gi, '')
-          .replace(/\\textbf\s*{([^}]+)}/gi, '$1')
-          .replace(/\\textit\s*{([^}]+)}/gi, '$1')
-          .replace(/\\small\s*{([^}]+)}/gi, '$1')
-          .replace(/\\%/g, '%')
-          .replace(/\\\\[0-9pt]+/gi, '')
-          .replace(/\\\\/g, '')
-          .replace(/[{}]/g, '')
-          .trim();
-
-        if (cleanLine) {
-          sectionItems.push(
-            <p key={`p-${lineIdx}`} className="text-gray-800 text-xs sm:text-sm font-sans my-1.5 leading-snug">
-              {cleanLine}
-            </p>
-          );
-        }
-      });
-
-      if (currentList && currentList.length > 0) {
-        sectionItems.push(
-          <ul key={`list-end`} className="list-disc pl-5 space-y-1 text-gray-800 my-1.5 font-sans text-xs sm:text-sm leading-snug">
-            {currentList.map((itemText, idx) => (
-              <li key={idx}>{itemText}</li>
-            ))}
-          </ul>
-        );
+      // If it already starts with an HTML tag or was converted earlier (like <h1 or <h3 or <ul or </ul or <li or <div or </div), preserve it directly
+      if (trimmed.startsWith('<h1') || trimmed.startsWith('<h3') || trimmed.startsWith('<ul') || trimmed.startsWith('</ul') || trimmed.startsWith('<li') || trimmed.startsWith('<div') || trimmed.startsWith('</div')) {
+        return trimmed;
       }
 
-      renderedElements.push(
-        <div key={`section-${i}`} className="mb-4">
-          <h3 className="font-bold text-xs sm:text-sm uppercase tracking-wider border-b border-gray-400 pb-0.5 mb-2 text-gray-900 font-sans">
-            {sectionTitle}
-          </h3>
-          <div className="space-y-1">{sectionItems}</div>
-        </div>
-      );
-    }
+      // Check if it has \hfill (left/right split alignment)
+      if (trimmed.includes('\\hfill')) {
+        let leftBold = '';
+        let rightText = '';
+        let leftItalic = '';
+        let rightSubText = '';
 
-    return <div className="space-y-4">{renderedElements}</div>;
+        const titleMatch = trimmed.match(/\\textbf\s*{([^}]+)}/i);
+        if (titleMatch) leftBold = titleMatch[1];
+
+        const hfillMatches = [...trimmed.matchAll(/\\hfill\s*{([^}]+)}/gi)];
+        if (hfillMatches.length > 0) rightText = hfillMatches[0][1];
+        if (hfillMatches.length > 1) rightSubText = hfillMatches[1][1];
+
+        const italicMatch = trimmed.match(/\\textit\s*{([^}]+)}/i);
+        if (italicMatch) leftItalic = italicMatch[1];
+
+        if (leftBold || leftItalic) {
+          return `<div class="my-2 font-sans text-xs sm:text-sm">
+            <div class="flex items-center justify-between font-bold text-gray-900 flex-wrap gap-x-2">
+              <span>${leftBold}</span>
+              <span>${rightText}</span>
+            </div>
+            ${(leftItalic || rightSubText) ? `<div class="flex items-center justify-between italic text-gray-700 text-[11px] sm:text-xs mt-0.5 flex-wrap gap-x-2">
+              <span>${leftItalic}</span>
+              <span>${rightSubText}</span>
+            </div>` : ''}
+          </div>`;
+        }
+      }
+
+      return trimmed;
+    });
+
+    clean = processedLines.join('\n');
+
+    // 6. Convert inline text formatting (\textbf, \textit, \small, \href, \underline, \noindent, \newline)
+    clean = clean
+      .replace(/\\textbf\s*{([^}]+)}/gi, '<strong class="font-bold text-gray-950">$1</strong>')
+      .replace(/\\textit\s*{([^}]+)}/gi, '<em class="italic text-gray-800">$1</em>')
+      .replace(/\\underline\s*{([^}]+)}/gi, '<span class="underline">$1</span>')
+      .replace(/\\small\s*{([^}]+)}/gi, '<span class="text-xs text-gray-700">$1</span>')
+      .replace(/\\href\s*{([^}]*)}\s*{([^}]+)}/gi, '<a href="$1" target="_blank" class="text-blue-700 underline font-medium">$2</a>')
+      .replace(/\\noindent/gi, '')
+      .replace(/\\\\[0-9pt]+/gi, '<br />')
+      .replace(/\\\\/g, '<br />')
+      .replace(/\\newline/gi, '<br />')
+      .replace(/\\hrule/gi, '<hr class="my-3 border-gray-400 border-t" />')
+      .replace(/\\vspace\s*{[^}]*}/gi, '<div class="my-1"></div>')
+      .replace(/\\%/g, '%');
+
+    // 7. Convert Markdown formatting (# headings, **bold**, *italic*, --- hr)
+    clean = clean
+      .replace(/^###\s+(.*)$/gm, '<h4 class="font-bold text-xs sm:text-sm text-gray-900 mt-3 mb-1 font-sans">$1</h4>')
+      .replace(/^##\s+(.*)$/gm, '<h3 class="font-bold text-xs sm:text-sm uppercase tracking-wider border-b border-gray-400 pb-0.5 mt-5 mb-2 text-gray-900 font-sans">$1</h3>')
+      .replace(/^#\s+(.*)$/gm, '<h1 class="text-xl sm:text-2xl font-bold uppercase tracking-wider text-gray-900 font-serif mb-2 border-b-2 border-gray-900 pb-1">$1</h1>')
+      .replace(/---/g, '<hr class="my-3 border-gray-400 border-t" />')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-gray-950">$1</strong>')
+      .replace(/\*([^*]+)\*/g, '<em class="italic text-gray-800">$1</em>');
+
+    return (
+      <div
+        className="space-y-3 font-serif text-gray-900 leading-relaxed text-xs sm:text-sm"
+        dangerouslySetInnerHTML={{ __html: clean }}
+      />
+    );
   };
 
   const handleRunAiAutoFixCode = async () => {
