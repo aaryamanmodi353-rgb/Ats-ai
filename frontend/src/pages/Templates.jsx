@@ -498,8 +498,8 @@ Results-driven ${targetRole.title} specializing in building high-concurrency, sc
       });
 
       if (res.data && (res.data._id || res.data.id)) {
-        toast.success(`⚡ Created fresh ${targetRole.title} profile! Opening Live ATS Editor...`);
-        navigate(`/editor/${res.data._id || res.data.id}`);
+        toast.success(`⚡ Created fresh ${targetRole.title} profile! Opening Overleaf Code Studio...`);
+        navigate(`/resume/${res.data._id || res.data.id}/editor?mode=overleaf&template=${template.id}`);
       } else {
         toast.success('Profile created!');
         navigate('/dashboard');

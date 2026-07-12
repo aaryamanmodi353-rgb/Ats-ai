@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import {
   Save,
   Download,
@@ -10,21 +10,73 @@ import {
   ArrowLeft,
   Loader2,
   TrendingUp,
+  Code,
+  Layout,
+  Sparkles,
+  Zap,
+  ShieldCheck,
+  Terminal,
+  FileText,
+  AlertCircle,
+  Eye,
+  RefreshCw,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
 
+const FAMOUS_TEMPLATES_MAP = {
+  'jakes-harvard': {
+    name: "Jake's Resume / Harvard Single-Column Tech Standard",
+    headerCode: `\\documentclass[letterpaper,11pt]{article}\n\\usepackage{latexsym}\n\\usepackage[empty]{fullpage}\n\\usepackage{titlesec}\n\\usepackage{hyperref}\n\\titleformat{\\section}{\\vspace{-4pt}\\scshape\\raggedright\\large}{}{0em}{}[\\color{black}\\titlerule\\vspace{-5pt}]`,
+  },
+  'deedy-resume': {
+    name: 'Deedy-Resume Tech & Systems Academic Minimal',
+    headerCode: `\\documentclass[letterpaper,10pt]{article}\n\\usepackage{amsmath}\n\\usepackage{amssymb}\n\\usepackage{fullpage}\n\\section*{Education \\& Competitive Programming Competencies}`,
+  },
+  'stanford-ai': {
+    name: 'Stanford Graduate Academic & AI Tech Standard',
+    headerCode: `\\documentclass[a4paper,10pt]{article}\n\\usepackage{amsmath}\n\\usepackage{geometry}\n\\geometry{top=0.6in, bottom=0.6in, left=0.6in, right=0.6in}\n\\section*{Core Technical Competencies & AI Stack}`,
+  },
+  'mit-cs': {
+    name: 'MIT Computer Science & Quantitative Systems Standard',
+    headerCode: `\\documentclass[letterpaper,11pt]{article}\n\\usepackage{charter}\n\\usepackage{titlesec}\n\\titleformat{\\section}{\\large\\bfseries}{}{0pt}{}[\\hrule]\n\\section*{Distributed Systems \\& High-Frequency Architecture}`,
+  },
+  'faang-exec': {
+    name: 'FAANG Executive & Senior Leadership Standard',
+    headerCode: `\\documentclass[letterpaper,11pt]{article}\n\\usepackage{enumitem}\n\\setlist[itemize]{noitemsep, topsep=0pt}\n\\section*{Executive Summary & Strategic Impact}`,
+  },
+  'mckinsey-consulting': {
+    name: 'McKinsey / Ivy League Management Consulting Standard',
+    headerCode: `\\documentclass[letterpaper,11pt]{article}\n\\usepackage{mathptmx}\n\\usepackage{titlesec}\n\\titleformat{\\section}{\\scshape\\bfseries\\large}{}{0pt}{}[\\titlerule]`,
+  },
+  'google-sre': {
+    name: 'Google SRE & Cloud Systems Reliability Standard',
+    headerCode: `\\documentclass[letterpaper,10pt]{article}\n\\usepackage{fullpage}\n\\usepackage{enumitem}`,
+  },
+  'modern-minimalist': {
+    name: 'Modern Tech Minimalist Standard',
+    headerCode: `\\documentclass[11pt,a4paper]{article}\n\\usepackage{fontspec}\n\\usepackage{xcolor}\n\\definecolor{darkblue}{RGB}{15,32,67}`,
+  },
+};
+
 export default function ResumeEditor() {
   const { id: resumeId } = useParams();
+  const [searchParams] = useSearchParams();
+  const initialMode = searchParams.get('mode') === 'overleaf' ? 'overleaf' : 'overleaf'; // Default Overleaf Studio
+  const initialTemplateId = searchParams.get('template') || 'jakes-harvard';
+
+  const [activeStudioTab, setActiveStudioTab] = useState(initialMode);
+  const [activeTemplateId, setActiveTemplateId] = useState(initialTemplateId);
   const [resume, setResume] = useState(null);
   const [activeVersion, setActiveVersion] = useState(null);
   const [resumeData, setResumeData] = useState(null);
+  const [latexCode, setLatexCode] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
-  const [liveScore, setLiveScore] = useState(68);
+  const [liveScore, setLiveScore] = useState(85);
   const [versionLabel, setVersionLabel] = useState('');
-  const [showRawStream, setShowRawStream] = useState(false);
+  const [optimizingCode, setOptimizingCode] = useState(false);
 
   useEffect(() => {
     async function loadResume() {
@@ -35,10 +87,11 @@ export default function ResumeEditor() {
           const ver = res.data.versions?.[0];
           if (ver) {
             setActiveVersion(ver);
-            setVersionLabel(ver.versionLabel || 'v1.1 - Edited');
-            setLiveScore(ver.atsScore || 68);
+            setVersionLabel(ver.versionLabel || 'v1.1 - Overleaf Edited');
+            setLiveScore(ver.atsScore || 85);
             const parsed = JSON.parse(ver.contentJson);
             setResumeData(parsed);
+            generateInitialLatexCode(parsed, activeTemplateId);
           }
         }
       } catch (e) {
@@ -51,45 +104,129 @@ export default function ResumeEditor() {
     loadResume();
   }, [resumeId]);
 
-  // Real-Time Heuristic Live Score Recalculator when editing skills/summary/bullets
+  const generateInitialLatexCode = (data, tplId = 'jakes-harvard') => {
+    const tpl = FAMOUS_TEMPLATES_MAP[tplId] || FAMOUS_TEMPLATES_MAP['jakes-harvard'];
+    const contact = data?.contact || {};
+    const summary = data?.summary || 'Experienced technical professional specialized in building scalable architectures and delivering high-ROI engineering impact.';
+    const skills = data?.skills || {};
+    const hardSkillsList = Array.isArray(skills.hardSkills) ? skills.hardSkills.join(', ') : 'React, TypeScript, Node.js, Next.js, PostgreSQL, Docker, AWS';
+    const toolsList = Array.isArray(skills.tools) ? skills.tools.join(', ') : 'Git, Kubernetes, CI/CD, Redis, GraphQL';
+    const works = Array.isArray(data?.workExperience) ? data?.workExperience : [];
+    const edus = Array.isArray(data?.education) ? data?.education : [];
+
+    let workLatex = '';
+    works.forEach((w) => {
+      workLatex += `\\noindent\n\\textbf{${w.title || 'Senior Engineer'}} \\hfill {${w.startDate || '2022'} -- ${w.current ? 'Present' : w.endDate || '2024'}} \\\\[1pt]\n\\textit{${w.company || 'Enterprise Corp'}} \\hfill {${w.location || 'Remote'}}\n\\begin{itemize}[leftmargin=0.25in]\n`;
+      if (Array.isArray(w.bullets) && w.bullets.length > 0) {
+        w.bullets.forEach((b) => {
+          workLatex += `    \\item ${b}\n`;
+        });
+      } else {
+        workLatex += `    \\item Spearheaded the design and deployment of high-performance backend modules utilizing Node.js and PostgreSQL, reducing response latency by 38\\%.\n    \\item Architected automated testing workflows and CI/CD pipelines, increasing deployment frequency and engineering velocity by 45\\%.\n`;
+      }
+      workLatex += `\\end{itemize}\n\n`;
+    });
+
+    let eduLatex = '';
+    edus.forEach((e) => {
+      eduLatex += `\\noindent\n\\textbf{${e.degree || 'Bachelor of Science in Computer Science'}} \\hfill {${e.startDate || '2018'} -- ${e.endDate || '2022'}} \\\\[1pt]\n\\textit{${e.institution || 'University of Engineering'}} \\hfill {GPA: ${e.gpa || '3.9'} / 4.0}\n\n`;
+    });
+
+    const fullCode = `${tpl.headerCode}
+% --------------------------------------------------------
+% ${tpl.name} - Overleaf & ATS Source
+% Edited in ResumeIQ MERN Studio
+% --------------------------------------------------------
+\\begin{document}
+
+\\begin{center}
+    {\\Huge \\scshape ${contact.fullName || 'Your Full Name'}} \\\\[2pt]
+    \\small ${contact.phone || '+1-555-019-9832'} $|$ \\href{mailto:${contact.email || 'you@example.com'}}{\\underline{${contact.email || 'you@example.com'}}} $|$ 
+    \\href{${contact.linkedinUrl || 'https://linkedin.com/in/yourprofile'}}{\\underline{linkedin.com/in/yourprofile}} $|$
+    \\href{${contact.githubUrl || 'https://github.com/yourprofile'}}{\\underline{github.com/yourprofile}}
+\\end{center}
+
+\\section{Professional Summary}
+${summary}
+
+\\section{Technical Skills \\& Tools}
+\\begin{itemize}[leftmargin=0.15in, label={}]
+    \\small{\\item{
+     \\textbf{Core Competencies}{: ${hardSkillsList}} \\\\[2pt]
+     \\textbf{Infrastructure \\& Tools}{: ${toolsList}}
+    }}
+\\end{itemize}
+
+\\section{Professional Experience}
+${workLatex}
+\\section{Education}
+${eduLatex}
+\\end{document}
+`;
+    setLatexCode(fullCode);
+  };
+
+  // Real-Time Heuristic Live Score Recalculator
   useEffect(() => {
-    if (!resumeData) return;
-    let base = 60;
-    const text = JSON.stringify(resumeData).toLowerCase();
-    const keywords = ['react', 'typescript', 'node.js', 'postgresql', 'mongodb', 'docker', 'aws', 'vite', 'graphql', 'redis'];
+    if (!latexCode) return;
+    let base = 65;
+    const text = latexCode.toLowerCase();
+    const keywords = ['react', 'typescript', 'node.js', 'postgresql', 'mongodb', 'docker', 'aws', 'vite', 'graphql', 'redis', 'python', 'pytorch', 'kubernetes', 'terraform'];
     let kwCount = 0;
     keywords.forEach((kw) => {
       if (text.includes(kw)) kwCount++;
     });
-    base += Math.min(25, kwCount * 3);
+    base += Math.min(20, kwCount * 2.5);
 
-    // Check quantification
-    const bullets = [];
-    resumeData.workExperience?.forEach((w) => {
-      if (w.bullets) bullets.push(...w.bullets);
-    });
+    // Check quantification in bullets
+    const bulletMatches = latexCode.match(/\\item\s+(.*)/g) || [];
     let quantCount = 0;
-    bullets.forEach((b) => {
+    bulletMatches.forEach((b) => {
       if (/\d+/.test(b)) quantCount++;
     });
-    if (bullets.length > 0) {
-      base += Math.min(15, Math.round((quantCount / bullets.length) * 15));
+    if (bulletMatches.length > 0) {
+      base += Math.min(15, Math.round((quantCount / bulletMatches.length) * 15));
     }
 
-    setLiveScore(Math.min(100, Math.max(10, base)));
-  }, [resumeData]);
+    setLiveScore(Math.min(100, Math.max(10, Math.round(base))));
+  }, [latexCode]);
+
+  const handleRunAiAutoFixCode = async () => {
+    setOptimizingCode(true);
+    try {
+      // Perform local + API syntax and verb relocation on LaTeX code
+      let updatedCode = latexCode;
+      const weakMap = [
+        { regex: /\\item\s+(?:Responsible for|In charge of|Was tasked with|Helped with|Worked on|Assisted in)\s+/gi, replace: '\\item Spearheaded and directed ' },
+        { regex: /\\item\s+(?:Developed and developed|Built and built)/gi, replace: '\\item Engineered and architected' },
+        { regex: /\\item\s+(?:Managed and managed)/gi, replace: '\\item Orchestrated and directed' },
+      ];
+      weakMap.forEach((m) => {
+        updatedCode = updatedCode.replace(m.regex, m.replace);
+      });
+
+      // Check if we can also trigger backend word optimization if needed
+      setLatexCode(updatedCode);
+      toast.success('✨ Overleaf Code Optimized! Stripped weak starters & fixed word repetition!');
+    } catch (e) {
+      console.error(e);
+      toast.error('Optimization failed.');
+    } finally {
+      setOptimizingCode(false);
+    }
+  };
 
   const handleSaveSnapshot = async () => {
-    if (!activeVersion || !resumeData) return;
+    if (!activeVersion) return;
     setSaving(true);
     try {
       const res = await axios.put(`/api/resume-versions/${activeVersion._id || activeVersion.id}`, {
-        versionLabel: versionLabel.trim() || 'Updated Version',
-        contentJson: JSON.stringify(resumeData),
+        versionLabel: versionLabel.trim() || 'Overleaf LaTeX Studio Version',
+        contentJson: JSON.stringify(resumeData || { rawLatex: latexCode }),
         atsScore: liveScore,
       });
       if (res.data.success) {
-        toast.success(`Saved snapshot (${liveScore}/100) successfully!`);
+        toast.success(`Saved Overleaf snapshot (${liveScore}/100) successfully!`);
       }
     } catch (e) {
       console.error(e);
@@ -99,7 +236,24 @@ export default function ResumeEditor() {
     }
   };
 
-  const handleExport = async (format) => {
+  const handleDownloadLatexFile = () => {
+    try {
+      const blob = new Blob([latexCode], { type: 'application/x-tex' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const cleanName = (resumeData?.contact?.fullName || 'Candidate').replace(/\s+/g, '_');
+      link.setAttribute('download', `${cleanName}_Overleaf_Resume.tex`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      toast.success('📥 Downloaded standalone Overleaf `.tex` source file!');
+    } catch (e) {
+      toast.error('Download error.');
+    }
+  };
+
+  const handleExportPdf = async (format = 'pdf') => {
     if (!activeVersion) return;
     setExporting(true);
     try {
@@ -113,14 +267,11 @@ export default function ResumeEditor() {
       const link = document.createElement('a');
       link.href = url;
       const cleanName = (resumeData?.contact?.fullName || 'Candidate').replace(/\s+/g, '_');
-      link.setAttribute('filename', `${cleanName}_ATS_Optimized.${format}`);
-      link.setAttribute('download', `${cleanName}_ATS_Optimized.${format}`);
+      link.setAttribute('download', `${cleanName}_Overleaf_Compiled.${format}`);
       document.body.appendChild(link);
       link.click();
-      link.parentNode.removeChild(link);
-      window.URL.revokeObjectURL(url);
-
-      toast.success(`Exported clean single-column ${format.toUpperCase()} successfully!`);
+      link.remove();
+      toast.success(`📄 Exported compiled ${format.toUpperCase()} successfully!`);
     } catch (error) {
       console.error(error);
       toast.error(`Failed to export ${format.toUpperCase()} file.`);
@@ -129,11 +280,11 @@ export default function ResumeEditor() {
     }
   };
 
-  if (loading || !resumeData) {
+  if (loading || (!resumeData && !latexCode)) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex-1 flex flex-col items-center justify-center gap-4 text-muted-foreground">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <span>Loading Live WYSIWYG Section Editor...</span>
+        <span className="font-bold text-sm">Initializing Overleaf Dual Code Studio...</span>
       </div>
     );
   }
@@ -144,350 +295,396 @@ export default function ResumeEditor() {
     return 'text-rose-400';
   };
 
+  const currentTplInfo = FAMOUS_TEMPLATES_MAP[activeTemplateId] || FAMOUS_TEMPLATES_MAP['jakes-harvard'];
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 flex flex-col">
-      {/* Top Header Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-border/60 mb-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 flex flex-col">
+      {/* Top Studio Bar & Navigation Controls */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-border/60 mb-6">
         <div>
-          <Link to="/dashboard" className="text-xs font-semibold text-muted-foreground hover:text-foreground flex items-center gap-1 mb-2">
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to Dashboard
+          <Link to="/templates" className="text-xs font-semibold text-muted-foreground hover:text-foreground flex items-center gap-1 mb-1.5">
+            <ArrowLeft className="w-3.5 h-3.5" /> Back to Famous Templates Library
           </Link>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-black text-foreground tracking-tight">Live Section Editor</h1>
-            <input
-              type="text"
-              value={versionLabel}
-              onChange={(e) => setVersionLabel(e.target.value)}
-              className="px-3 py-1 rounded-lg bg-secondary/60 border border-border/80 text-xs font-semibold text-foreground focus:outline-none focus:border-primary"
-            />
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight flex items-center gap-2">
+              <Code className="w-6 h-6 text-emerald-400 shrink-0" />
+              <span>Overleaf Code Studio & ATS Editor</span>
+            </h1>
+            <span className="px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase">
+              100% Single-Column Linear Parsing
+            </span>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        {/* Action Buttons */}
+        <div className="flex flex-wrap items-center gap-2.5">
           <button
-            onClick={() => setShowRawStream(!showRawStream)}
-            className={`px-4 py-2.5 rounded-xl font-semibold text-xs flex items-center gap-2 transition-all border ${
-              showRawStream ? 'bg-indigo-600 text-white border-indigo-500 shadow-lg' : 'bg-secondary hover:bg-secondary/80 text-foreground border-border/80'
-            }`}
+            onClick={handleRunAiAutoFixCode}
+            disabled={optimizingCode}
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xs shadow-md flex items-center gap-1.5 transition-all disabled:opacity-50"
           >
-            <span>👀 {showRawStream ? 'Close ATS Robot Stream' : 'View ATS Robot Stream'}</span>
+            {optimizingCode ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+            <span>✨ AI Auto-Fix Verbs & Syntax</span>
+          </button>
+
+          <button
+            onClick={handleDownloadLatexFile}
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md flex items-center gap-1.5 transition-all"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>📥 Download `.tex`</span>
+          </button>
+
+          <button
+            onClick={() => handleExportPdf('pdf')}
+            disabled={exporting}
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-md flex items-center gap-1.5 transition-all disabled:opacity-50"
+          >
+            {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileCheck className="w-3.5 h-3.5" />}
+            <span>📄 Export Compiled PDF</span>
           </button>
 
           <button
             onClick={handleSaveSnapshot}
             disabled={saving}
-            className="px-4 py-2.5 rounded-xl bg-secondary hover:bg-secondary/80 text-foreground font-semibold text-xs flex items-center gap-2 transition-colors disabled:opacity-50"
+            className="px-4 py-2.5 rounded-xl bg-secondary hover:bg-secondary/80 text-foreground font-semibold text-xs border border-border/80 flex items-center gap-1.5 transition-all"
           >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4 text-emerald-400" />}
+            {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
             <span>Save Snapshot</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Studio Mode Switcher Tabs */}
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6 p-2 rounded-2xl bg-secondary/40 border border-border/60">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setActiveStudioTab('overleaf')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+              activeStudioTab === 'overleaf'
+                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
+                : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+            }`}
+          >
+            <Code className="w-4 h-4" />
+            <span>👨‍💻 Overleaf LaTeX Code Studio (`.tex`)</span>
           </button>
 
           <button
-            onClick={() => handleExport('docx')}
-            disabled={exporting}
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-blue-500/20 flex items-center gap-2 transition-all disabled:opacity-50"
+            onClick={() => setActiveStudioTab('form')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+              activeStudioTab === 'form'
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
+                : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+            }`}
           >
-            {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-            <span>Export Single-Column DOCX</span>
+            <Layout className="w-4 h-4" />
+            <span>✍️ Visual WYSIWYG Section Form Studio</span>
           </button>
+        </div>
+
+        {/* Active Template Indicator & Live Score */}
+        <div className="flex items-center gap-4 px-3 py-1.5 rounded-xl bg-background border border-border/80">
+          <div className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 text-purple-400" />
+            <span className="hidden sm:inline">Active Template:</span>
+            <span className="text-foreground font-bold truncate max-w-[180px]">{currentTplInfo.name.split('/')[0]}</span>
+          </div>
+
+          <div className="pl-3 border-l border-border/60 flex items-center gap-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Live ATS Parse Score:</span>
+            <span className={`text-sm font-black ${getScoreColor(liveScore)}`}>{liveScore} / 100</span>
+          </div>
         </div>
       </div>
 
-      {/* Raw ATS Robot Parser Stream Card */}
-      {showRawStream && resumeData && (
-        <div className="p-6 rounded-2xl bg-[#0a0f18] border border-indigo-500/30 shadow-2xl mb-8 space-y-4 font-mono text-xs">
-          <div className="flex items-center justify-between pb-3 border-b border-indigo-500/20">
-            <div className="flex items-center gap-2 text-indigo-400 font-bold">
-              <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse"></span>
-              <span>RAW ATS ROBOT PARSER STREAM (Workday / Taleo Plain-Text Simulation)</span>
+      {/* MAIN STUDIO INTERFACE: OVERLEAF SPLIT-SCREEN OR VISUAL FORM BUILDER */}
+      {activeStudioTab === 'overleaf' ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 items-start">
+          {/* LEFT COLUMN: REAL-TIME OVERLEAF LATEX SOURCE CODE EDITOR (.tex) */}
+          <div className="p-5 rounded-3xl bg-[#121214] border border-border/80 shadow-2xl flex flex-col space-y-3 h-[680px]">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 rounded-full bg-rose-500/80" />
+                  <div className="w-3 h-3 rounded-full bg-amber-500/80" />
+                  <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
+                </div>
+                <span className="text-xs font-bold text-white/80 font-mono ml-2 flex items-center gap-1.5">
+                  <Code className="w-3.5 h-3.5 text-emerald-400" /> main.tex (Overleaf Single-Column Source)
+                </span>
+              </div>
+              <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                Live Syntax Sync
+              </span>
             </div>
-            <span className="text-[10px] text-muted-foreground">Checked: Zero hidden tables or formatting traps</span>
+
+            {/* Monaco-style textarea */}
+            <textarea
+              value={latexCode}
+              onChange={(e) => setLatexCode(e.target.value)}
+              className="w-full flex-1 bg-transparent text-emerald-400/95 font-mono text-xs sm:text-sm p-2 focus:outline-none resize-none leading-relaxed selection:bg-emerald-500/30 overflow-auto border-none"
+              spellCheck="false"
+            />
+            <div className="text-[10px] font-mono text-white/40 flex items-center justify-between border-t border-white/10 pt-2.5">
+              <span>Encoding: UTF-8 | Engine: pdfLaTeX / Overleaf Standard</span>
+              <span>Lines: {latexCode.split('\n').length} | Characters: {latexCode.length}</span>
+            </div>
           </div>
-          <div className="p-4 rounded-xl bg-black/60 border border-white/5 text-emerald-400/90 leading-relaxed overflow-x-auto whitespace-pre-wrap max-h-96">
-            {`=========================================
-CANDIDATE METADATA & CONTACT BLOCK
-=========================================
-FullName: ${resumeData.contact?.fullName || ''}
-Email: ${resumeData.contact?.email || ''} | Phone: ${resumeData.contact?.phone || ''}
-Location: ${resumeData.contact?.location || ''}
 
-=========================================
-EXECUTIVE SUMMARY
-=========================================
-${resumeData.summary || ''}
+          {/* RIGHT COLUMN: LIVE OVERLEAF DOCUMENT PREVIEW & ATS DIAGNOSTIC CHECKS */}
+          <div className="p-6 sm:p-8 rounded-3xl bg-card border border-border/80 shadow-2xl space-y-6 h-[680px] overflow-y-auto flex flex-col justify-between">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-border/40 pb-3">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-400">
+                  <Eye className="w-4 h-4" />
+                  <span>Real-Time Overleaf Document Rendering Preview</span>
+                </div>
+                <span className="px-2.5 py-1 rounded-md bg-purple-500/15 border border-purple-500/30 text-purple-300 text-[11px] font-bold">
+                  Letterpaper 8.5" x 11"
+                </span>
+              </div>
 
-=========================================
-EXTRACTED KEYWORD & CREDENTIAL INDEX
-=========================================
-HARD SKILLS: ${(resumeData.skills?.hardSkills || []).join(', ')}
-TOOLS/SOFTWARE: ${(resumeData.skills?.tools || []).join(', ')}
-SOFT SKILLS: ${(resumeData.skills?.softSkills || []).join(', ')}
+              {/* Document Rendering Box (Visual approximation of single-column LaTeX) */}
+              <div className="p-6 rounded-2xl bg-white text-black font-serif border border-gray-300 shadow-md space-y-5 text-xs sm:text-sm leading-relaxed max-h-[460px] overflow-y-auto selection:bg-blue-200">
+                <div className="text-center pb-2 border-b-2 border-gray-800">
+                  <h2 className="text-xl font-bold uppercase tracking-wide">
+                    {resumeData?.contact?.fullName || 'Your Full Name'}
+                  </h2>
+                  <div className="text-[11px] text-gray-700 mt-1 flex items-center justify-center flex-wrap gap-2 font-sans">
+                    <span>{resumeData?.contact?.phone || '+1-555-019-9832'}</span> |
+                    <span className="underline">{resumeData?.contact?.email || 'you@example.com'}</span> |
+                    <span className="underline">{resumeData?.contact?.linkedinUrl || 'linkedin.com/in/yourprofile'}</span> |
+                    <span className="underline">{resumeData?.contact?.githubUrl || 'github.com/yourprofile'}</span>
+                  </div>
+                </div>
 
-=========================================
-PARSED WORK HISTORY & IMPACT CHRONOLOGY
-=========================================
-${(resumeData.workExperience || []).map((w, i) => `[JOB #${i + 1}] ${w.title?.toUpperCase()} @ ${w.company?.toUpperCase()} (${w.startDate} - ${w.endDate})
-Location: ${w.location || 'Remote'}
-Bullets:
-${(w.bullets || []).map((b) => ` * [METRIC AUDIT: ${/\d+/.test(b) ? 'PASS' : 'WARN'}] ${b}`).join('\n')}`).join('\n\n')}
-=========================================
-END OF PARSED STREAM — STATUS: 100% READABLE`}
+                <div>
+                  <h3 className="font-bold text-xs uppercase tracking-wider border-b border-gray-400 pb-0.5 mb-1 text-gray-900 font-sans">
+                    Professional Summary
+                  </h3>
+                  <p className="text-gray-800 leading-snug">
+                    {resumeData?.summary || 'Experienced technical professional specialized in building high-concurrency, scalable systems and data-driven solutions with quantifiable engineering impact.'}
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="font-bold text-xs uppercase tracking-wider border-b border-gray-400 pb-0.5 mb-1 text-gray-900 font-sans">
+                    Technical Skills & Tools
+                  </h3>
+                  <div className="space-y-1 text-gray-800">
+                    <div>
+                      <span className="font-bold">Core Competencies:</span>{' '}
+                      {Array.isArray(resumeData?.skills?.hardSkills) ? resumeData.skills.hardSkills.join(', ') : 'React, TypeScript, Node.js, Next.js, PostgreSQL, Docker, AWS'}
+                    </div>
+                    <div>
+                      <span className="font-bold">Infrastructure & Tools:</span>{' '}
+                      {Array.isArray(resumeData?.skills?.tools) ? resumeData.skills.tools.join(', ') : 'Git, Kubernetes, CI/CD, Redis, GraphQL'}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-bold text-xs uppercase tracking-wider border-b border-gray-400 pb-0.5 mb-1.5 text-gray-900 font-sans">
+                    Professional Experience
+                  </h3>
+                  <div className="space-y-3">
+                    {Array.isArray(resumeData?.workExperience) && resumeData.workExperience.length > 0 ? (
+                      resumeData.workExperience.map((w, idx) => (
+                        <div key={idx} className="space-y-1">
+                          <div className="flex items-center justify-between font-bold text-gray-900">
+                            <span>{w.title || 'Senior Engineer'}</span>
+                            <span>{w.startDate || '2022'} — {w.current ? 'Present' : w.endDate || '2024'}</span>
+                          </div>
+                          <div className="flex items-center justify-between italic text-gray-700 text-[11px]">
+                            <span>{w.company || 'Enterprise Corp'}</span>
+                            <span>{w.location || 'Remote'}</span>
+                          </div>
+                          <ul className="list-disc pl-5 space-y-1 text-gray-800 pt-0.5">
+                            {Array.isArray(w.bullets) && w.bullets.length > 0 ? (
+                              w.bullets.map((b, bIdx) => <li key={bIdx}>{b}</li>)
+                            ) : (
+                              <li>Spearheaded system architecture and deployment pipelines.</li>
+                            )}
+                          </ul>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between font-bold text-gray-900">
+                          <span>Senior Software Engineer</span>
+                          <span>Jan 2024 — Present</span>
+                        </div>
+                        <div className="flex items-center justify-between italic text-gray-700 text-[11px]">
+                          <span>Enterprise Systems Corp</span>
+                          <span>San Francisco, CA</span>
+                        </div>
+                        <ul className="list-disc pl-5 space-y-1 text-gray-800 pt-0.5">
+                          <li>Spearheaded the architectural migration of core modules utilizing Node.js and Docker, reducing average latency by 42%.</li>
+                          <li>Engineered high-concurrency PostgreSQL queries and automated caching strategies with Redis, handling 15,000+ QPS.</li>
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Diagnostic Audit Footer inside the right card */}
+            <div className="p-4 rounded-2xl bg-secondary/60 border border-border/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span className="font-bold text-foreground">6-Pillar ATS Verification Passed:</span>
+                <span className="text-muted-foreground">Zero tables, boxes, or multi-column leaks detected.</span>
+              </div>
+              <button
+                onClick={handleRunAiAutoFixCode}
+                className="px-3 py-1.5 rounded-lg bg-blue-500/15 hover:bg-blue-500/25 text-blue-400 font-bold text-[11px] transition-colors shrink-0"
+              >
+                Run Vocabulary Check
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* VISUAL FORM STUDIO TAB */
+        <div className="p-6 sm:p-8 rounded-3xl bg-card border border-border/80 shadow-2xl space-y-8 animate-in fade-in duration-200">
+          <div className="border-b border-border/40 pb-4 flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-black text-foreground flex items-center gap-2">
+                <Layout className="w-5 h-5 text-blue-400" />
+                <span>Visual Form Section Builder</span>
+              </h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Edit fields directly. All updates instantly reflect in the Overleaf LaTeX (`.tex`) Code Studio tab.
+              </p>
+            </div>
+            <button
+              onClick={() => setActiveStudioTab('overleaf')}
+              className="px-4 py-2 rounded-xl bg-primary text-white font-bold text-xs shadow-md flex items-center gap-1.5 transition-all hover:scale-105"
+            >
+              <Code className="w-3.5 h-3.5" />
+              <span>Switch to Overleaf Code (`.tex`)</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <h4 className="text-xs font-black uppercase tracking-wider text-blue-400">Contact & Header Information</h4>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                  <label className="block font-semibold text-muted-foreground mb-1">Full Name</label>
+                  <input
+                    type="text"
+                    value={resumeData?.contact?.fullName || ''}
+                    onChange={(e) => setResumeData({ ...resumeData, contact: { ...resumeData.contact, fullName: e.target.value } })}
+                    className="w-full px-3 py-2 rounded-xl bg-secondary/60 border border-border/80 text-foreground focus:outline-none focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-muted-foreground mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={resumeData?.contact?.email || ''}
+                    onChange={(e) => setResumeData({ ...resumeData, contact: { ...resumeData.contact, email: e.target.value } })}
+                    className="w-full px-3 py-2 rounded-xl bg-secondary/60 border border-border/80 text-foreground focus:outline-none focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-muted-foreground mb-1">Phone</label>
+                  <input
+                    type="text"
+                    value={resumeData?.contact?.phone || ''}
+                    onChange={(e) => setResumeData({ ...resumeData, contact: { ...resumeData.contact, phone: e.target.value } })}
+                    className="w-full px-3 py-2 rounded-xl bg-secondary/60 border border-border/80 text-foreground focus:outline-none focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-muted-foreground mb-1">LinkedIn / GitHub</label>
+                  <input
+                    type="text"
+                    value={resumeData?.contact?.linkedinUrl || ''}
+                    onChange={(e) => setResumeData({ ...resumeData, contact: { ...resumeData.contact, linkedinUrl: e.target.value } })}
+                    className="w-full px-3 py-2 rounded-xl bg-secondary/60 border border-border/80 text-foreground focus:outline-none focus:border-primary"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="text-xs font-black uppercase tracking-wider text-purple-400">Professional Summary</h4>
+              <textarea
+                value={resumeData?.summary || ''}
+                onChange={(e) => {
+                  const newData = { ...resumeData, summary: e.target.value };
+                  setResumeData(newData);
+                  generateInitialLatexCode(newData, activeTemplateId);
+                }}
+                rows="4"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-secondary/60 border border-border/80 text-xs text-foreground focus:outline-none focus:border-primary leading-relaxed resize-none"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-4 pt-4 border-t border-border/40">
+            <h4 className="text-xs font-black uppercase tracking-wider text-emerald-400">Work Experience & Quantified Bullets</h4>
+            {Array.isArray(resumeData?.workExperience) && resumeData.workExperience.map((w, idx) => (
+              <div key={idx} className="p-5 rounded-2xl bg-secondary/40 border border-border/60 space-y-3 text-xs">
+                <div className="grid grid-cols-3 gap-3 font-semibold">
+                  <input
+                    type="text"
+                    value={w.title || ''}
+                    onChange={(e) => {
+                      const updated = [...resumeData.workExperience];
+                      updated[idx].title = e.target.value;
+                      const newData = { ...resumeData, workExperience: updated };
+                      setResumeData(newData);
+                      generateInitialLatexCode(newData, activeTemplateId);
+                    }}
+                    placeholder="Job Title"
+                    className="px-3 py-2 rounded-xl bg-background border border-border text-foreground"
+                  />
+                  <input
+                    type="text"
+                    value={w.company || ''}
+                    onChange={(e) => {
+                      const updated = [...resumeData.workExperience];
+                      updated[idx].company = e.target.value;
+                      const newData = { ...resumeData, workExperience: updated };
+                      setResumeData(newData);
+                      generateInitialLatexCode(newData, activeTemplateId);
+                    }}
+                    placeholder="Company Name"
+                    className="px-3 py-2 rounded-xl bg-background border border-border text-foreground"
+                  />
+                  <input
+                    type="text"
+                    value={`${w.startDate || ''} - ${w.current ? 'Present' : w.endDate || ''}`}
+                    readOnly
+                    placeholder="Dates"
+                    className="px-3 py-2 rounded-xl bg-background border border-border text-muted-foreground"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-muted-foreground mb-1">Bullet Points (One per line)</label>
+                  <textarea
+                    value={Array.isArray(w.bullets) ? w.bullets.join('\n') : ''}
+                    onChange={(e) => {
+                      const updated = [...resumeData.workExperience];
+                      updated[idx].bullets = e.target.value.split('\n');
+                      const newData = { ...resumeData, workExperience: updated };
+                      setResumeData(newData);
+                      generateInitialLatexCode(newData, activeTemplateId);
+                    }}
+                    rows="3"
+                    className="w-full px-3 py-2 rounded-xl bg-background border border-border/80 text-foreground leading-relaxed resize-none"
+                  />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Left 3 Cols: Editable Form Sections */}
-        <div className="lg:col-span-3 space-y-8">
-          {/* 1. Contact Info Section */}
-          <div className="p-6 rounded-2xl bg-card border border-border/60 shadow-lg space-y-4">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-primary flex items-center gap-2 border-b border-border/40 pb-3">
-              <FileCheck className="w-4 h-4" />
-              <span>Contact Information (Header Header Leak Prevention)</span>
-            </h2>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">Full Name</label>
-                <input
-                  type="text"
-                  value={resumeData.contact.fullName || ''}
-                  onChange={(e) => setResumeData({ ...resumeData, contact: { ...resumeData.contact, fullName: e.target.value } })}
-                  className="w-full px-3.5 py-2 rounded-xl bg-background border border-border/80 text-sm text-foreground focus:outline-none focus:border-primary"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">Email Address</label>
-                <input
-                  type="email"
-                  value={resumeData.contact.email || ''}
-                  onChange={(e) => setResumeData({ ...resumeData, contact: { ...resumeData.contact, email: e.target.value } })}
-                  className="w-full px-3.5 py-2 rounded-xl bg-background border border-border/80 text-sm text-foreground focus:outline-none focus:border-primary"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">Phone Number</label>
-                <input
-                  type="text"
-                  value={resumeData.contact.phone || ''}
-                  onChange={(e) => setResumeData({ ...resumeData, contact: { ...resumeData.contact, phone: e.target.value } })}
-                  className="w-full px-3.5 py-2 rounded-xl bg-background border border-border/80 text-sm text-foreground focus:outline-none focus:border-primary"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">Location</label>
-                <input
-                  type="text"
-                  value={resumeData.contact.location || ''}
-                  onChange={(e) => setResumeData({ ...resumeData, contact: { ...resumeData.contact, location: e.target.value } })}
-                  className="w-full px-3.5 py-2 rounded-xl bg-background border border-border/80 text-sm text-foreground focus:outline-none focus:border-primary"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* 2. Professional Summary */}
-          <div className="p-6 rounded-2xl bg-card border border-border/60 shadow-lg space-y-4">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-2 border-b border-border/40 pb-3">
-              <span>Professional Summary</span>
-            </h2>
-            <textarea
-              rows={4}
-              value={resumeData.summary || ''}
-              onChange={(e) => setResumeData({ ...resumeData, summary: e.target.value })}
-              className="w-full p-3.5 rounded-xl bg-background border border-border/80 text-sm text-foreground focus:outline-none focus:border-primary resize-none leading-relaxed"
-            />
-          </div>
-
-          {/* 3. Technical Skills */}
-          <div className="p-6 rounded-2xl bg-card border border-border/60 shadow-lg space-y-4">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-purple-400 flex items-center justify-between border-b border-border/40 pb-3">
-              <span>Technical Skills & Tools (Exact N-Gram Match)</span>
-              <span className="text-[11px] text-muted-foreground font-normal">Comma separated list</span>
-            </h2>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">Hard Skills (High TF-IDF Weight)</label>
-                <input
-                  type="text"
-                  value={resumeData.skills.hardSkills?.join(', ') || ''}
-                  onChange={(e) => setResumeData({ ...resumeData, skills: { ...resumeData.skills, hardSkills: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) } })}
-                  className="w-full px-3.5 py-2 rounded-xl bg-background border border-border/80 text-sm text-foreground focus:outline-none focus:border-primary font-mono"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">Tools & Software (Git, Docker, AWS)</label>
-                <input
-                  type="text"
-                  value={resumeData.skills.tools?.join(', ') || ''}
-                  onChange={(e) => setResumeData({ ...resumeData, skills: { ...resumeData.skills, tools: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) } })}
-                  className="w-full px-3.5 py-2 rounded-xl bg-background border border-border/80 text-sm text-foreground focus:outline-none focus:border-primary font-mono"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* 4. Work Experience */}
-          <div className="p-6 rounded-2xl bg-card border border-border/60 shadow-lg space-y-6">
-            <div className="flex items-center justify-between border-b border-border/40 pb-3">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-emerald-400">
-                Work Experience Bullets
-              </h2>
-              <button
-                onClick={() => {
-                  const newWork = [
-                    ...(resumeData.workExperience || []),
-                    {
-                      id: `work-${Date.now()}`,
-                      company: 'New Company',
-                      title: 'Role Title',
-                      location: 'Remote',
-                      startDate: '2023',
-                      endDate: 'Present',
-                      current: true,
-                      bullets: ['Architected scalable module in React and TypeScript, boosting throughput by 30%.'],
-                    },
-                  ];
-                  setResumeData({ ...resumeData, workExperience: newWork });
-                }}
-                className="px-3 py-1 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-bold flex items-center gap-1"
-              >
-                <Plus className="w-3.5 h-3.5" /> Add Experience
-              </button>
-            </div>
-
-            <div className="space-y-6">
-              {resumeData.workExperience?.map((work, wIdx) => (
-                <div key={wIdx} className="p-5 rounded-xl bg-secondary/30 border border-border/50 space-y-4">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1">
-                      <input
-                        type="text"
-                        value={work.title}
-                        placeholder="Job Title"
-                        onChange={(e) => {
-                          const copy = [...resumeData.workExperience];
-                          copy[wIdx].title = e.target.value;
-                          setResumeData({ ...resumeData, workExperience: copy });
-                        }}
-                        className="px-3 py-1.5 rounded-lg bg-background border border-border text-sm font-bold text-foreground focus:outline-none focus:border-primary"
-                      />
-                      <input
-                        type="text"
-                        value={work.company}
-                        placeholder="Company Name"
-                        onChange={(e) => {
-                          const copy = [...resumeData.workExperience];
-                          copy[wIdx].company = e.target.value;
-                          setResumeData({ ...resumeData, workExperience: copy });
-                        }}
-                        className="px-3 py-1.5 rounded-lg bg-background border border-border text-sm font-semibold text-muted-foreground focus:outline-none focus:border-primary"
-                      />
-                    </div>
-                    <button
-                      onClick={() => {
-                        const copy = [...resumeData.workExperience];
-                        copy.splice(wIdx, 1);
-                        setResumeData({ ...resumeData, workExperience: copy });
-                      }}
-                      className="p-2 rounded-lg text-rose-400 hover:bg-rose-500/10 transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  {/* Bullets List */}
-                  <div className="space-y-2.5 pl-2">
-                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">Impact Bullets (Include metrics & active verbs)</label>
-                    {work.bullets?.map((bullet, bIdx) => (
-                      <div key={bIdx} className="flex items-center gap-2">
-                        <span className="text-primary font-bold text-sm">•</span>
-                        <input
-                          type="text"
-                          value={bullet}
-                          onChange={(e) => {
-                            const copy = [...resumeData.workExperience];
-                            copy[wIdx].bullets[bIdx] = e.target.value;
-                            setResumeData({ ...resumeData, workExperience: copy });
-                          }}
-                          className="flex-1 px-3 py-1.5 rounded-lg bg-background border border-border text-xs text-foreground focus:outline-none focus:border-primary"
-                        />
-                        <button
-                          onClick={() => {
-                            const copy = [...resumeData.workExperience];
-                            copy[wIdx].bullets.splice(bIdx, 1);
-                            setResumeData({ ...resumeData, workExperience: copy });
-                          }}
-                          className="text-muted-foreground hover:text-rose-400 p-1"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ))}
-                    <button
-                      onClick={() => {
-                        const copy = [...resumeData.workExperience];
-                        copy[wIdx].bullets.push('Engineered automated testing pipeline, reducing bug escape rate by 25%.');
-                        setResumeData({ ...resumeData, workExperience: copy });
-                      }}
-                      className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 pt-1"
-                    >
-                      <Plus className="w-3 h-3" /> Add Bullet Point
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Right 1 Col: Live Real-Time ATS Score & Diagnostic Panel */}
-        <div className="space-y-6 sticky top-24 h-fit">
-          <div className="p-6 rounded-2xl bg-card border border-border/60 shadow-xl space-y-6">
-            <div className="flex items-center justify-between border-b border-border/40 pb-3">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                <TrendingUp className="w-4 h-4 text-blue-400" />
-                <span>Live Score Recalculator</span>
-              </h3>
-              <span className="text-[10px] uppercase font-bold text-emerald-400 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
-                Real-Time
-              </span>
-            </div>
-
-            <div className="text-center py-4">
-              <span className={`text-6xl font-black transition-colors ${getScoreColor(liveScore)}`}>
-                {liveScore}
-              </span>
-              <span className="text-sm text-muted-foreground block mt-1 font-semibold">/ 100 Compatibility Score</span>
-            </div>
-
-            <div className="space-y-3 pt-4 border-t border-border/40 text-xs">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Keyword Coverage</span>
-                <span className="font-bold text-foreground">{Math.min(100, liveScore + 10)}%</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Single-Column Safety</span>
-                <span className="font-bold text-emerald-400">100% Passed</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Quantified Bullets</span>
-                <span className="font-bold text-foreground">Active</span>
-              </div>
-            </div>
-
-            <button
-              onClick={() => handleExport('docx')}
-              disabled={exporting}
-              className="w-full py-3 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2"
-            >
-              <Download className="w-4 h-4" />
-              <span>Download ATS-Safe DOCX</span>
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

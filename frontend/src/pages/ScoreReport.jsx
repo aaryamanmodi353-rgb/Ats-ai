@@ -380,39 +380,39 @@ export default function ScoreReport() {
         <div className="lg:col-span-2 space-y-8">
           {/* Keyword Gap Analysis */}
           <div className="p-6 sm:p-8 rounded-2xl bg-card border border-border/60 shadow-lg space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border/40 pb-4 gap-4">
+            <div className="flex flex-col gap-4 border-b border-border/40 pb-5">
               <div>
                 <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                   <Zap className="w-5 h-5 text-blue-400" />
                   <span>Exact N-Gram Keyword Gap Analysis</span>
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Extracted directly from the target Job Description against your parsed resume text.
+                  Extracted directly from the target Job Description against your parsed resume text. Click any action below to auto-inject or optimize.
                 </p>
               </div>
-              <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+              <div className="flex flex-wrap items-center gap-2.5 w-full pt-1">
                 <button
                   onClick={handleAutoInjectKeywords}
                   disabled={injecting || (breakdown?.keywordMatch?.missingRequired?.length === 0 && breakdown?.keywordMatch?.missingPreferred?.length === 0)}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-md flex items-center gap-2 transition-all disabled:opacity-50"
+                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-md flex items-center gap-2 transition-all disabled:opacity-50"
                 >
-                  {injecting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
+                  {injecting ? <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" /> : <Zap className="w-3.5 h-3.5 shrink-0" />}
                   <span>⚡ Auto-Inject Missing Skills</span>
                 </button>
                 <button
                   onClick={handleOptimizeVerbsAndWords}
                   disabled={optimizingWords}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xs shadow-md flex items-center gap-2 transition-all disabled:opacity-50"
+                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xs shadow-md flex items-center gap-2 transition-all disabled:opacity-50"
                 >
-                  {optimizingWords ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                  {optimizingWords ? <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" /> : <Sparkles className="w-3.5 h-3.5 shrink-0" />}
                   <span>✨ Auto-Optimize Verbs & Repeated Words</span>
                 </button>
                 <button
                   onClick={handleInjectAndDownloadLatex}
                   disabled={downloadingLatex}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md flex items-center gap-2 transition-all disabled:opacity-50"
+                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md flex items-center gap-2 transition-all disabled:opacity-50"
                 >
-                  {downloadingLatex ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+                  {downloadingLatex ? <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" /> : <Download className="w-3.5 h-3.5 shrink-0" />}
                   <span>📥 Auto-Inject & Download LaTeX (.tex)</span>
                 </button>
               </div>

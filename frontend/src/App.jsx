@@ -118,6 +118,14 @@ export default function App() {
                 }
               />
               <Route
+                path="/editor/:id"
+                element={
+                  <ProtectedRoute>
+                    <ResumeEditor />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/applications"
                 element={
                   <ProtectedRoute>
