@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShieldCheck, Key, Database, CheckCircle2, Zap, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -6,14 +6,22 @@ export default function Settings() {
   const [apiKey, setApiKey] = useState('');
   const [tier, setTier] = useState('pro'); // 'free' | 'pro'
 
+  useEffect(() => {
+    const savedKey = localStorage.getItem('GROQ_API_KEY_OVERRIDE') || localStorage.getItem('ANTHROPIC_API_KEY_OVERRIDE') || '';
+    if (savedKey) {
+      setApiKey(savedKey);
+    }
+  }, []);
+
   const handleSaveKey = (e) => {
     e.preventDefault();
     if (apiKey.trim()) {
-      localStorage.setItem('ANTHROPIC_API_KEY_OVERRIDE', apiKey.trim());
-      toast.success('Saved Anthropic API Key for MERN AI Coach override!');
+      localStorage.setItem('GROQ_API_KEY_OVERRIDE', apiKey.trim());
+      toast.success('Saved Groq API Key for Ultra-Fast LPU Bullet Coach!');
     } else {
+      localStorage.removeItem('GROQ_API_KEY_OVERRIDE');
       localStorage.removeItem('ANTHROPIC_API_KEY_OVERRIDE');
-      toast.info('Removed custom API Key. Reverting to Anti-Hallucination Simulation Guardrails.');
+      toast.info('Removed custom API Key. Reverting to Intelligent Simulation Guardrails.');
     }
   };
 
@@ -109,26 +117,27 @@ export default function Settings() {
         <div>
           <h2 className="text-sm font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-2">
             <Key className="w-4 h-4" />
-            <span>Anthropic API Key Override</span>
+            <span>Groq Cloud API Key (LPU Ultra-Fast Inference)</span>
           </h2>
           <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-            By default, ResumeIQ runs in **Intelligent Simulation Guardrail Mode** without requiring an external API key. If you want live Claude 3.5 Sonnet generation, input your `sk-ant-...` key below.
+            By default, ResumeIQ runs in **Intelligent Simulation Guardrail Mode** without requiring an external API key. For live sub-second LPU inference powered by **Llama 3.3 70B Versatile**, input your Groq API key (starts with <code className="text-primary font-mono">gsk_...</code>) below.
           </p>
         </div>
 
         <form onSubmit={handleSaveKey} className="space-y-4 max-w-lg">
           <div>
-            <label className="block text-xs font-semibold text-muted-foreground mb-1.5">Anthropic API Key</label>
+            <label className="block text-xs font-semibold text-muted-foreground mb-1.5">Groq API Key (LPU Accelerated)</label>
             <input
               type="password"
-              placeholder="sk-ant-api03-..."
+              placeholder="gsk_..."
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               className="w-full px-4 py-2.5 rounded-xl bg-background border border-border text-sm text-foreground focus:outline-none focus:border-primary font-mono"
             />
           </div>
-          <button type="submit" className="px-5 py-2.5 rounded-xl bg-primary text-white font-bold text-xs shadow-md">
-            Save API Key Preference
+          <button type="submit" className="px-5 py-2.5 rounded-xl bg-primary text-white font-bold text-xs shadow-md hover:bg-primary/90 transition-all flex items-center gap-2">
+            <Zap className="w-3.5 h-3.5" />
+            <span>Save Groq API Key</span>
           </button>
         </form>
       </div>

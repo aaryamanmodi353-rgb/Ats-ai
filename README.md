@@ -35,8 +35,10 @@ Our proprietary algorithm calculates a composite compatibility score (`0-100`) w
 - **Famous Big-Tech Layouts**: Pick from battle-tested layouts used by top engineers, including **Google/FAANG Standard Single-Column**, **Amazon Leadership Principles Format**, **Stripe Minimalist Single-Column**, and **Y-Combinator Startup Engineering Profile**.
 - **Role-Specific Advice & One-Click Creation**: View targeted recommendations on which key competencies and metrics to feature for each role, and click **Create Profile From Template** to immediately launch an editable Overleaf workspace.
 
-### ✍️ 5. AI Bullet Coach & Clean Document Exporter
+### ✍️ 5. AI Bullet Coach (Powered by Groq Cloud LPU) & Clean Document Exporter
+- **Ultra-Fast Groq Inference**: Powered by **Llama 3.3 70B Versatile** on Groq LPUs for sub-second bullet rewrite generation with deterministic JSON schema validation.
 - **Granular Bullet-by-Bullet Review**: Inspect every experience bullet with real-time highlights for weak verbs and missing numbers.
+- **Strict Anti-Hallucination Guardrails**: Prohibits the AI from inventing numbers or metrics; unquantified achievements trigger a prompt asking the candidate for their verified data.
 - **Clean Single-Column Exporter**: Export fully optimized profiles directly to clean, single-column **`.docx`** or **`.txt`** formats guaranteed to parse seamlessly through enterprise ATS systems without table or column errors.
 
 ### 📊 6. Integrated Job Application Kanban Tracker
@@ -91,6 +93,8 @@ Create a `.env` file inside the `backend/` directory:
 PORT=5000
 MONGODB_URI=mongodb://127.0.0.1:27017/ats-ai
 NODE_ENV=development
+GROQ_API_KEY=gsk_your_groq_api_key_here
+GROQ_MODEL=llama-3.3-70b-versatile
 ```
 
 ### 3. Install Dependencies & Start Development Servers

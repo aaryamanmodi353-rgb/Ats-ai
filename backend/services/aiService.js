@@ -1,28 +1,33 @@
-import Anthropic from '@anthropic-ai/sdk';
+import Groq from 'groq-sdk';
 
 export class AIService {
   static async generateBulletRewrites({ bulletText, company, title, jdKeywords = null, apiKey = null }) {
+    const groqKey = apiKey || process.env.GROQ_API_KEY || process.env.ANTHROPIC_API_KEY;
+
     // If no API key is set, run Intelligent Anti-Hallucination Simulation Mode immediately
-    if (!apiKey && !process.env.ANTHROPIC_API_KEY) {
+    if (!groqKey) {
       return this.getSimulatedRewrites(bulletText, jdKeywords);
     }
 
     try {
-      const anthropic = new Anthropic({
-        apiKey: apiKey || process.env.ANTHROPIC_API_KEY,
+      const groq = new Groq({
+        apiKey: groqKey,
       });
 
-      const prompt = `You are an expert ATS Resume Coach and Anti-Hallucination Guardrail System.
-The candidate has the following experience bullet point from their time at "${company}" as a "${title}":
-"${bulletText}"
+      const model = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 
-Target Job Description Keywords:
-${jdKeywords ? JSON.stringify(jdKeywords, null, 2) : 'General Senior Software Engineer role'}
-
+      const systemPrompt = `You are an expert ATS Resume Coach and Anti-Hallucination Guardrail System.
 YOUR MANDATORY GUARDRAILS:
 1. NEVER fabricate or invent metrics, numbers, percentages, or dollar amounts. If the original bullet has no metric, you MUST include a "promptForMetric" question asking the user for the exact metric.
 2. Replace weak verbs ("Responsible for", "Helped with") with strong active leadership verbs ("Architected", "Spearheaded", "Engineered").
 3. Seamlessly incorporate 1-2 missing target keywords where technically logical without lying.
+4. Output strictly valid JSON conforming to the requested schema.`;
+
+      const userPrompt = `Candidate experience bullet from their time at "${company}" as a "${title}":
+"${bulletText}"
+
+Target Job Description Keywords:
+${jdKeywords ? JSON.stringify(jdKeywords, null, 2) : 'General Senior Software Engineer role'}
 
 Output ONLY a valid JSON object matching this schema:
 {
@@ -39,17 +44,20 @@ Output ONLY a valid JSON object matching this schema:
   "unsupportedRequirementsFlagged": ["string"]
 }`;
 
-      const response = await anthropic.messages.create({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 1200,
-        messages: [{ role: 'user', content: prompt }],
+      const chatCompletion = await groq.chat.completions.create({
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+        model: model,
+        temperature: 0.2,
+        response_format: { type: 'json_object' },
       });
 
-      const text = response.content[0].text;
-      const jsonStr = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
-      return JSON.parse(jsonStr);
+      const content = chatCompletion.choices[0]?.message?.content || '{}';
+      return JSON.parse(content);
     } catch (error) {
-      console.warn('Anthropic API error or invalid response, falling back to simulation guardrails:', error.message);
+      console.warn('Groq API error or invalid response, falling back to simulation guardrails:', error.message);
       return this.getSimulatedRewrites(bulletText, jdKeywords);
     }
   }
