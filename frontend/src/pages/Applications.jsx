@@ -4,10 +4,10 @@ import { toast } from 'sonner';
 import axios from 'axios';
 
 const COLUMNS = [
-  { id: 'applied', label: 'Applied / In Review', icon: Clock, color: 'text-blue-400 border-blue-500/30 bg-blue-500/10' },
-  { id: 'interview', label: 'Interviews Scheduled', icon: CheckCircle2, color: 'text-amber-400 border-amber-500/30 bg-amber-500/10' },
-  { id: 'offer', label: 'Offer Received 🎉', icon: Award, color: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' },
-  { id: 'rejected', label: 'Archived / Rejected', icon: XCircle, color: 'text-rose-400 border-rose-500/30 bg-rose-500/10' },
+  { id: 'applied', label: 'Applied / In Review', icon: Clock, color: 'text-[#164e3f] border-[#d2e2d8] bg-[#e6f0ea]' },
+  { id: 'interview', label: 'Interviews Scheduled', icon: CheckCircle2, color: 'text-amber-800 border-[#fde68a] bg-[#fffbeb]' },
+  { id: 'offer', label: 'Offer Received 🎉', icon: Award, color: 'text-[#164e3f] border-[#c8ded1] bg-[#e6f0ea]' },
+  { id: 'rejected', label: 'Archived / Rejected', icon: XCircle, color: 'text-rose-700 border-[#fecaca] bg-[#fef2f2]' },
 ];
 
 export default function Applications() {
@@ -73,9 +73,9 @@ export default function Applications() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex-1 flex flex-col items-center justify-center gap-4 text-muted-foreground">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <span>Loading Kanban Application Tracker...</span>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex-1 flex flex-col items-center justify-center gap-4 text-[#5c6962]">
+        <Loader2 className="w-8 h-8 animate-spin text-[#164e3f]" />
+        <span className="font-semibold text-sm">Loading Kanban Application Tracker...</span>
       </div>
     );
   }
@@ -84,14 +84,14 @@ export default function Applications() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 flex flex-col">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-black text-foreground tracking-tight">Application Tracker (Kanban)</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#141c18] tracking-tight">Application Tracker (Kanban)</h1>
+          <p className="text-sm text-[#5c6962] mt-1">
             Track application progression across pipeline stages and link specific tailored resume versions.
           </p>
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-blue-500/20 flex items-center gap-2 transition-all hover:scale-105"
+          className="px-5 py-2.5 rounded-xl bg-[#164e3f] hover:bg-[#124235] text-white font-semibold text-xs sm:text-sm shadow-sm flex items-center gap-2 transition-all active:scale-[0.99]"
         >
           <Plus className="w-4 h-4" />
           <span>Add Application</span>
@@ -104,38 +104,38 @@ export default function Applications() {
           const colApps = applications.filter((a) => a.status === col.id);
           const Icon = col.icon;
           return (
-            <div key={col.id} className="p-4 rounded-2xl bg-card border border-border/60 min-h-[480px] flex flex-col">
-              <div className="flex items-center justify-between pb-3 border-b border-border/40 mb-4">
+            <div key={col.id} className="p-4 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm min-h-[480px] flex flex-col">
+              <div className="flex items-center justify-between pb-3 border-b border-[#eef1ed] mb-4">
                 <div className="flex items-center gap-2">
                   <span className={`p-1.5 rounded-lg border ${col.color}`}>
                     <Icon className="w-4 h-4" />
                   </span>
-                  <h3 className="font-bold text-foreground text-sm">{col.label}</h3>
+                  <h3 className="font-bold text-[#141c18] text-sm">{col.label}</h3>
                 </div>
-                <span className="w-6 h-6 rounded-full bg-secondary text-xs font-black flex items-center justify-center text-muted-foreground">
+                <span className="w-6 h-6 rounded-full bg-[#f4f7f4] text-xs font-semibold flex items-center justify-center text-[#5c6962]">
                   {colApps.length}
                 </span>
               </div>
 
               <div className="space-y-3 flex-1">
                 {colApps.length === 0 ? (
-                  <div className="h-28 rounded-xl border-2 border-dashed border-border/40 flex items-center justify-center text-xs text-muted-foreground italic">
+                  <div className="h-28 rounded-xl border border-dashed border-[#dbe0d9] flex items-center justify-center text-xs text-[#5c6962] italic bg-[#fafbfa]">
                     Empty Stage
                   </div>
                 ) : (
                   colApps.map((app) => (
-                    <div key={app._id || app.id} className="p-4 rounded-xl bg-secondary/40 border border-border/60 hover:border-primary/40 transition-all space-y-3">
+                    <div key={app._id || app.id} className="p-4 rounded-xl bg-[#fbfcfb] border border-[#e6e9e4] hover:border-[#164e3f] transition-all space-y-3 shadow-xs">
                       <div>
-                        <h4 className="font-bold text-foreground text-sm leading-tight">{app.roleTitle}</h4>
-                        <p className="text-xs text-muted-foreground mt-0.5">{app.companyName}</p>
+                        <h4 className="font-bold text-[#141c18] text-sm leading-tight">{app.roleTitle}</h4>
+                        <p className="text-xs text-[#5c6962] mt-0.5">{app.companyName}</p>
                       </div>
 
-                      <div className="flex items-center justify-between pt-2 border-t border-border/40 text-[11px] text-muted-foreground">
+                      <div className="flex items-center justify-between pt-2 border-t border-[#eef1ed] text-[11px] text-[#5c6962]">
                         <span>{new Date(app.appliedAt || app.createdAt).toLocaleDateString()}</span>
                         <select
                           value={app.status}
                           onChange={(e) => handleStatusChange(app._id || app.id, e.target.value)}
-                          className="bg-background border border-border rounded px-1.5 py-0.5 text-[10px] font-bold text-foreground focus:outline-none"
+                          className="bg-white border border-[#e6e9e4] rounded px-2 py-0.5 text-[10px] font-semibold text-[#141c18] focus:outline-none focus:border-[#164e3f]"
                         >
                           <option value="applied">Applied</option>
                           <option value="interview">Interview</option>
@@ -154,38 +154,38 @@ export default function Applications() {
 
       {/* Add Application Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md p-6 rounded-2xl bg-card border border-border shadow-2xl space-y-5">
-            <h3 className="text-lg font-black text-foreground">Add Application Item</h3>
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-md p-6 rounded-2xl bg-white border border-[#e6e9e4] shadow-xl space-y-5">
+            <h3 className="text-lg font-bold text-[#141c18]">Add Application Item</h3>
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">Company Name</label>
+                <label className="block text-xs font-semibold text-[#5c6962] mb-1">Company Name</label>
                 <input
                   type="text"
                   placeholder="Stripe / Netflix / Google"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl bg-background border border-border text-sm text-foreground focus:outline-none focus:border-primary"
+                  className="w-full px-3.5 py-2 rounded-xl bg-[#f7f9f7] border border-[#e6e9e4] text-sm text-[#141c18] focus:outline-none focus:border-[#164e3f]"
                   required
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">Job Title</label>
+                <label className="block text-xs font-semibold text-[#5c6962] mb-1">Job Title</label>
                 <input
                   type="text"
                   placeholder="Senior Full Stack Engineer"
                   value={roleTitle}
                   onChange={(e) => setRoleTitle(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl bg-background border border-border text-sm text-foreground focus:outline-none focus:border-primary"
+                  className="w-full px-3.5 py-2 rounded-xl bg-[#f7f9f7] border border-[#e6e9e4] text-sm text-[#141c18] focus:outline-none focus:border-[#164e3f]"
                   required
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-muted-foreground mb-1">Status</label>
+                <label className="block text-xs font-semibold text-[#5c6962] mb-1">Status</label>
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl bg-background border border-border text-sm text-foreground focus:outline-none focus:border-primary font-semibold"
+                  className="w-full px-3.5 py-2 rounded-xl bg-[#f7f9f7] border border-[#e6e9e4] text-sm text-[#141c18] focus:outline-none focus:border-[#164e3f] font-semibold"
                 >
                   <option value="applied">Applied / In Review</option>
                   <option value="interview">Interview Scheduled</option>
@@ -194,17 +194,17 @@ export default function Applications() {
                 </select>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-4">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#eef1ed]">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 rounded-xl border border-border text-xs font-semibold text-muted-foreground hover:text-foreground"
+                  className="px-4 py-2 rounded-xl border border-[#e6e9e4] text-xs font-semibold text-[#5c6962] hover:bg-[#f4f7f4] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-primary text-white font-bold text-xs shadow-md"
+                  className="px-5 py-2 rounded-xl bg-[#164e3f] hover:bg-[#124235] text-white font-semibold text-xs shadow-sm transition-colors"
                 >
                   Save Application
                 </button>

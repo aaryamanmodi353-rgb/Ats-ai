@@ -514,24 +514,20 @@ Results-driven ${targetRole.title} specializing in building high-concurrency, sc
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-24">
+    <div className="min-h-screen bg-[#f7f8f6] text-[#141c18] pb-24">
       {/* Hero Banner */}
-      <section className="relative py-16 sm:py-24 border-b border-border/60 overflow-hidden bg-gradient-to-b from-secondary/40 via-background to-background">
-        <div className="absolute inset-0 -z-10 flex items-center justify-center opacity-30 pointer-events-none">
-          <div className="w-[650px] h-[350px] bg-gradient-to-tr from-purple-600 via-blue-600 to-indigo-600 rounded-full blur-[130px]" />
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-purple-500/15 via-indigo-500/15 to-blue-500/15 border border-purple-500/30 text-purple-300 text-xs font-bold uppercase tracking-wider shadow-sm">
-            <Sparkles className="w-4 h-4 text-purple-400 animate-pulse" />
+      <section className="relative py-14 sm:py-20 border-b border-[#e6e9e4] bg-[#f4f7f4]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-5">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#e6f0ea] border border-[#d2e2d8] text-[#164e3f] text-xs font-semibold uppercase tracking-wider">
+            <Sparkles className="w-3.5 h-3.5 text-[#164e3f]" />
             <span>Famous 100% ATS-Verified Templates Library</span>
           </div>
 
-          <h1 className="text-4xl sm:text-6xl font-black tracking-tight max-w-4xl mx-auto leading-tight">
-            World-Famous ATS Templates & <span className="gradient-text">Role-Based AI Guide</span>
+          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#141c18] max-w-4xl mx-auto leading-tight">
+            World-Famous ATS Templates & <span className="text-[#164e3f]">Role-Based AI Guide</span>
           </h1>
 
-          <p className="text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+          <p className="text-sm sm:text-base text-[#5c6962] max-w-3xl mx-auto leading-relaxed">
             Create authentic Overleaf-ready LaTeX (`.tex`) resumes using 12+ industry-benchmark templates trusted by engineers at FAANG, Ivy League consultancies, and top AI labs. Explore exact hard skills, leadership verbs, and quantified metrics tailored for all 10 major career tracks.
           </p>
         </div>
@@ -541,29 +537,29 @@ Results-driven ${targetRole.title} specializing in building high-concurrency, sc
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 space-y-16">
         {/* SECTION 1: ROLE-BASED RECOMMENDATION ENGINE */}
         <section className="space-y-8">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-border/40 pb-6">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#e6e9e4] pb-6">
             <div>
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-400 mb-1">
-                <Briefcase className="w-4 h-4" />
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#164e3f] mb-1">
+                <Briefcase className="w-4 h-4 text-[#164e3f]" />
                 <span>Job Role Intelligence</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground">
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#141c18]">
                 Role-Based ATS Recommendations & Checklist ({ROLE_RECOMMENDATIONS.length} Roles)
               </h2>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-sm text-[#5c6962] mt-1">
                 Select your target career path below to unlock recommended hard skills, elite action verbs, and section blueprints.
               </p>
             </div>
 
             {/* Search filter */}
             <div className="relative w-full sm:w-72">
-              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#5c6962]" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search roles or skills..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-card border border-border/60 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-[#e6e9e4] text-xs text-[#141c18] placeholder:text-[#5c6962] focus:outline-none focus:border-[#164e3f]"
               />
             </div>
           </div>
@@ -574,10 +570,10 @@ Results-driven ${targetRole.title} specializing in building high-concurrency, sc
               <button
                 key={cat}
                 onClick={() => setSelectedCategoryFilter(cat)}
-                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
                   selectedCategoryFilter === cat
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20'
-                    : 'bg-secondary/60 text-muted-foreground hover:bg-secondary hover:text-foreground border border-border/60'
+                    ? 'bg-[#164e3f] text-white shadow-sm'
+                    : 'bg-white text-[#5c6962] hover:bg-[#f4f7f4] hover:text-[#141c18] border border-[#e6e9e4]'
                 }`}
               >
                 {cat}
@@ -596,16 +592,16 @@ Results-driven ${targetRole.title} specializing in building high-concurrency, sc
                   onClick={() => setSelectedRole(role)}
                   className={`p-4 rounded-2xl border text-left transition-all flex flex-col justify-between gap-3 ${
                     isSelected
-                      ? 'bg-gradient-to-br from-secondary/90 to-card border-blue-500/60 shadow-lg shadow-blue-500/10 scale-[1.02]'
-                      : 'bg-card/60 hover:bg-card border-border/60 hover:border-border text-muted-foreground hover:text-foreground'
+                      ? 'bg-white border-[#164e3f] ring-2 ring-[#164e3f] shadow-sm'
+                      : 'bg-white hover:bg-[#fafbfa] border-[#e6e9e4] text-[#5c6962] hover:text-[#141c18]'
                   }`}
                 >
-                  <div className={`w-9 h-9 rounded-xl bg-gradient-to-tr ${role.badgeColor} flex items-center justify-center text-white shadow-sm`}>
+                  <div className="w-9 h-9 rounded-xl bg-[#e6f0ea] border border-[#d2e2d8] flex items-center justify-center text-[#164e3f] shadow-xs">
                     <Icon className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="text-xs font-black leading-snug text-foreground">{role.title}</div>
-                    <div className="text-[10px] font-semibold text-muted-foreground mt-0.5">{role.category}</div>
+                    <div className="text-xs font-bold leading-snug text-[#141c18]">{role.title}</div>
+                    <div className="text-[10px] font-semibold text-[#5c6962] mt-0.5">{role.category}</div>
                   </div>
                 </button>
               );
@@ -614,26 +610,26 @@ Results-driven ${targetRole.title} specializing in building high-concurrency, sc
 
           {/* Selected Role Deep Breakdown Panel */}
           {selectedRole && (
-            <div className="p-6 sm:p-8 rounded-3xl bg-card border border-border/80 shadow-2xl space-y-8 animate-in fade-in duration-300">
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-border/40">
+            <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm space-y-8 animate-in fade-in duration-300">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-[#eef1ed]">
                 <div className="space-y-2 max-w-3xl">
                   <div className="flex items-center gap-2">
-                    <span className="px-3 py-1 rounded-lg bg-blue-500/15 border border-blue-500/30 text-blue-400 text-xs font-black uppercase tracking-wider">
+                    <span className="px-3 py-0.5 rounded-full bg-[#e6f0ea] border border-[#d2e2d8] text-[#164e3f] text-xs font-semibold uppercase tracking-wider">
                       {selectedRole.category}
                     </span>
-                    <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1">
+                    <span className="text-xs font-semibold text-[#164e3f] flex items-center gap-1">
                       <ShieldCheck className="w-3.5 h-3.5" /> Verified ATS Blueprint
                     </span>
                   </div>
-                  <h3 className="text-2xl sm:text-3xl font-black text-foreground">{selectedRole.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{selectedRole.description}</p>
+                  <h3 className="text-2xl sm:text-3xl font-extrabold text-[#141c18]">{selectedRole.title}</h3>
+                  <p className="text-sm text-[#5c6962] leading-relaxed">{selectedRole.description}</p>
                 </div>
 
                 <div className="flex items-center gap-3 shrink-0">
                   <button
                     onClick={() => handleCreateProfileFromTemplate(FAMOUS_TEMPLATES[0], selectedRole)}
                     disabled={creatingProfileId !== null}
-                    className="px-5 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold text-xs shadow-lg shadow-blue-500/25 flex items-center gap-2 transition-all hover:scale-105"
+                    className="px-5 py-3 rounded-xl bg-[#164e3f] hover:bg-[#124235] text-white font-semibold text-xs shadow-sm flex items-center gap-2 transition-all active:scale-[0.99]"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Create & Edit {selectedRole.title.split(' ')[0]} Profile Now</span>
@@ -644,63 +640,63 @@ Results-driven ${targetRole.title} specializing in building high-concurrency, sc
               {/* 3 Column Blueprint Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* 1. Essential Skills */}
-                <div className="p-5 rounded-2xl bg-secondary/40 border border-border/60 space-y-4">
+                <div className="p-5 rounded-xl bg-[#f7f9f7] border border-[#e6e9e4] space-y-4">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-black uppercase tracking-wider text-blue-400 flex items-center gap-2">
-                      <Zap className="w-4 h-4" /> Essential Hard Skills
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#164e3f] flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-[#164e3f]" /> Essential Hard Skills
                     </h4>
-                    <span className="text-[10px] font-bold text-muted-foreground">High ATS Weight</span>
+                    <span className="text-[10px] font-semibold text-[#5c6962]">High ATS Weight</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {selectedRole.essentialSkills.map((skill, idx) => (
                       <span
                         key={idx}
-                        className="px-3 py-1 rounded-lg bg-blue-500/10 border border-blue-500/25 text-blue-300 text-xs font-bold flex items-center gap-1"
+                        className="px-3 py-1 rounded-lg bg-white border border-[#d2e2d8] text-[#164e3f] text-xs font-medium flex items-center gap-1 shadow-xs"
                       >
                         + {skill}
                       </span>
                     ))}
                   </div>
-                  <p className="text-[11px] text-muted-foreground italic leading-relaxed">
+                  <p className="text-[11px] text-[#5c6962] italic leading-relaxed">
                     Include these exact keywords inside your Skills grid and Work Experience bullets.
                   </p>
                 </div>
 
                 {/* 2. Action Verbs */}
-                <div className="p-5 rounded-2xl bg-secondary/40 border border-border/60 space-y-4">
+                <div className="p-5 rounded-xl bg-[#f7f9f7] border border-[#e6e9e4] space-y-4">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-black uppercase tracking-wider text-purple-400 flex items-center gap-2">
-                      <Sparkles className="w-4 h-4" /> Recommended Action Verbs
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#164e3f] flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-[#164e3f]" /> Recommended Action Verbs
                     </h4>
-                    <span className="text-[10px] font-bold text-muted-foreground">Start Every Bullet</span>
+                    <span className="text-[10px] font-semibold text-[#5c6962]">Start Every Bullet</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {selectedRole.recommendedVerbs.map((verb, idx) => (
                       <span
                         key={idx}
-                        className="px-3 py-1 rounded-lg bg-purple-500/10 border border-purple-500/25 text-purple-300 text-xs font-bold"
+                        className="px-3 py-1 rounded-lg bg-[#e6f0ea] border border-[#c8ded1] text-[#164e3f] text-xs font-semibold"
                       >
                         {verb}
                       </span>
                     ))}
                   </div>
-                  <p className="text-[11px] text-muted-foreground italic leading-relaxed">
+                  <p className="text-[11px] text-[#5c6962] italic leading-relaxed">
                     Avoid passive starters like 'Responsible for' or 'Worked on'. Lead immediately with these verbs.
                   </p>
                 </div>
 
                 {/* 3. Must-Have Sections */}
-                <div className="p-5 rounded-2xl bg-secondary/40 border border-border/60 space-y-4">
+                <div className="p-5 rounded-xl bg-[#f7f9f7] border border-[#e6e9e4] space-y-4">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4" /> Required Sections Check
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#164e3f] flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-[#164e3f]" /> Required Sections Check
                     </h4>
-                    <span className="text-[10px] font-bold text-muted-foreground">Pillar 3 Structure</span>
+                    <span className="text-[10px] font-semibold text-[#5c6962]">Pillar 3 Structure</span>
                   </div>
                   <ul className="space-y-2">
                     {selectedRole.mustHaveSections.map((sec, idx) => (
-                      <li key={idx} className="text-xs text-foreground font-semibold flex items-start gap-2">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                      <li key={idx} className="text-xs text-[#141c18] font-medium flex items-start gap-2">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#164e3f] shrink-0 mt-0.5" />
                         <span>{sec}</span>
                       </li>
                     ))}
@@ -709,15 +705,15 @@ Results-driven ${targetRole.title} specializing in building high-concurrency, sc
               </div>
 
               {/* Role ATS Expert Rationale Banner */}
-              <div className="p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-transparent border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0 font-black text-lg">
+              <div className="p-5 rounded-xl bg-[#f4f8f5] border border-[#d2e2d8] flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-[#e6f0ea] border border-[#c8ded1] flex items-center justify-center text-[#164e3f] shrink-0 font-bold text-lg">
                   💡
                 </div>
                 <div>
-                  <div className="text-xs font-black uppercase tracking-wider text-amber-400">
+                  <div className="text-xs font-bold uppercase tracking-wider text-[#164e3f]">
                     ATS Scanner & Recruiter Secret for {selectedRole.title}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  <p className="text-xs text-[#5c6962] mt-1 leading-relaxed">
                     {selectedRole.atsAdvice}
                   </p>
                 </div>
@@ -728,15 +724,15 @@ Results-driven ${targetRole.title} specializing in building high-concurrency, sc
 
         {/* SECTION 2: FAMOUS TEMPLATES GALLERY */}
         <section className="space-y-8 pt-4">
-          <div className="border-b border-border/40 pb-6">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-purple-400 mb-1">
-              <FileText className="w-4 h-4" />
+          <div className="border-b border-[#e6e9e4] pb-6">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#164e3f] mb-1">
+              <FileText className="w-4 h-4 text-[#164e3f]" />
               <span>Overleaf & ATS Benchmarks ({FAMOUS_TEMPLATES.length} World-Class Layouts)</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground">
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#141c18]">
               Famous 100% ATS-Verified Templates Library
             </h2>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-sm text-[#5c6962] mt-1">
               Select any of our 12 world-renowned templates below to instantly create and customize your live resume profile or download Overleaf `.tex` source code tailored to your target job role.
             </p>
           </div>
@@ -745,56 +741,56 @@ Results-driven ${targetRole.title} specializing in building high-concurrency, sc
             {FAMOUS_TEMPLATES.map((tpl) => (
               <div
                 key={tpl.id}
-                className="p-6 sm:p-8 rounded-3xl bg-card border border-border/80 shadow-xl flex flex-col justify-between gap-6 hover:border-blue-500/50 transition-all group"
+                className="p-6 sm:p-8 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm flex flex-col justify-between gap-6 hover:border-[#164e3f] transition-all group"
               >
                 <div className="space-y-4">
                   <div className="flex items-center justify-between gap-3">
-                    <span className="px-3 py-1 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-black uppercase tracking-wider">
+                    <span className="px-3 py-0.5 rounded-full bg-[#e6f0ea] border border-[#d2e2d8] text-[#164e3f] text-xs font-semibold uppercase tracking-wider">
                       {tpl.badge}
                     </span>
-                    <span className="px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-1 shrink-0">
-                      <ShieldCheck className="w-3.5 h-3.5" /> {tpl.atsScore}
+                    <span className="px-3 py-0.5 rounded-full bg-[#f4f7f4] border border-[#d2e2d8] text-[#164e3f] text-xs font-bold flex items-center gap-1 shrink-0">
+                      <ShieldCheck className="w-3.5 h-3.5 text-[#164e3f]" /> {tpl.atsScore}
                     </span>
                   </div>
 
-                  <h3 className="text-xl sm:text-2xl font-black text-foreground group-hover:text-blue-400 transition-colors">
+                  <h3 className="text-xl sm:text-2xl font-bold text-[#141c18] group-hover:text-[#164e3f] transition-colors">
                     {tpl.name}
                   </h3>
 
-                  <div className="text-xs font-bold text-blue-400 flex items-center gap-1.5">
-                    <Award className="w-4 h-4 shrink-0" />
+                  <div className="text-xs font-semibold text-[#164e3f] flex items-center gap-1.5">
+                    <Award className="w-4 h-4 shrink-0 text-[#164e3f]" />
                     <span>Best For: {tpl.targetRoles}</span>
                   </div>
 
-                  <p className="text-xs text-muted-foreground leading-relaxed">
+                  <p className="text-xs text-[#5c6962] leading-relaxed">
                     {tpl.description}
                   </p>
 
                   <div className="grid grid-cols-2 gap-2 pt-2">
                     {tpl.previewFeatures.map((feat, idx) => (
-                      <div key={idx} className="flex items-center gap-2 text-xs font-semibold text-foreground/90 bg-secondary/50 p-2.5 rounded-xl border border-border/50">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                      <div key={idx} className="flex items-center gap-2 text-xs font-medium text-[#141c18] bg-[#f7f9f7] p-2.5 rounded-xl border border-[#e6e9e4]">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#164e3f] shrink-0" />
                         <span className="truncate">{feat}</span>
                       </div>
                     ))}
                   </div>
 
                   {/* Code preview snippet */}
-                  <div className="p-3.5 rounded-xl bg-black/60 border border-border/40 font-mono text-[11px] text-muted-foreground overflow-x-auto">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-purple-400 mb-1.5 flex items-center gap-1">
-                      <Code className="w-3 h-3" /> Overleaf LaTeX Source Header (`.tex`)
+                  <div className="p-3.5 rounded-xl bg-[#151f1a] border border-[#27382f] font-mono text-[11px] text-[#5c6962] overflow-x-auto">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-[#a3d9bc] mb-1.5 flex items-center gap-1">
+                      <Code className="w-3 h-3 text-[#6ee7b7]" /> Overleaf LaTeX Source Header (`.tex`)
                     </div>
-                    <pre className="whitespace-pre-wrap text-emerald-400/90 leading-tight">
+                    <pre className="whitespace-pre-wrap text-[#6ee7b7] leading-tight">
                       {tpl.latexSnippet}
                     </pre>
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-border/40">
+                <div className="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-[#eef1ed]">
                   <button
                     onClick={() => handleCreateProfileFromTemplate(tpl, selectedRole)}
                     disabled={creatingProfileId === tpl.id}
-                    className="w-full sm:w-1/2 px-4 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md flex items-center justify-center gap-2 transition-all disabled:opacity-50 hover:scale-[1.02]"
+                    className="w-full sm:w-1/2 px-4 py-3 rounded-xl bg-[#164e3f] hover:bg-[#124235] text-white font-semibold text-xs shadow-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50"
                   >
                     <Plus className="w-4 h-4" />
                     <span>⚡ Create & Edit With Template</span>
@@ -803,9 +799,9 @@ Results-driven ${targetRole.title} specializing in building high-concurrency, sc
                   <button
                     onClick={() => handleDownloadLatexTemplate(tpl)}
                     disabled={downloadingTemplateId === tpl.id}
-                    className="w-full sm:w-1/2 px-4 py-3.5 rounded-2xl bg-secondary hover:bg-secondary/80 text-foreground font-bold text-xs border border-border/80 flex items-center justify-center gap-2 transition-all shadow-sm hover:border-purple-500/40"
+                    className="w-full sm:w-1/2 px-4 py-3 rounded-xl bg-[#e6f0ea] hover:bg-[#d8e7de] text-[#164e3f] font-semibold text-xs border border-[#c8ded1] flex items-center justify-center gap-2 transition-all shadow-sm"
                   >
-                    <Download className="w-4 h-4 text-purple-400" />
+                    <Download className="w-4 h-4 text-[#164e3f]" />
                     <span>Download Overleaf (`.tex`)</span>
                   </button>
                 </div>
@@ -815,24 +811,24 @@ Results-driven ${targetRole.title} specializing in building high-concurrency, sc
         </section>
 
         {/* Call to Action Box */}
-        <section className="p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-blue-900/30 via-indigo-900/30 to-purple-900/30 border border-blue-500/30 text-center space-y-6 shadow-2xl">
-          <h2 className="text-2xl sm:text-4xl font-black tracking-tight max-w-2xl mx-auto">
+        <section className="p-8 sm:p-12 rounded-2xl bg-white border border-[#e6e9e4] text-center space-y-6 shadow-sm">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#141c18] tracking-tight max-w-2xl mx-auto">
             Ready to Run a Live 6-Pillar ATS Scan on Your New Template?
           </h2>
-          <p className="text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">
+          <p className="text-sm text-[#5c6962] max-w-xl mx-auto leading-relaxed">
             Upload your customized PDF or DOCX resume to get instant quantitative diagnostics, action verb scoring, and skill gap analysis against target job descriptions.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
             <Link
               to="/resume/new"
-              className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-xl shadow-blue-500/25 flex items-center gap-2 transition-all hover:scale-105"
+              className="px-6 py-3 rounded-xl bg-[#164e3f] hover:bg-[#124235] text-white font-semibold text-sm shadow-sm flex items-center gap-2 transition-all active:scale-[0.99]"
             >
               <Sparkles className="w-4 h-4" />
               <span>Launch ATS Scanner Now</span>
             </Link>
             <Link
               to="/dashboard"
-              className="px-6 py-3.5 rounded-2xl bg-secondary hover:bg-secondary/80 text-foreground font-bold text-sm border border-border/80 transition-all"
+              className="px-6 py-3 rounded-xl bg-white hover:bg-[#f4f7f4] text-[#141c18] font-semibold text-sm border border-[#e6e9e4] transition-all"
             >
               <span>Go to Dashboard</span>
             </Link>

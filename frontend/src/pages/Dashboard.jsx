@@ -47,17 +47,17 @@ export default function Dashboard() {
   const interviewRate = totalApps > 0 ? Math.round((interviews / totalApps) * 100) : 0;
 
   const getScoreColor = (score) => {
-    if (score === null || score === undefined) return 'text-muted-foreground';
-    if (score >= 80) return 'text-emerald-400';
-    if (score >= 65) return 'text-amber-400';
-    return 'text-rose-400';
+    if (score === null || score === undefined) return 'text-[#5c6962]';
+    if (score >= 80) return 'text-[#164e3f]';
+    if (score >= 65) return 'text-amber-700';
+    return 'text-rose-700';
   };
 
   const getScoreBadgeClass = (score) => {
-    if (score === null || score === undefined) return 'bg-secondary text-muted-foreground border-border';
-    if (score >= 80) return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30';
-    if (score >= 65) return 'bg-amber-500/15 text-amber-400 border-amber-500/30';
-    return 'bg-rose-500/15 text-rose-400 border-rose-500/30';
+    if (score === null || score === undefined) return 'bg-[#f4f6f3] text-[#5c6962] border-[#e2e6e1]';
+    if (score >= 80) return 'bg-[#e6f0ea] text-[#164e3f] border-[#d2e2d8]';
+    if (score >= 65) return 'bg-amber-50 text-amber-800 border-amber-200';
+    return 'bg-rose-50 text-rose-800 border-rose-200';
   };
 
   const getScoreLabel = (score) => {
@@ -68,25 +68,42 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 flex-1 space-y-8">
+      {/* Top Breadcrumb & Status */}
+      <div className="flex items-center justify-between text-xs text-[#5c6962] border-b border-[#e6e9e4] pb-3">
+        <div className="flex items-center gap-2">
+          <span>Workspace</span>
+          <span>/</span>
+          <span className="text-[#141c18] font-medium">Dashboard</span>
+        </div>
+        <div className="text-xs text-[#5c6962] hidden sm:block">
+          Personal workspace
+        </div>
+      </div>
+
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-foreground tracking-tight">Resume Intelligence Dashboard</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Track your ATS score across tailored versions and monitor MERN application conversion.
+          <div className="text-[11px] font-bold uppercase tracking-wider text-[#164e3f] mb-1">
+            OVERVIEW & ANALYTICS
+          </div>
+          <h1 className="text-3xl font-extrabold text-[#141c18] tracking-tight">
+            Resume Intelligence Dashboard
+          </h1>
+          <p className="text-sm text-[#5c6962] mt-1">
+            Track your ATS score across tailored versions and monitor application conversion.
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Link
             to="/applications"
-            className="px-4 py-2.5 rounded-xl border border-border/80 bg-card hover:bg-secondary/40 text-foreground font-semibold text-sm flex items-center gap-2 transition-colors"
+            className="px-4 py-2.5 rounded-xl border border-[#e3e7e2] bg-white hover:bg-[#f4f6f3] text-[#141c18] font-semibold text-xs sm:text-sm flex items-center gap-2 transition-colors shadow-sm"
           >
-            <Kanban className="w-4 h-4 text-indigo-400" />
+            <Kanban className="w-4 h-4 text-[#164e3f]" />
             <span>Application Tracker</span>
           </Link>
           <Link
             to="/resume/new"
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-sm shadow-lg shadow-blue-500/25 flex items-center gap-2 transition-all hover:scale-[1.02]"
+            className="px-5 py-2.5 rounded-xl bg-[#164e3f] hover:bg-[#124235] text-white font-semibold text-xs sm:text-sm shadow-sm flex items-center gap-2 transition-all active:scale-[0.99]"
           >
             <Plus className="w-4 h-4" />
             <span>New ATS Scan</span>
@@ -95,65 +112,71 @@ export default function Dashboard() {
       </div>
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-        <div className="p-6 rounded-2xl bg-card border border-border/60 shadow-lg relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl -z-10" />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="p-6 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Latest ATS Score</span>
-            <Sparkles className="w-4 h-4 text-blue-400" />
+            <span className="text-xs font-bold uppercase tracking-wider text-[#5c6962]">Latest ATS Score</span>
+            <div className="w-8 h-8 rounded-lg bg-[#e6f0ea] text-[#164e3f] flex items-center justify-center">
+              <Sparkles className="w-4 h-4" />
+            </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={`text-4xl font-black ${getScoreColor(latestScore)}`}>{latestScore !== null ? latestScore : '-'}</span>
-            <span className="text-sm text-muted-foreground">/ 100</span>
+            <span className={`text-4xl font-black ${getScoreColor(latestScore)}`}>
+              {latestScore !== null ? latestScore : '-'}
+            </span>
+            <span className="text-sm text-[#5c6962]">/ 100</span>
           </div>
-          <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground font-semibold">
-            <TrendingUp className="w-3.5 h-3.5 text-blue-400" />
+          <div className="mt-3 flex items-center gap-1.5 text-xs text-[#5c6962] font-semibold">
+            <TrendingUp className="w-3.5 h-3.5 text-[#164e3f]" />
             <span>{latestScore !== null ? 'ATS audit score calculated' : 'Upload resume to scan'}</span>
           </div>
         </div>
 
-        <div className="p-6 rounded-2xl bg-card border border-border/60 shadow-lg relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl -z-10" />
+        <div className="p-6 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Saved Profiles</span>
-            <FileText className="w-4 h-4 text-purple-400" />
+            <span className="text-xs font-bold uppercase tracking-wider text-[#5c6962]">Saved Profiles</span>
+            <div className="w-8 h-8 rounded-lg bg-[#f4f6f3] text-[#141c18] flex items-center justify-center">
+              <FileText className="w-4 h-4 text-[#164e3f]" />
+            </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black text-foreground">{totalResumes}</span>
-            <span className="text-sm text-muted-foreground">Active Profiles</span>
+            <span className="text-4xl font-black text-[#141c18]">{totalResumes}</span>
+            <span className="text-sm text-[#5c6962]">Active Profiles</span>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground truncate">
+          <p className="mt-3 text-xs text-[#5c6962] truncate">
             {latestResume ? `Latest: ${latestResume.originalFilename}` : 'No resumes uploaded yet'}
           </p>
         </div>
 
-        <div className="p-6 rounded-2xl bg-card border border-border/60 shadow-lg relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl -z-10" />
+        <div className="p-6 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Applications Tracked</span>
-            <Kanban className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-bold uppercase tracking-wider text-[#5c6962]">Applications Tracked</span>
+            <div className="w-8 h-8 rounded-lg bg-[#f4f6f3] text-[#141c18] flex items-center justify-center">
+              <Kanban className="w-4 h-4 text-[#164e3f]" />
+            </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black text-foreground">{totalApps}</span>
-            <span className="text-sm text-muted-foreground">Active Roles</span>
+            <span className="text-4xl font-black text-[#141c18]">{totalApps}</span>
+            <span className="text-sm text-[#5c6962]">Active Roles</span>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">
+          <p className="mt-3 text-xs text-[#5c6962]">
             {totalApps > 0 ? 'Role tracking active' : 'No applications tracked yet'}
           </p>
         </div>
 
-        <div className="p-6 rounded-2xl bg-card border border-border/60 shadow-lg relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl -z-10" />
+        <div className="p-6 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Interview Conversion</span>
-            <BarChart3 className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs font-bold uppercase tracking-wider text-[#5c6962]">Interview Conversion</span>
+            <div className="w-8 h-8 rounded-lg bg-[#e6f0ea] text-[#164e3f] flex items-center justify-center">
+              <BarChart3 className="w-4 h-4" />
+            </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black text-emerald-400">{interviewRate}%</span>
-            <span className="text-sm text-muted-foreground">Call Rate</span>
+            <span className="text-4xl font-black text-[#164e3f]">{interviewRate}%</span>
+            <span className="text-sm text-[#5c6962]">Call Rate</span>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground flex items-center gap-1">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+          <p className="mt-3 text-xs text-[#5c6962] flex items-center gap-1">
+            <CheckCircle2 className="w-3.5 h-3.5 text-[#164e3f]" />
             <span>Higher scores yield 3.2x calls</span>
           </p>
         </div>
@@ -163,32 +186,32 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-              <FileCheck className="w-5 h-5 text-primary" />
+            <h2 className="text-lg font-bold text-[#141c18] flex items-center gap-2">
+              <FileCheck className="w-5 h-5 text-[#164e3f]" />
               <span>Uploaded Resumes & ATS Versions</span>
             </h2>
-            <Link to="/resume/new" className="text-xs font-semibold text-primary hover:underline">
+            <Link to="/resume/new" className="text-xs font-bold text-[#164e3f] hover:underline">
               Upload New Version →
             </Link>
           </div>
 
           {loading ? (
-            <div className="p-12 rounded-2xl bg-card border border-border/60 flex items-center justify-center text-muted-foreground gap-3">
-              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            <div className="p-12 rounded-2xl bg-white border border-[#e6e9e4] flex items-center justify-center text-[#5c6962] gap-3">
+              <Loader2 className="w-5 h-5 animate-spin text-[#164e3f]" />
               <span>Loading workspace resumes...</span>
             </div>
           ) : resumes.length === 0 ? (
-            <div className="p-12 rounded-2xl bg-card border border-border/60 text-center space-y-4">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto text-primary">
+            <div className="p-12 rounded-2xl bg-white border border-[#e6e9e4] text-center space-y-4 shadow-sm">
+              <div className="w-12 h-12 rounded-full bg-[#e6f0ea] flex items-center justify-center mx-auto text-[#164e3f]">
                 <FileText className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-bold text-foreground">No Resumes Found</h3>
-                <p className="text-sm text-muted-foreground mt-1">Upload your first resume PDF or DOCX to run a compatibility check.</p>
+                <h3 className="font-bold text-[#141c18]">No Resumes Found</h3>
+                <p className="text-sm text-[#5c6962] mt-1">Upload your first resume PDF or DOCX to run a compatibility check.</p>
               </div>
               <Link
                 to="/resume/new"
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-white font-semibold text-sm shadow-md"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#164e3f] text-white font-semibold text-xs shadow-sm hover:bg-[#124235]"
               >
                 <span>Upload First Resume</span>
                 <ArrowRight className="w-4 h-4" />
@@ -202,17 +225,17 @@ export default function Dashboard() {
                 return (
                   <div
                     key={r._id || r.id}
-                    className="p-6 rounded-2xl bg-card border border-border/60 hover:border-border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                    className="p-5 sm:p-6 rounded-2xl bg-white border border-[#e6e9e4] hover:border-[#164e3f]/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
                   >
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2.5">
-                        <FileText className="w-5 h-5 text-indigo-400 shrink-0" />
-                        <h3 className="font-bold text-foreground text-base">{r.originalFilename}</h3>
-                        <span className="text-[11px] px-2 py-0.5 rounded-md bg-secondary text-muted-foreground font-medium">
+                        <FileText className="w-5 h-5 text-[#164e3f] shrink-0" />
+                        <h3 className="font-bold text-[#141c18] text-base">{r.originalFilename}</h3>
+                        <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#f4f6f3] text-[#5c6962] font-semibold border border-[#e5eae4]">
                           {r.versions?.length || 1} {r.versions?.length === 1 ? 'version' : 'versions'}
                         </span>
                       </div>
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-4 text-xs text-[#5c6962]">
                         <span className="flex items-center gap-1">
                           <Calendar className="w-3.5 h-3.5" />
                           <span>Added {new Date(r.createdAt).toLocaleDateString()}</span>
@@ -222,27 +245,27 @@ export default function Dashboard() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
+                    <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap">
+                      <div className="text-left sm:text-right">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-semibold text-muted-foreground">ATS Score:</span>
-                          <span className={`px-2.5 py-1 rounded-lg border text-sm font-black ${getScoreBadgeClass(score)}`}>
+                          <span className="text-xs font-semibold text-[#5c6962]">ATS Score:</span>
+                          <span className={`px-2.5 py-0.5 rounded-lg border text-xs font-black ${getScoreBadgeClass(score)}`}>
                             {score !== null ? `${score}/100` : '- / 100'}
                           </span>
                         </div>
-                        <span className="text-[10px] text-muted-foreground">{getScoreLabel(score)}</span>
+                        <span className="text-[10px] text-[#5c6962] block mt-0.5">{getScoreLabel(score)}</span>
                       </div>
 
                       <div className="flex items-center gap-2">
                         <Link
                           to={`/resume/${r._id || r.id}/editor`}
-                          className="px-3.5 py-2 rounded-xl bg-secondary hover:bg-secondary/80 text-foreground font-semibold text-xs transition-colors"
+                          className="px-3.5 py-2 rounded-xl bg-[#f4f6f3] hover:bg-[#e8ece7] text-[#141c18] border border-[#e3e7e2] font-semibold text-xs transition-colors"
                         >
                           Live Editor
                         </Link>
                         <Link
                           to={`/resume/${r._id || r.id}/score/latest`}
-                          className="px-3.5 py-2 rounded-xl bg-primary text-white font-semibold text-xs shadow-md shadow-primary/20 hover:bg-primary/90 transition-all"
+                          className="px-3.5 py-2 rounded-xl bg-[#164e3f] text-white font-semibold text-xs shadow-sm hover:bg-[#124235] transition-all"
                         >
                           Audit Report
                         </Link>
@@ -257,33 +280,33 @@ export default function Dashboard() {
 
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-              <Kanban className="w-5 h-5 text-indigo-400" />
+            <h2 className="text-lg font-bold text-[#141c18] flex items-center gap-2">
+              <Kanban className="w-5 h-5 text-[#164e3f]" />
               <span>Recent Applications</span>
             </h2>
-            <Link to="/applications" className="text-xs font-semibold text-primary hover:underline">
+            <Link to="/applications" className="text-xs font-bold text-[#164e3f] hover:underline">
               View All →
             </Link>
           </div>
 
-          <div className="p-6 rounded-2xl bg-card border border-border/60 space-y-4">
+          <div className="p-6 rounded-2xl bg-white border border-[#e6e9e4] space-y-4 shadow-sm">
             {applications.length === 0 ? (
-              <p className="text-xs text-muted-foreground py-6 text-center">No tracked applications yet.</p>
+              <p className="text-xs text-[#5c6962] py-6 text-center">No tracked applications yet.</p>
             ) : (
               applications.slice(0, 4).map((app) => {
                 const statusColors = {
-                  applied: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-                  interview: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-                  rejected: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
-                  offer: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+                  applied: 'bg-blue-50 text-blue-700 border-blue-200',
+                  interview: 'bg-amber-50 text-amber-800 border-amber-200',
+                  rejected: 'bg-rose-50 text-rose-800 border-rose-200',
+                  offer: 'bg-[#e6f0ea] text-[#164e3f] border-[#d2e2d8]',
                 };
                 return (
-                  <div key={app._id || app.id} className="p-4 rounded-xl bg-secondary/30 border border-border/40 flex items-center justify-between gap-3">
+                  <div key={app._id || app.id} className="p-3.5 rounded-xl bg-[#f9faf8] border border-[#e8ece7] flex items-center justify-between gap-3">
                     <div className="min-w-0">
-                      <h4 className="font-bold text-foreground text-sm truncate">{app.roleTitle}</h4>
-                      <p className="text-xs text-muted-foreground truncate">{app.companyName}</p>
+                      <h4 className="font-bold text-[#141c18] text-sm truncate">{app.roleTitle}</h4>
+                      <p className="text-xs text-[#5c6962] truncate">{app.companyName}</p>
                     </div>
-                    <span className={`px-2.5 py-1 rounded-lg border text-[11px] font-bold uppercase tracking-wider shrink-0 ${statusColors[app.status] || statusColors.applied}`}>
+                    <span className={`px-2.5 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider shrink-0 ${statusColors[app.status] || statusColors.applied}`}>
                       {app.status}
                     </span>
                   </div>
@@ -293,7 +316,7 @@ export default function Dashboard() {
 
             <Link
               to="/applications"
-              className="w-full py-2.5 rounded-xl border border-border/80 bg-secondary/40 hover:bg-secondary text-xs font-semibold text-foreground flex items-center justify-center gap-1.5 transition-colors mt-2"
+              className="w-full py-2.5 rounded-xl border border-[#e3e7e2] bg-[#f4f6f3] hover:bg-[#e8ece7] text-xs font-semibold text-[#141c18] flex items-center justify-center gap-1.5 transition-colors mt-2"
             >
               <span>Go to Application Tracker</span>
               <ArrowRight className="w-3.5 h-3.5" />

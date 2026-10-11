@@ -23,20 +23,16 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-background via-background/95 to-secondary/20 relative overflow-hidden">
-      {/* Ambient background glow */}
-      <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
-      <div className="absolute bottom-1/4 left-1/3 w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
-
-      <div className="max-w-md w-full space-y-8 p-8 sm:p-10 rounded-3xl bg-card border border-border/80 shadow-2xl backdrop-blur-xl relative z-10">
+    <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-[#f7f8f6]">
+      <div className="max-w-md w-full space-y-8 p-8 sm:p-10 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm relative z-10">
         <div className="text-center space-y-2">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-purple-500/25 mx-auto mb-4">
-            <UserPlus className="w-7 h-7" />
+          <div className="w-12 h-12 rounded-xl bg-[#e6f0ea] border border-[#d2e2d8] flex items-center justify-center text-[#164e3f] mx-auto mb-4">
+            <UserPlus className="w-6 h-6" />
           </div>
-          <h2 className="text-3xl font-black text-foreground tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#141c18] tracking-tight">
             Create Free Account
           </h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
+          <p className="text-sm text-[#5c6962] leading-relaxed">
             Get instant access to our 6-Pillar Deterministic ATS Audit engine, AI Bullet Coach, and single-column document exporters.
           </p>
         </div>
@@ -44,8 +40,8 @@ export default function Signup() {
         <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-purple-400" />
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#5c6962] mb-1.5 flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-[#164e3f]" />
                 <span>Full Name</span>
               </label>
               <input
@@ -54,13 +50,13 @@ export default function Signup() {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Alex Morgan"
-                className="w-full px-4 py-3 rounded-xl bg-background/80 border border-border/80 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors font-medium"
+                className="w-full px-4 py-2.5 rounded-xl bg-[#f7f9f7] border border-[#e6e9e4] text-sm text-[#141c18] placeholder:text-[#5c6962] focus:outline-none focus:border-[#164e3f] transition-colors font-medium"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
-                <Mail className="w-3.5 h-3.5 text-blue-400" />
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#5c6962] mb-1.5 flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5 text-[#164e3f]" />
                 <span>Email Address</span>
               </label>
               <input
@@ -69,13 +65,13 @@ export default function Signup() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full px-4 py-3 rounded-xl bg-background/80 border border-border/80 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors font-medium"
+                className="w-full px-4 py-2.5 rounded-xl bg-[#f7f9f7] border border-[#e6e9e4] text-sm text-[#141c18] placeholder:text-[#5c6962] focus:outline-none focus:border-[#164e3f] transition-colors font-medium"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5 text-indigo-400" />
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#5c6962] mb-1.5 flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-[#164e3f]" />
                 <span>Password (6+ characters)</span>
               </label>
               <input
@@ -85,14 +81,14 @@ export default function Signup() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-4 py-3 rounded-xl bg-background/80 border border-border/80 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors font-medium"
+                className="w-full px-4 py-2.5 rounded-xl bg-[#f7f9f7] border border-[#e6e9e4] text-sm text-[#141c18] placeholder:text-[#5c6962] focus:outline-none focus:border-[#164e3f] transition-colors font-medium"
               />
             </div>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-secondary/60 border border-border/60 text-xs text-muted-foreground space-y-1">
-            <div className="flex items-center gap-2 font-semibold text-foreground">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          <div className="p-3.5 rounded-xl bg-[#f4f8f5] border border-[#d2e2d8] text-xs text-[#5c6962] space-y-1">
+            <div className="flex items-center gap-2 font-semibold text-[#141c18]">
+              <CheckCircle2 className="w-4 h-4 text-[#164e3f] shrink-0" />
               <span>Included on your Free Tier Account:</span>
             </div>
             <p className="pl-6 text-[11px] leading-relaxed">
@@ -103,11 +99,11 @@ export default function Signup() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-4 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold text-sm shadow-xl shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60"
+            className="w-full py-3.5 rounded-xl bg-[#164e3f] hover:bg-[#124235] text-white font-semibold text-sm shadow-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-60"
           >
             {submitting ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin text-white" />
                 <span>Creating Account...</span>
               </>
             ) : (
@@ -119,15 +115,15 @@ export default function Signup() {
           </button>
         </form>
 
-        <div className="pt-4 border-t border-border/40 text-center space-y-3">
-          <p className="text-xs text-muted-foreground">
+        <div className="pt-4 border-t border-[#eef1ed] text-center space-y-3">
+          <p className="text-xs text-[#5c6962]">
             Already have a ResumeIQ account?{' '}
-            <Link to="/login" className="font-bold text-primary hover:text-primary/80 transition-colors inline-flex items-center gap-1">
+            <Link to="/login" className="font-semibold text-[#164e3f] hover:underline inline-flex items-center gap-1">
               Sign In Here <ArrowRight className="w-3 h-3" />
             </Link>
           </p>
-          <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+          <div className="flex items-center justify-center gap-1.5 text-[11px] text-[#5c6962]">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#164e3f]" />
             <span>256-bit JWT & bcrypt encrypted security</span>
           </div>
         </div>

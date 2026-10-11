@@ -249,27 +249,35 @@ export default function ScoreReport() {
   };
 
   const getScoreColor = (s) => {
-    if (s >= 80) return 'text-emerald-400';
-    if (s >= 65) return 'text-amber-400';
-    return 'text-rose-400';
-  };
-
-  const getScoreBg = (s) => {
-    if (s >= 80) return 'from-emerald-500/20 via-emerald-500/5 to-transparent border-emerald-500/30';
-    if (s >= 65) return 'from-amber-500/20 via-amber-500/5 to-transparent border-amber-500/30';
-    return 'from-rose-500/20 via-rose-500/5 to-transparent border-rose-500/30';
+    if (s >= 80) return 'text-[#164e3f]';
+    if (s >= 65) return 'text-amber-700';
+    return 'text-rose-700';
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-        <div>
-          <Link to="/dashboard" className="text-xs font-semibold text-muted-foreground hover:text-foreground flex items-center gap-1 mb-2">
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to Dashboard
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 flex-1 space-y-8">
+      {/* Top Breadcrumb */}
+      <div className="flex items-center justify-between text-xs text-[#5c6962] border-b border-[#e6e9e4] pb-3">
+        <div className="flex items-center gap-2">
+          <Link to="/dashboard" className="hover:text-[#164e3f] flex items-center gap-1">
+            <ArrowLeft className="w-3.5 h-3.5" /> Workspace / Dashboard
           </Link>
-          <h1 className="text-3xl font-black text-foreground tracking-tight flex items-center gap-3">
-            <span>PRO ATS Audit: {resume.originalFilename}</span>
-            <span className="text-xs font-bold px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+          <span>/</span>
+          <span className="text-[#141c18] font-medium">ATS Audit Report</span>
+        </div>
+        <div className="text-xs text-[#5c6962] hidden sm:block">
+          6-Pillar Audit Engine
+        </div>
+      </div>
+
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <div className="text-[11px] font-bold uppercase tracking-wider text-[#164e3f] mb-1">
+            REPORT & METRICS
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#141c18] tracking-tight flex items-center gap-3">
+            <span>ATS Audit: {resume.originalFilename}</span>
+            <span className="text-xs font-bold px-3 py-0.5 rounded-full bg-[#e6f0ea] text-[#164e3f] border border-[#d2e2d8]">
               6-Pillar Enterprise Engine
             </span>
           </h1>
@@ -278,7 +286,7 @@ export default function ScoreReport() {
         <div className="flex items-center gap-3">
           <Link
             to={`/resume/${resume._id || resume.id}/editor`}
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-blue-500/20 flex items-center gap-2 transition-all hover:scale-105"
+            className="px-5 py-2.5 rounded-xl bg-[#164e3f] hover:bg-[#124235] text-white font-semibold text-xs sm:text-sm shadow-sm flex items-center gap-2 transition-all active:scale-[0.99]"
           >
             <Edit3 className="w-4 h-4" />
             <span>Open in Live Editor</span>
@@ -287,87 +295,117 @@ export default function ScoreReport() {
       </div>
 
       {/* Top Banner: Composite Score & Summary */}
-      <div className={`p-8 rounded-3xl bg-gradient-to-br border shadow-2xl mb-10 ${getScoreBg(compositeScore)}`}>
+      <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-          <div className="flex flex-col items-center justify-center text-center p-6 rounded-2xl bg-card/80 backdrop-blur-md border border-border/60">
-            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">Enterprise ATS Score</span>
-            <div className="flex items-baseline gap-1">
-              <span className={`text-6xl font-black ${getScoreColor(compositeScore)}`}>{compositeScore}</span>
-              <span className="text-xl font-bold text-muted-foreground">/100</span>
+          <div className="flex flex-col items-center justify-center text-center p-6 rounded-2xl bg-[#f4f7f4] border border-[#e2ece5]">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#5c6962] mb-3">Enterprise ATS Score</span>
+            
+            {/* Circular Gauge */}
+            <div className="relative w-28 h-28 mx-auto flex items-center justify-center mb-2">
+              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="40"
+                  fill="transparent"
+                  stroke="#dbe5dd"
+                  strokeWidth="8"
+                />
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="40"
+                  fill="transparent"
+                  stroke="#164e3f"
+                  strokeWidth="8"
+                  strokeDasharray="251.2"
+                  strokeDashoffset={251.2 * (1 - compositeScore / 100)}
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div className="absolute flex flex-col items-center justify-center">
+                <span className="text-3xl font-black text-[#141c18] leading-none">
+                  {compositeScore}
+                </span>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-[#5c6962] mt-0.5">
+                  / 100
+                </span>
+              </div>
             </div>
-            <span className="mt-3 text-xs font-semibold px-3 py-1 rounded-full bg-secondary text-foreground">
+
+            <span className="mt-1 text-xs font-semibold px-3 py-0.5 rounded-full bg-white text-[#164e3f] border border-[#d2e2d8] shadow-sm">
               {compositeScore >= 80 ? 'PRO Elite Match & Ready' : compositeScore >= 65 ? 'Moderate Risk — Needs Polish' : 'High Auto-Rejection Risk'}
             </span>
           </div>
 
           <div className="md:col-span-2 space-y-4">
-            <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-blue-400" />
+            <h3 className="text-lg font-bold text-[#141c18] flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-[#164e3f]" />
               <span>Diagnostic Explanation</span>
             </h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#5c6962] leading-relaxed">
               {breakdown?.summaryExplanation || `Your resume scored ${compositeScore}/100 based on our 6-Pillar Pro formula (Keywords 30%, Format 15%, Metrics 15%, Action Verbs 15%, Seniority Alignment 15%, Readability 10%).`}
             </p>
 
             {/* 6 Pillar Mini Bars */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4 border-t border-border/40">
-              <div>
-                <div className="flex justify-between text-xs font-semibold mb-1">
-                  <span className="text-muted-foreground">Keywords (30%)</span>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4 border-t border-[#eef1ed]">
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs font-semibold">
+                  <span className="text-[#5c6962]">Keywords (30%)</span>
                   <span className={getScoreColor(keywordScore)}>{keywordScore}%</span>
                 </div>
-                <div className="w-full h-2 rounded-full bg-secondary overflow-hidden">
-                  <div className="h-full bg-blue-500 rounded-full" style={{ width: `${keywordScore}%` }} />
+                <div className="w-full h-2 rounded-full bg-[#e8ede7] overflow-hidden">
+                  <div className="h-full bg-[#164e3f] rounded-full" style={{ width: `${keywordScore}%` }} />
                 </div>
               </div>
 
-              <div>
-                <div className="flex justify-between text-xs font-semibold mb-1">
-                  <span className="text-muted-foreground">Format Audit (15%)</span>
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs font-semibold">
+                  <span className="text-[#5c6962]">Format Audit (15%)</span>
                   <span className={getScoreColor(formatScore)}>{formatScore}%</span>
                 </div>
-                <div className="w-full h-2 rounded-full bg-secondary overflow-hidden">
-                  <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${formatScore}%` }} />
+                <div className="w-full h-2 rounded-full bg-[#e8ede7] overflow-hidden">
+                  <div className="h-full bg-[#164e3f] rounded-full" style={{ width: `${formatScore}%` }} />
                 </div>
               </div>
 
-              <div>
-                <div className="flex justify-between text-xs font-semibold mb-1">
-                  <span className="text-muted-foreground">Metrics (15%)</span>
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs font-semibold">
+                  <span className="text-[#5c6962]">Metrics (15%)</span>
                   <span className={getScoreColor(quantificationScore)}>{quantificationScore}%</span>
                 </div>
-                <div className="w-full h-2 rounded-full bg-secondary overflow-hidden">
-                  <div className="h-full bg-purple-500 rounded-full" style={{ width: `${quantificationScore}%` }} />
+                <div className="w-full h-2 rounded-full bg-[#e8ede7] overflow-hidden">
+                  <div className="h-full bg-[#164e3f] rounded-full" style={{ width: `${quantificationScore}%` }} />
                 </div>
               </div>
 
-              <div>
-                <div className="flex justify-between text-xs font-semibold mb-1">
-                  <span className="text-muted-foreground">Action Verbs (15%)</span>
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs font-semibold">
+                  <span className="text-[#5c6962]">Action Verbs (15%)</span>
                   <span className={getScoreColor(actionVerbScore)}>{actionVerbScore}%</span>
                 </div>
-                <div className="w-full h-2 rounded-full bg-secondary overflow-hidden">
-                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${actionVerbScore}%` }} />
+                <div className="w-full h-2 rounded-full bg-[#e8ede7] overflow-hidden">
+                  <div className="h-full bg-[#164e3f] rounded-full" style={{ width: `${actionVerbScore}%` }} />
                 </div>
               </div>
 
-              <div>
-                <div className="flex justify-between text-xs font-semibold mb-1">
-                  <span className="text-muted-foreground">Seniority (15%)</span>
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs font-semibold">
+                  <span className="text-[#5c6962]">Seniority (15%)</span>
                   <span className={getScoreColor(seniorityScore)}>{seniorityScore}%</span>
                 </div>
-                <div className="w-full h-2 rounded-full bg-secondary overflow-hidden">
-                  <div className="h-full bg-amber-500 rounded-full" style={{ width: `${seniorityScore}%` }} />
+                <div className="w-full h-2 rounded-full bg-[#e8ede7] overflow-hidden">
+                  <div className="h-full bg-[#164e3f] rounded-full" style={{ width: `${seniorityScore}%` }} />
                 </div>
               </div>
 
-              <div>
-                <div className="flex justify-between text-xs font-semibold mb-1">
-                  <span className="text-muted-foreground">Readability (10%)</span>
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs font-semibold">
+                  <span className="text-[#5c6962]">Readability (10%)</span>
                   <span className={getScoreColor(readabilityScore)}>{readabilityScore}%</span>
                 </div>
-                <div className="w-full h-2 rounded-full bg-secondary overflow-hidden">
-                  <div className="h-full bg-cyan-500 rounded-full" style={{ width: `${readabilityScore}%` }} />
+                <div className="w-full h-2 rounded-full bg-[#e8ede7] overflow-hidden">
+                  <div className="h-full bg-[#164e3f] rounded-full" style={{ width: `${readabilityScore}%` }} />
                 </div>
               </div>
             </div>
@@ -379,14 +417,14 @@ export default function ScoreReport() {
         {/* Left 2 Cols: Keyword Gap Analysis & Format Warnings */}
         <div className="lg:col-span-2 space-y-8">
           {/* Keyword Gap Analysis */}
-          <div className="p-6 sm:p-8 rounded-2xl bg-card border border-border/60 shadow-lg space-y-6">
-            <div className="flex flex-col gap-4 border-b border-border/40 pb-5">
+          <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm space-y-6">
+            <div className="flex flex-col gap-4 border-b border-[#eef1ed] pb-5">
               <div>
-                <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                  <Zap className="w-5 h-5 text-blue-400" />
+                <h3 className="text-lg font-bold text-[#141c18] flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-[#164e3f]" />
                   <span>Exact N-Gram Keyword Gap Analysis</span>
                 </h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-xs text-[#5c6962] mt-0.5">
                   Extracted directly from the target Job Description against your parsed resume text. Click any action below to auto-inject or optimize.
                 </p>
               </div>
@@ -394,7 +432,7 @@ export default function ScoreReport() {
                 <button
                   onClick={handleAutoInjectKeywords}
                   disabled={injecting || (breakdown?.keywordMatch?.missingRequired?.length === 0 && breakdown?.keywordMatch?.missingPreferred?.length === 0)}
-                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-md flex items-center gap-2 transition-all disabled:opacity-50"
+                  className="px-4 py-2.5 rounded-xl bg-[#164e3f] hover:bg-[#124235] text-white font-semibold text-xs shadow-sm flex items-center gap-2 transition-all disabled:opacity-50"
                 >
                   {injecting ? <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" /> : <Zap className="w-3.5 h-3.5 shrink-0" />}
                   <span>⚡ Auto-Inject Missing Skills</span>
@@ -402,7 +440,7 @@ export default function ScoreReport() {
                 <button
                   onClick={handleOptimizeVerbsAndWords}
                   disabled={optimizingWords}
-                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xs shadow-md flex items-center gap-2 transition-all disabled:opacity-50"
+                  className="px-4 py-2.5 rounded-xl bg-white hover:bg-[#f4f7f4] text-[#164e3f] border border-[#d2e2d8] font-semibold text-xs shadow-sm flex items-center gap-2 transition-all disabled:opacity-50"
                 >
                   {optimizingWords ? <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" /> : <Sparkles className="w-3.5 h-3.5 shrink-0" />}
                   <span>✨ Auto-Optimize Verbs & Repeated Words</span>
@@ -410,7 +448,7 @@ export default function ScoreReport() {
                 <button
                   onClick={handleInjectAndDownloadLatex}
                   disabled={downloadingLatex}
-                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md flex items-center gap-2 transition-all disabled:opacity-50"
+                  className="px-4 py-2.5 rounded-xl bg-[#e6f0ea] hover:bg-[#d8e7de] text-[#164e3f] border border-[#c8ded1] font-semibold text-xs shadow-sm flex items-center gap-2 transition-all disabled:opacity-50"
                 >
                   {downloadingLatex ? <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" /> : <Download className="w-3.5 h-3.5 shrink-0" />}
                   <span>📥 Auto-Inject & Download LaTeX (.tex)</span>
@@ -420,57 +458,57 @@ export default function ScoreReport() {
 
             <div className="space-y-5">
               <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-rose-400 mb-2 flex items-center gap-1.5">
-                  <AlertTriangle className="w-3.5 h-3.5" />
+                <h4 className="text-xs font-bold uppercase tracking-wider text-rose-700 mb-2 flex items-center gap-1.5">
+                  <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
                   <span>Missing Required Hard Skills (Double Penalty)</span>
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {breakdown?.keywordMatch?.missingRequired && breakdown.keywordMatch.missingRequired.length > 0 ? (
                     breakdown.keywordMatch.missingRequired.map((kw, i) => (
-                      <span key={i} className="px-3 py-1 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-bold flex items-center gap-1.5">
-                        <Zap className="w-3 h-3" /> + {kw}
+                      <span key={i} className="px-3 py-1 rounded-lg bg-[#fef2f2] border border-[#fecaca] text-[#991b1b] text-xs font-semibold flex items-center gap-1.5">
+                        <Zap className="w-3 h-3 text-rose-600" /> + {kw}
                       </span>
                     ))
                   ) : (
-                    <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> All required hard skills matched exactly!
+                    <span className="text-xs text-[#164e3f] font-semibold flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#164e3f]" /> All required hard skills matched exactly!
                     </span>
                   )}
                 </div>
               </div>
 
               <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400 mb-2 flex items-center gap-1.5">
-                  <Zap className="w-3.5 h-3.5" />
+                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-800 mb-2 flex items-center gap-1.5">
+                  <Zap className="w-3.5 h-3.5 text-amber-600" />
                   <span>Missing Preferred & Tools Credentials</span>
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {[...(breakdown?.keywordMatch?.missingPreferred || []), ...(breakdown?.keywordMatch?.missingTools || [])].length > 0 ? (
                     [...(breakdown?.keywordMatch?.missingPreferred || []), ...(breakdown?.keywordMatch?.missingTools || [])].map((kw, i) => (
-                      <span key={i} className="px-3 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-semibold">
+                      <span key={i} className="px-3 py-1 rounded-lg bg-[#fffbeb] border border-[#fde68a] text-[#92400e] text-xs font-medium">
                         + {kw}
                       </span>
                     ))
                   ) : (
-                    <span className="text-xs text-emerald-400 font-semibold">All preferred tools and software matched!</span>
+                    <span className="text-xs text-[#164e3f] font-semibold">All preferred tools and software matched!</span>
                   )}
                 </div>
               </div>
 
               <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-2 flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#164e3f] mb-2 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#164e3f]" />
                   <span>Successfully Matched Keywords</span>
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {breakdown?.keywordMatch?.matchedKeywords && breakdown.keywordMatch.matchedKeywords.length > 0 ? (
                     breakdown.keywordMatch.matchedKeywords.map((kw, i) => (
-                      <span key={i} className="px-3 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" /> {kw}
+                      <span key={i} className="px-3 py-1 rounded-lg bg-[#e6f0ea] border border-[#c8ded1] text-[#164e3f] text-xs font-semibold flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3 text-[#164e3f]" /> {kw}
                       </span>
                     ))
                   ) : (
-                    <span className="text-xs text-muted-foreground">No exact keywords matched.</span>
+                    <span className="text-xs text-[#5c6962]">No exact keywords matched.</span>
                   )}
                 </div>
               </div>
@@ -479,64 +517,64 @@ export default function ScoreReport() {
 
           {/* Deep Diagnostic Audit Card */}
           {breakdown?.deepDiagnosticAudit && (
-            <div className="p-6 sm:p-8 rounded-2xl bg-card border border-border/60 shadow-lg space-y-6">
-              <div className="border-b border-border/40 pb-4">
-                <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                  <Activity className="w-5 h-5 text-purple-400" />
+            <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm space-y-6">
+              <div className="border-b border-[#eef1ed] pb-4">
+                <h3 className="text-lg font-bold text-[#141c18] flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-[#164e3f]" />
                   <span>Deep Diagnostic & Why Your Score is Low</span>
                 </h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-xs text-[#5c6962] mt-0.5">
                   Comprehensive 5-Point Audit covering action verbs, repetition, missing structural sections, domain alignment, and URL links.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 rounded-xl bg-secondary/50 border border-border/60 space-y-2">
-                  <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-purple-400">
-                    <Sparkles className="w-4 h-4" /> Action Verbs & Vocabulary
+                <div className="p-4 rounded-xl bg-[#f7f9f7] border border-[#e6ede8] space-y-2">
+                  <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-[#164e3f]">
+                    <Sparkles className="w-4 h-4 text-[#164e3f]" /> Action Verbs & Vocabulary
                   </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
+                  <p className="text-xs text-[#5c6962] leading-relaxed">
                     {breakdown.deepDiagnosticAudit.actionVerbAdvice}
                   </p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-secondary/50 border border-border/60 space-y-2">
-                  <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-blue-400">
-                    <Activity className="w-4 h-4" /> Word Repetition & Redundancy
+                <div className="p-4 rounded-xl bg-[#f7f9f7] border border-[#e6ede8] space-y-2">
+                  <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-[#164e3f]">
+                    <Activity className="w-4 h-4 text-[#164e3f]" /> Word Repetition & Redundancy
                   </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
+                  <p className="text-xs text-[#5c6962] leading-relaxed">
                     {breakdown.deepDiagnosticAudit.wordRepetitionAdvice}
                   </p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-secondary/50 border border-border/60 space-y-2">
-                  <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-amber-400">
-                    <AlertTriangle className="w-4 h-4" /> Structural Section Completeness
+                <div className="p-4 rounded-xl bg-[#f7f9f7] border border-[#e6ede8] space-y-2">
+                  <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-amber-800">
+                    <AlertTriangle className="w-4 h-4 text-amber-700" /> Structural Section Completeness
                   </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
+                  <p className="text-xs text-[#5c6962] leading-relaxed">
                     {breakdown.deepDiagnosticAudit.componentAdvice}
                   </p>
                 </div>
 
-                <div className="p-4 rounded-xl bg-secondary/50 border border-border/60 space-y-2">
-                  <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-emerald-400">
-                    <CheckCircle2 className="w-4 h-4" /> Project & JD Domain Alignment
+                <div className="p-4 rounded-xl bg-[#f7f9f7] border border-[#e6ede8] space-y-2">
+                  <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-[#164e3f]">
+                    <CheckCircle2 className="w-4 h-4 text-[#164e3f]" /> Project & JD Domain Alignment
                   </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
+                  <p className="text-xs text-[#5c6962] leading-relaxed">
                     {breakdown.deepDiagnosticAudit.domainMatch}
                   </p>
                 </div>
 
-                <div className="md:col-span-2 p-4 rounded-xl bg-secondary/50 border border-border/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="md:col-span-2 p-4 rounded-xl bg-[#f7f9f7] border border-[#e6ede8] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-1">
-                    <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-indigo-400">
-                      <ExternalLink className="w-4 h-4" /> URL & Link Health Verification
+                    <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-[#164e3f]">
+                      <ExternalLink className="w-4 h-4 text-[#164e3f]" /> URL & Link Health Verification
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
+                    <p className="text-xs text-[#5c6962] leading-relaxed">
                       {breakdown.deepDiagnosticAudit.linkAdvice}
                     </p>
                   </div>
-                  <span className={`px-3 py-1 rounded-lg border text-xs font-bold shrink-0 ${breakdown.deepDiagnosticAudit.urlsVerifiedCount > 0 ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/15 text-amber-400 border-amber-500/30'}`}>
+                  <span className={`px-3 py-1 rounded-lg border text-xs font-semibold shrink-0 ${breakdown.deepDiagnosticAudit.urlsVerifiedCount > 0 ? 'bg-[#e6f0ea] text-[#164e3f] border-[#c8ded1]' : 'bg-[#fffbeb] text-[#92400e] border-[#fde68a]'}`}>
                     {breakdown.deepDiagnosticAudit.urlsVerifiedCount > 0 ? `${breakdown.deepDiagnosticAudit.urlsVerifiedCount} Link(s) Active` : 'No URLs Found'}
                   </span>
                 </div>
@@ -545,18 +583,18 @@ export default function ScoreReport() {
           )}
 
           {/* Formatting & Layout Audit */}
-          <div className="p-6 sm:p-8 rounded-2xl bg-card border border-border/60 shadow-lg space-y-6">
-            <div className="flex items-center justify-between border-b border-border/40 pb-4">
+          <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm space-y-6">
+            <div className="flex items-center justify-between border-b border-[#eef1ed] pb-4">
               <div>
-                <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-indigo-400" />
+                <h3 className="text-lg font-bold text-[#141c18] flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-[#164e3f]" />
                   <span>Formatting & Parseability Audit</span>
                 </h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-xs text-[#5c6962] mt-0.5">
                   Detects multi-column sidebars, table grids, and header/footer contact leaks.
                 </p>
               </div>
-              <span className="text-xs font-black text-indigo-400 px-3 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20">
+              <span className="text-xs font-bold text-[#164e3f] px-3 py-1 rounded-lg bg-[#e6f0ea] border border-[#c8ded1]">
                 15% Weight
               </span>
             </div>
@@ -564,23 +602,23 @@ export default function ScoreReport() {
             <div className="space-y-4">
               {breakdown?.formattingAudit?.risksFound && breakdown.formattingAudit.risksFound.length > 0 ? (
                 breakdown.formattingAudit.risksFound.map((risk, i) => (
-                  <div key={i} className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-start gap-3.5">
-                    <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+                  <div key={i} className="p-4 rounded-xl bg-[#fef2f2] border border-[#fecaca] flex items-start gap-3.5">
+                    <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="text-xs font-bold text-rose-300 uppercase tracking-wider">{risk.type.replace(/_/g, ' ')} Risk</h4>
-                      <p className="text-sm text-rose-200/90 mt-1">{risk.description}</p>
-                      <p className="text-xs text-rose-300/80 mt-2 font-semibold flex items-center gap-1">
+                      <h4 className="text-xs font-bold text-[#991b1b] uppercase tracking-wider">{risk.type.replace(/_/g, ' ')} Risk</h4>
+                      <p className="text-sm text-[#7f1d1d] mt-1">{risk.description}</p>
+                      <p className="text-xs text-[#991b1b] mt-2 font-semibold flex items-center gap-1">
                         <span>Fix Suggestion:</span> {risk.suggestion}
                       </p>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                <div className="p-4 rounded-xl bg-[#e6f0ea] border border-[#c8ded1] flex items-center gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-[#164e3f] shrink-0" />
                   <div>
-                    <h4 className="text-sm font-bold text-emerald-300">Clean Single-Column Structure</h4>
-                    <p className="text-xs text-emerald-200/90 mt-0.5">Your layout passed all structural parseability checks without multi-column errors.</p>
+                    <h4 className="text-sm font-bold text-[#164e3f]">Clean Single-Column Structure</h4>
+                    <p className="text-xs text-[#335946] mt-0.5">Your layout passed all structural parseability checks without multi-column errors.</p>
                   </div>
                 </div>
               )}
@@ -589,32 +627,32 @@ export default function ScoreReport() {
 
           {/* Pillar 5: Seniority Alignment & Pillar 6: Readability Audit */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="p-6 rounded-2xl bg-card border border-border/60 shadow-lg space-y-4">
-              <div className="flex items-center justify-between border-b border-border/40 pb-3">
-                <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4 text-amber-400" />
+            <div className="p-6 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm space-y-4">
+              <div className="flex items-center justify-between border-b border-[#eef1ed] pb-3">
+                <h3 className="text-sm font-bold text-[#141c18] flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 text-[#164e3f]" />
                   <span>Seniority Alignment</span>
                 </h3>
-                <span className="text-xs font-bold px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#e6f0ea] text-[#164e3f] border border-[#d2e2d8]">
                   {breakdown?.seniorityAlignment?.targetLevelDetected || 'Mid-Level Target'}
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <p className="text-xs text-[#5c6962] leading-relaxed">
                 {breakdown?.seniorityAlignment?.insights?.[0]?.message || 'Your vocabulary aligns well with target role expectations.'}
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-card border border-border/60 shadow-lg space-y-4">
-              <div className="flex items-center justify-between border-b border-border/40 pb-3">
-                <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-cyan-400" />
+            <div className="p-6 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm space-y-4">
+              <div className="flex items-center justify-between border-b border-[#eef1ed] pb-3">
+                <h3 className="text-sm font-bold text-[#141c18] flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-[#164e3f]" />
                   <span>Readability & Skim Audit</span>
                 </h3>
-                <span className="text-xs font-bold px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
+                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#e6f0ea] text-[#164e3f] border border-[#d2e2d8]">
                   {breakdown?.readabilityAudit?.idealBulletsCount || 0}/{breakdown?.readabilityAudit?.totalBullets || 0} Ideal Bullets
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <p className="text-xs text-[#5c6962] leading-relaxed">
                 {breakdown?.readabilityAudit?.issues?.length > 0 ? (
                   <span>Flagged {breakdown.readabilityAudit.issues.length} bullets that exceed or fall short of optimal 12–28 word density.</span>
                 ) : (
@@ -627,13 +665,13 @@ export default function ScoreReport() {
 
         {/* Right Col: AI Bullet Rewrite Coach */}
         <div className="space-y-6">
-          <div className="p-6 rounded-2xl bg-card border border-border/60 shadow-lg space-y-6">
+          <div className="p-6 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm space-y-6">
             <div>
-              <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-purple-400" />
+              <h3 className="text-lg font-bold text-[#141c18] flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-[#164e3f]" />
                 <span>AI Bullet Coach</span>
               </h3>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-[#5c6962] mt-1 leading-relaxed">
                 We review every experience bullet for quantifiable metrics (`%`, `$`) and action verbs. Click &ldquo;Generate Rewrites&rdquo; to test anti-fabrication guardrails.
               </p>
             </div>
@@ -658,7 +696,7 @@ export default function ScoreReport() {
                   </div>
                 ))
               ) : (
-                <p className="text-xs text-muted-foreground text-center py-8">No experience bullets found to rewrite.</p>
+                <p className="text-xs text-[#5c6962] text-center py-8">No experience bullets found to rewrite.</p>
               )}
             </div>
           </div>
