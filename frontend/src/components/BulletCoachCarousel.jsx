@@ -1,16 +1,15 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   Sparkles,
   ChevronLeft,
   ChevronRight,
   RotateCw,
-  Play,
   Pause,
   AlertTriangle,
-  CheckCircle2,
   List,
   SlidersHorizontal,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import BulletRewriteCard from './BulletRewriteCard.jsx';
 
 export default function BulletCoachCarousel({
@@ -21,8 +20,10 @@ export default function BulletCoachCarousel({
   const [filter, setFilter] = useState('all'); // 'all' | 'unquantified' | 'weak'
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoRotating, setIsAutoRotating] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [viewMode, setViewMode] = useState('carousel'); // 'carousel' | 'list'
+
+  const ROTATE_INTERVAL_MS = 3500;
 
   // Flatten all bullets from workExperience
   const allBullets = useMemo(() => {
@@ -70,27 +71,62 @@ export default function BulletCoachCarousel({
   useEffect(() => {
     if (currentIndex >= filteredBullets.length) {
       setCurrentIndex(Math.max(0, filteredBullets.length - 1));
+      setProgress(0);
     }
   }, [filteredBullets.length, currentIndex]);
 
-  // Auto-rotate effect
+  // Robust Auto-rotate timer with visual progress tracking
   useEffect(() => {
-    if (!isAutoRotating || isHovered || filteredBullets.length <= 1) return;
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % filteredBullets.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [isAutoRotating, isHovered, filteredBullets.length]);
+    if (!isAutoRotating || filteredBullets.length <= 1) {
+      setProgress(0);
+      return;
+    }
 
-  const handlePrev = () => {
+    const stepMs = 50;
+    const increment = (stepMs / ROTATE_INTERVAL_MS) * 100;
+
+    const timer = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          setCurrentIndex((curr) => (curr + 1) % filteredBullets.length);
+          return 0;
+        }
+        return prev + increment;
+      });
+    }, stepMs);
+
+    return () => clearInterval(timer);
+  }, [isAutoRotating, filteredBullets.length]);
+
+  const handleToggleAutoRotate = useCallback(() => {
+    setIsAutoRotating((prev) => {
+      const nextState = !prev;
+      setProgress(0);
+      if (nextState) {
+        toast.success('Auto-Rotate enabled: rotating bullets every 3.5s');
+      } else {
+        toast.info('Auto-Rotate paused');
+      }
+      return nextState;
+    });
+  }, []);
+
+  const handlePrev = useCallback(() => {
     if (filteredBullets.length === 0) return;
+    setProgress(0);
     setCurrentIndex((prev) => (prev - 1 + filteredBullets.length) % filteredBullets.length);
-  };
+  }, [filteredBullets.length]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (filteredBullets.length === 0) return;
+    setProgress(0);
     setCurrentIndex((prev) => (prev + 1) % filteredBullets.length);
-  };
+  }, [filteredBullets.length]);
+
+  const handleSelectBullet = useCallback((idx) => {
+    setProgress(0);
+    setCurrentIndex(idx);
+  }, []);
 
   if (allBullets.length === 0) {
     return (
@@ -105,11 +141,7 @@ export default function BulletCoachCarousel({
   const currentBullet = filteredBullets[currentIndex];
 
   return (
-    <div
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="p-5 sm:p-6 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm space-y-5 transition-all"
-    >
+    <div className="p-5 sm:p-6 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm space-y-5 transition-all">
       {/* Header with Title & Slide Rotate Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#f0f2ee] pb-4">
         <div>
@@ -128,16 +160,25 @@ export default function BulletCoachCarousel({
         {/* View Mode & Auto-Rotate Controls */}
         <div className="flex items-center gap-1.5 self-start sm:self-auto shrink-0">
           <button
-            onClick={() => setIsAutoRotating(!isAutoRotating)}
-            title={isAutoRotating ? 'Pause auto-slide' : 'Auto-rotate slides (5s)'}
-            className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all border ${
+            onClick={handleToggleAutoRotate}
+            title={isAutoRotating ? 'Pause auto-slide' : 'Auto-rotate slides (3.5s)'}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all border ${
               isAutoRotating
-                ? 'bg-[#164e3f] text-white border-[#164e3f]'
+                ? 'bg-[#164e3f] text-white border-[#164e3f] shadow-sm ring-2 ring-[#164e3f]/20'
                 : 'bg-[#f7f9f7] text-[#5c6962] hover:text-[#141c18] border-[#e6e9e4]'
             }`}
           >
-            {isAutoRotating ? <Pause className="w-3 h-3" /> : <RotateCw className="w-3 h-3" />}
-            <span className="text-[11px]">{isAutoRotating ? 'Auto Playing' : 'Auto Rotate'}</span>
+            {isAutoRotating ? (
+              <>
+                <RotateCw className="w-3.5 h-3.5 animate-spin" />
+                <span className="text-[11px] font-bold">Auto Rotating</span>
+              </>
+            ) : (
+              <>
+                <RotateCw className="w-3.5 h-3.5" />
+                <span className="text-[11px]">Auto Rotate</span>
+              </>
+            )}
           </button>
 
           <button
@@ -150,6 +191,16 @@ export default function BulletCoachCarousel({
         </div>
       </div>
 
+      {/* Live Animated Auto-Rotate Progress Bar */}
+      {isAutoRotating && filteredBullets.length > 1 && (
+        <div className="w-full h-1 bg-[#eef1ed] rounded-full overflow-hidden -mt-2">
+          <div
+            className="h-full bg-[#164e3f] rounded-full transition-all duration-75 ease-linear"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      )}
+
       {/* Filter Tabs */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
@@ -157,6 +208,7 @@ export default function BulletCoachCarousel({
             onClick={() => {
               setFilter('all');
               setCurrentIndex(0);
+              setProgress(0);
             }}
             className={`px-3 py-1 rounded-lg font-semibold transition-all shrink-0 ${
               filter === 'all'
@@ -171,6 +223,7 @@ export default function BulletCoachCarousel({
               onClick={() => {
                 setFilter('unquantified');
                 setCurrentIndex(0);
+                setProgress(0);
               }}
               className={`px-3 py-1 rounded-lg font-semibold transition-all shrink-0 flex items-center gap-1 ${
                 filter === 'unquantified'
@@ -187,6 +240,7 @@ export default function BulletCoachCarousel({
               onClick={() => {
                 setFilter('weak');
                 setCurrentIndex(0);
+                setProgress(0);
               }}
               className={`px-3 py-1 rounded-lg font-semibold transition-all shrink-0 ${
                 filter === 'weak'
@@ -231,7 +285,7 @@ export default function BulletCoachCarousel({
             return (
               <button
                 key={bulletItem.id}
-                onClick={() => setCurrentIndex(idx)}
+                onClick={() => handleSelectBullet(idx)}
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all shrink-0 flex items-center gap-1 ${
                   isActive
                     ? 'bg-[#164e3f] text-white shadow-sm ring-2 ring-[#164e3f]/20'
