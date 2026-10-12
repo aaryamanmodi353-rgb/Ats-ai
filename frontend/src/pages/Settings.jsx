@@ -1,29 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { ShieldCheck, Key, Database, CheckCircle2, Zap, AlertTriangle } from 'lucide-react';
+import React, { useState } from 'react';
+import { ShieldCheck, Cpu, Database, CheckCircle2, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Settings() {
-  const [apiKey, setApiKey] = useState('');
   const [tier, setTier] = useState('pro'); // 'free' | 'pro'
-
-  useEffect(() => {
-    const savedKey = localStorage.getItem('GROQ_API_KEY_OVERRIDE') || localStorage.getItem('ANTHROPIC_API_KEY_OVERRIDE') || '';
-    if (savedKey) {
-      setApiKey(savedKey);
-    }
-  }, []);
-
-  const handleSaveKey = (e) => {
-    e.preventDefault();
-    if (apiKey.trim()) {
-      localStorage.setItem('GROQ_API_KEY_OVERRIDE', apiKey.trim());
-      toast.success('Saved Groq API Key for Ultra-Fast LPU Bullet Coach!');
-    } else {
-      localStorage.removeItem('GROQ_API_KEY_OVERRIDE');
-      localStorage.removeItem('ANTHROPIC_API_KEY_OVERRIDE');
-      toast.info('Removed custom API Key. Reverting to Intelligent Simulation Guardrails.');
-    }
-  };
 
   const handlePurgeData = () => {
     if (window.confirm('Are you sure you want to clear your local PII and cached versions?')) {
@@ -112,34 +92,41 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* API Key Override Form */}
+      {/* Backend AI Engine Status */}
       <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm space-y-6">
-        <div>
-          <h2 className="text-xs font-bold uppercase tracking-wider text-[#164e3f] flex items-center gap-2">
-            <Key className="w-4 h-4 text-[#164e3f]" />
-            <span>Groq Cloud API Key (LPU Ultra-Fast Inference)</span>
-          </h2>
-          <p className="text-xs text-[#5c6962] mt-1 leading-relaxed">
-            By default, ResumeIQ runs in **Intelligent Simulation Guardrail Mode** without requiring an external API key. For live sub-second LPU inference powered by **Llama 3.3 70B Versatile**, input your Groq API key (starts with <code className="text-[#164e3f] font-mono font-semibold">gsk_...</code>) below.
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#f0f2ee]">
+          <div>
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[#164e3f] flex items-center gap-2">
+              <Cpu className="w-4 h-4 text-[#164e3f]" />
+              <span>Backend AI Engine (Groq Cloud LPU)</span>
+            </h2>
+            <p className="text-xs text-[#5c6962] mt-1 leading-relaxed">
+              Powered by Groq Ultra-Fast LPU Inference directly on your Express backend. API keys and model parameters are securely managed server-side.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#f4f8f5] border border-[#d2e2d8] text-xs font-semibold text-[#164e3f] shrink-0 self-start sm:self-auto">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Active &amp; Server-Managed</span>
+          </div>
         </div>
 
-        <form onSubmit={handleSaveKey} className="space-y-4 max-w-lg">
-          <div>
-            <label className="block text-xs font-semibold text-[#5c6962] mb-1.5">Groq API Key (LPU Accelerated)</label>
-            <input
-              type="password"
-              placeholder="gsk_..."
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl bg-[#f7f9f7] border border-[#e6e9e4] text-sm text-[#141c18] focus:outline-none focus:border-[#164e3f] font-mono"
-            />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="p-4 rounded-xl bg-[#f7f9f7] border border-[#e6e9e4]">
+            <p className="text-[11px] font-semibold text-[#5c6962] uppercase tracking-wider">Inference Engine</p>
+            <p className="text-sm font-bold text-[#141c18] mt-1">Groq LPU Cloud</p>
+            <p className="text-[11px] text-[#5c6962] mt-0.5">openai/gpt-oss-120b</p>
           </div>
-          <button type="submit" className="px-5 py-2.5 rounded-xl bg-[#164e3f] hover:bg-[#124235] text-white font-semibold text-xs shadow-sm transition-all flex items-center gap-2">
-            <Zap className="w-3.5 h-3.5" />
-            <span>Save Groq API Key</span>
-          </button>
-        </form>
+          <div className="p-4 rounded-xl bg-[#f7f9f7] border border-[#e6e9e4]">
+            <p className="text-[11px] font-semibold text-[#5c6962] uppercase tracking-wider">Security Architecture</p>
+            <p className="text-sm font-bold text-[#141c18] mt-1">Zero-Leak Backend</p>
+            <p className="text-[11px] text-[#5c6962] mt-0.5">Key stored in backend/.env</p>
+          </div>
+          <div className="p-4 rounded-xl bg-[#f7f9f7] border border-[#e6e9e4]">
+            <p className="text-[11px] font-semibold text-[#5c6962] uppercase tracking-wider">Anti-Hallucination</p>
+            <p className="text-sm font-bold text-[#141c18] mt-1">Guardrails Active</p>
+            <p className="text-[11px] text-[#5c6962] mt-0.5">Metric verification enforced</p>
+          </div>
+        </div>
       </div>
 
       {/* PII & Database Management */}

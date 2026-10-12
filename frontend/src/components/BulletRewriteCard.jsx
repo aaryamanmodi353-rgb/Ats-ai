@@ -31,13 +31,11 @@ export default function BulletRewriteCard({
   const handleFetchRewrites = async () => {
     setLoading(true);
     try {
-      const customApiKey = localStorage.getItem('GROQ_API_KEY_OVERRIDE') || localStorage.getItem('ANTHROPIC_API_KEY_OVERRIDE');
       const response = await axios.post('/api/rewrite-suggestions', {
         bulletText: originalText,
         company,
         title,
         jobDescriptionId,
-        apiKey: customApiKey || undefined,
       });
       const data = response.data;
       if (data.success && Array.isArray(data.rewrites)) {
