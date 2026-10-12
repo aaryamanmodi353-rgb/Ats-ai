@@ -1,0 +1,291 @@
+import React, { useState, useMemo, useEffect } from 'react';
+import {
+  Sparkles,
+  ChevronLeft,
+  ChevronRight,
+  RotateCw,
+  Play,
+  Pause,
+  AlertTriangle,
+  CheckCircle2,
+  List,
+  SlidersHorizontal,
+} from 'lucide-react';
+import BulletRewriteCard from './BulletRewriteCard.jsx';
+
+export default function BulletCoachCarousel({
+  workExperience = [],
+  jobDescriptionId,
+  onApplyRewrite,
+}) {
+  const [filter, setFilter] = useState('all'); // 'all' | 'unquantified' | 'weak'
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAutoRotating, setIsAutoRotating] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [viewMode, setViewMode] = useState('carousel'); // 'carousel' | 'list'
+
+  // Flatten all bullets from workExperience
+  const allBullets = useMemo(() => {
+    const list = [];
+    if (!Array.isArray(workExperience)) return list;
+    workExperience.forEach((work, wIdx) => {
+      work.bullets?.forEach((bullet, bIdx) => {
+        const hasNumbers = /\d+/.test(bullet);
+        const hasWeakVerb = /^(Responsible for|Helped with|Tasked with|Worked on|Assisted in)/i.test(bullet);
+        list.push({
+          id: `${wIdx}-${bIdx}`,
+          workIndex: wIdx,
+          bulletIndex: bIdx,
+          company: work.company || 'Company',
+          title: work.title || 'Role',
+          bulletText: bullet,
+          hasNumbers,
+          hasWeakVerb,
+        });
+      });
+    });
+    return list;
+  }, [workExperience]);
+
+  const unquantifiedCount = useMemo(
+    () => allBullets.filter((b) => !b.hasNumbers).length,
+    [allBullets]
+  );
+  const weakVerbCount = useMemo(
+    () => allBullets.filter((b) => b.hasWeakVerb).length,
+    [allBullets]
+  );
+
+  const filteredBullets = useMemo(() => {
+    if (filter === 'unquantified') {
+      return allBullets.filter((b) => !b.hasNumbers);
+    }
+    if (filter === 'weak') {
+      return allBullets.filter((b) => b.hasWeakVerb);
+    }
+    return allBullets;
+  }, [allBullets, filter]);
+
+  // Keep currentIndex in bounds when filtered bullets change
+  useEffect(() => {
+    if (currentIndex >= filteredBullets.length) {
+      setCurrentIndex(Math.max(0, filteredBullets.length - 1));
+    }
+  }, [filteredBullets.length, currentIndex]);
+
+  // Auto-rotate effect
+  useEffect(() => {
+    if (!isAutoRotating || isHovered || filteredBullets.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % filteredBullets.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [isAutoRotating, isHovered, filteredBullets.length]);
+
+  const handlePrev = () => {
+    if (filteredBullets.length === 0) return;
+    setCurrentIndex((prev) => (prev - 1 + filteredBullets.length) % filteredBullets.length);
+  };
+
+  const handleNext = () => {
+    if (filteredBullets.length === 0) return;
+    setCurrentIndex((prev) => (prev + 1) % filteredBullets.length);
+  };
+
+  if (allBullets.length === 0) {
+    return (
+      <div className="p-6 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm text-center py-10 space-y-2">
+        <Sparkles className="w-8 h-8 text-[#5c6962] mx-auto opacity-50" />
+        <h4 className="text-sm font-bold text-[#141c18]">No Experience Bullets Found</h4>
+        <p className="text-xs text-[#5c6962]">Upload a resume with parsed work experience to run AI bullet coaching.</p>
+      </div>
+    );
+  }
+
+  const currentBullet = filteredBullets[currentIndex];
+
+  return (
+    <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="p-5 sm:p-6 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm space-y-5 transition-all"
+    >
+      {/* Header with Title & Slide Rotate Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#f0f2ee] pb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-[#164e3f]" />
+            <h3 className="text-base font-bold text-[#141c18]">AI Bullet Coach</h3>
+            <span className="px-2 py-0.5 rounded-full bg-[#e6f0ea] text-[#164e3f] text-[10px] font-bold border border-[#d2e2d8]">
+              {filteredBullets.length} Bullets
+            </span>
+          </div>
+          <p className="text-[11px] text-[#5c6962] mt-0.5">
+            Slide and rotate through bullets to verify metrics & leadership verbs.
+          </p>
+        </div>
+
+        {/* View Mode & Auto-Rotate Controls */}
+        <div className="flex items-center gap-1.5 self-start sm:self-auto shrink-0">
+          <button
+            onClick={() => setIsAutoRotating(!isAutoRotating)}
+            title={isAutoRotating ? 'Pause auto-slide' : 'Auto-rotate slides (5s)'}
+            className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all border ${
+              isAutoRotating
+                ? 'bg-[#164e3f] text-white border-[#164e3f]'
+                : 'bg-[#f7f9f7] text-[#5c6962] hover:text-[#141c18] border-[#e6e9e4]'
+            }`}
+          >
+            {isAutoRotating ? <Pause className="w-3 h-3" /> : <RotateCw className="w-3 h-3" />}
+            <span className="text-[11px]">{isAutoRotating ? 'Auto Playing' : 'Auto Rotate'}</span>
+          </button>
+
+          <button
+            onClick={() => setViewMode(viewMode === 'carousel' ? 'list' : 'carousel')}
+            title={viewMode === 'carousel' ? 'Switch to All Bullets List' : 'Switch to Carousel Slide Mode'}
+            className="p-1.5 rounded-xl bg-[#f7f9f7] hover:bg-[#eef2ee] text-[#5c6962] hover:text-[#141c18] border border-[#e6e9e4] transition-colors"
+          >
+            {viewMode === 'carousel' ? <List className="w-4 h-4" /> : <SlidersHorizontal className="w-4 h-4" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Filter Tabs */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+          <button
+            onClick={() => {
+              setFilter('all');
+              setCurrentIndex(0);
+            }}
+            className={`px-3 py-1 rounded-lg font-semibold transition-all shrink-0 ${
+              filter === 'all'
+                ? 'bg-[#164e3f] text-white shadow-sm'
+                : 'bg-[#f4f7f4] text-[#5c6962] hover:text-[#141c18] border border-[#e6e9e4]'
+            }`}
+          >
+            All ({allBullets.length})
+          </button>
+          {unquantifiedCount > 0 && (
+            <button
+              onClick={() => {
+                setFilter('unquantified');
+                setCurrentIndex(0);
+              }}
+              className={`px-3 py-1 rounded-lg font-semibold transition-all shrink-0 flex items-center gap-1 ${
+                filter === 'unquantified'
+                  ? 'bg-rose-700 text-white shadow-sm'
+                  : 'bg-rose-50 text-rose-800 hover:bg-rose-100 border border-rose-200'
+              }`}
+            >
+              <AlertTriangle className="w-3 h-3" />
+              <span>Needs Metrics ({unquantifiedCount})</span>
+            </button>
+          )}
+          {weakVerbCount > 0 && (
+            <button
+              onClick={() => {
+                setFilter('weak');
+                setCurrentIndex(0);
+              }}
+              className={`px-3 py-1 rounded-lg font-semibold transition-all shrink-0 ${
+                filter === 'weak'
+                  ? 'bg-amber-700 text-white shadow-sm'
+                  : 'bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200'
+              }`}
+            >
+              Weak Verbs ({weakVerbCount})
+            </button>
+          )}
+        </div>
+
+        {/* Carousel Stepper Buttons */}
+        {viewMode === 'carousel' && filteredBullets.length > 1 && (
+          <div className="flex items-center gap-1.5 shrink-0 ml-auto">
+            <span className="text-[11px] font-semibold text-[#5c6962]">
+              {currentIndex + 1} / {filteredBullets.length}
+            </span>
+            <button
+              onClick={handlePrev}
+              aria-label="Previous bullet"
+              className="p-1 rounded-lg bg-[#f4f7f4] hover:bg-[#eaf1ec] border border-[#dce5df] text-[#164e3f] transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={handleNext}
+              aria-label="Next bullet"
+              className="p-1 rounded-lg bg-[#f4f7f4] hover:bg-[#eaf1ec] border border-[#dce5df] text-[#164e3f] transition-colors"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Horizontal Slide Pill Navigator */}
+      {viewMode === 'carousel' && filteredBullets.length > 1 && (
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 scrollbar-thin">
+          {filteredBullets.map((bulletItem, idx) => {
+            const isActive = idx === currentIndex;
+            return (
+              <button
+                key={bulletItem.id}
+                onClick={() => setCurrentIndex(idx)}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all shrink-0 flex items-center gap-1 ${
+                  isActive
+                    ? 'bg-[#164e3f] text-white shadow-sm ring-2 ring-[#164e3f]/20'
+                    : 'bg-[#f7f9f7] text-[#5c6962] hover:bg-[#edf2ed] hover:text-[#141c18] border border-[#e6e9e4]'
+                }`}
+              >
+                <span>#{idx + 1}</span>
+                {!bulletItem.hasNumbers ? (
+                  <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-amber-300' : 'bg-rose-500'}`} />
+                ) : (
+                  <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-300' : 'bg-emerald-600'}`} />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Slide Display Area */}
+      {viewMode === 'carousel' ? (
+        currentBullet ? (
+          <div key={currentBullet.id} className="transition-all duration-300 animate-fadeIn">
+            <BulletRewriteCard
+              bulletIndex={currentBullet.bulletIndex}
+              company={currentBullet.company}
+              title={currentBullet.title}
+              originalText={currentBullet.bulletText}
+              jobDescriptionId={jobDescriptionId}
+              onApplyRewrite={(newText) => {
+                onApplyRewrite(currentBullet.workIndex, currentBullet.bulletIndex, newText);
+              }}
+            />
+          </div>
+        ) : (
+          <p className="text-xs text-[#5c6962] text-center py-6">No matching bullets in this filter.</p>
+        )
+      ) : (
+        /* List Mode Fallback */
+        <div className="space-y-4 max-h-[600px] overflow-y-auto pr-1">
+          {filteredBullets.map((item) => (
+            <BulletRewriteCard
+              key={item.id}
+              bulletIndex={item.bulletIndex}
+              company={item.company}
+              title={item.title}
+              originalText={item.bulletText}
+              jobDescriptionId={jobDescriptionId}
+              onApplyRewrite={(newText) => {
+                onApplyRewrite(item.workIndex, item.bulletIndex, newText);
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

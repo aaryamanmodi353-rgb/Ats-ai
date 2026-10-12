@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
-import BulletRewriteCard from '../components/BulletRewriteCard.jsx';
+import BulletCoachCarousel from '../components/BulletCoachCarousel.jsx';
 
 export default function ScoreReport() {
   const { id: resumeId, reportId } = useParams();
@@ -663,43 +663,36 @@ export default function ScoreReport() {
           </div>
         </div>
 
-        {/* Right Col: AI Bullet Rewrite Coach */}
-        <div className="space-y-6">
-          <div className="p-6 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm space-y-6">
-            <div>
-              <h3 className="text-lg font-bold text-[#141c18] flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-[#164e3f]" />
-                <span>AI Bullet Coach</span>
-              </h3>
-              <p className="text-xs text-[#5c6962] mt-1 leading-relaxed">
-                We review every experience bullet for quantifiable metrics (`%`, `$`) and action verbs. Click &ldquo;Generate Rewrites&rdquo; to test anti-fabrication guardrails.
-              </p>
-            </div>
+        {/* Right Col: AI Bullet Rewrite Coach (Slide Rotate Carousel) */}
+        <div className="space-y-6 lg:sticky lg:top-20 lg:self-start">
+          <BulletCoachCarousel
+            workExperience={resumeData?.workExperience || []}
+            jobDescriptionId={report.jobDescriptionId}
+            onApplyRewrite={async (workIdx, bulletIdx, newText) => {
+              if (!latestVer || !resumeData) return;
+              const updatedWork = [...(resumeData.workExperience || [])];
+              if (updatedWork[workIdx]?.bullets) {
+                updatedWork[workIdx].bullets[bulletIdx] = newText;
+                const updatedResumeData = { ...resumeData, workExperience: updatedWork };
 
-            <div className="space-y-4">
-              {resumeData?.workExperience?.length > 0 ? (
-                resumeData.workExperience.map((work, wIdx) => (
-                  <div key={wIdx} className="space-y-4">
-                    {work.bullets?.map((bullet, bIdx) => (
-                      <BulletRewriteCard
-                        key={`${wIdx}-${bIdx}`}
-                        bulletIndex={bIdx}
-                        company={work.company}
-                        title={work.title}
-                        originalText={bullet}
-                        jobDescriptionId={report.jobDescriptionId}
-                        onApplyRewrite={(newText) => {
-                          work.bullets[bIdx] = newText;
-                        }}
-                      />
-                    ))}
-                  </div>
-                ))
-              ) : (
-                <p className="text-xs text-[#5c6962] text-center py-8">No experience bullets found to rewrite.</p>
-              )}
-            </div>
-          </div>
+                try {
+                  await axios.put(`/api/resume-versions/${latestVer._id || latestVer.id}`, {
+                    contentJson: JSON.stringify(updatedResumeData),
+                  });
+                  setResume((prev) => ({
+                    ...prev,
+                    versions: prev.versions.map((v, i) =>
+                      i === 0 ? { ...v, contentJson: JSON.stringify(updatedResumeData) } : v
+                    ),
+                  }));
+                  toast.success('Saved and synced updated bullet to resume version!');
+                } catch (err) {
+                  console.error('Error saving updated bullet:', err);
+                  toast.error('Failed to sync updated bullet to database.');
+                }
+              }
+            }}
+          />
         </div>
       </div>
     </div>
