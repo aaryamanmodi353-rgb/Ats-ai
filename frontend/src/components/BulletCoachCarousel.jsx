@@ -130,10 +130,10 @@ export default function BulletCoachCarousel({
 
   if (allBullets.length === 0) {
     return (
-      <div className="p-6 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm text-center py-10 space-y-2">
-        <Sparkles className="w-8 h-8 text-[#5c6962] mx-auto opacity-50" />
-        <h4 className="text-sm font-bold text-[#141c18]">No Experience Bullets Found</h4>
-        <p className="text-xs text-[#5c6962]">Upload a resume with parsed work experience to run AI bullet coaching.</p>
+      <div className="p-6 rounded-2xl bg-white border border-[#e7e2eb] shadow-sm text-center py-10 space-y-2">
+        <Sparkles className="w-8 h-8 text-[#716b79] mx-auto opacity-50" />
+        <h4 className="text-sm font-bold text-[#201a29]">No Experience Bullets Found</h4>
+        <p className="text-xs text-[#716b79]">Upload a resume with parsed work experience to run AI bullet coaching.</p>
       </div>
     );
   }
@@ -141,18 +141,18 @@ export default function BulletCoachCarousel({
   const currentBullet = filteredBullets[currentIndex];
 
   return (
-    <div className="p-5 sm:p-6 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm space-y-5 transition-all">
+    <div className="p-5 sm:p-6 rounded-2xl bg-white border border-[#e7e2eb] shadow-sm space-y-5 transition-all">
       {/* Header with Title & Slide Rotate Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#f0f2ee] pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#164e3f]" />
-            <h3 className="text-base font-bold text-[#141c18]">AI Bullet Coach</h3>
-            <span className="px-2 py-0.5 rounded-full bg-[#e6f0ea] text-[#164e3f] text-[10px] font-bold border border-[#d2e2d8]">
+            <Sparkles className="w-4 h-4 text-[#5520a5]" />
+            <h3 className="text-base font-bold text-[#201a29]">AI Bullet Coach</h3>
+            <span className="px-2 py-0.5 rounded-full bg-[#f0e8fa] text-[#5520a5] text-[10px] font-bold border border-[#dfd1f0]">
               {filteredBullets.length} Bullets
             </span>
           </div>
-          <p className="text-[11px] text-[#5c6962] mt-0.5">
+          <p className="text-[11px] text-[#716b79] mt-0.5">
             Slide and rotate through bullets to verify metrics & leadership verbs.
           </p>
         </div>
@@ -164,8 +164,8 @@ export default function BulletCoachCarousel({
             title={isAutoRotating ? 'Pause auto-slide' : 'Auto-rotate slides (3.5s)'}
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all border ${
               isAutoRotating
-                ? 'bg-[#164e3f] text-white border-[#164e3f] shadow-sm ring-2 ring-[#164e3f]/20'
-                : 'bg-[#f7f9f7] text-[#5c6962] hover:text-[#141c18] border-[#e6e9e4]'
+                ? 'bg-[#5520a5] text-white border-[#5520a5] shadow-sm ring-2 ring-[#5520a5]/20'
+                : 'bg-[#f7f9f7] text-[#716b79] hover:text-[#201a29] border-[#e7e2eb]'
             }`}
           >
             {isAutoRotating ? (
@@ -184,7 +184,7 @@ export default function BulletCoachCarousel({
           <button
             onClick={() => setViewMode(viewMode === 'carousel' ? 'list' : 'carousel')}
             title={viewMode === 'carousel' ? 'Switch to All Bullets List' : 'Switch to Carousel Slide Mode'}
-            className="p-1.5 rounded-xl bg-[#f7f9f7] hover:bg-[#eef2ee] text-[#5c6962] hover:text-[#141c18] border border-[#e6e9e4] transition-colors"
+            className="p-1.5 rounded-xl bg-[#f7f9f7] hover:bg-[#eef2ee] text-[#716b79] hover:text-[#201a29] border border-[#e7e2eb] transition-colors"
           >
             {viewMode === 'carousel' ? <List className="w-4 h-4" /> : <SlidersHorizontal className="w-4 h-4" />}
           </button>
@@ -193,9 +193,9 @@ export default function BulletCoachCarousel({
 
       {/* Live Animated Auto-Rotate Progress Bar */}
       {isAutoRotating && filteredBullets.length > 1 && (
-        <div className="w-full h-1 bg-[#eef1ed] rounded-full overflow-hidden -mt-2">
+        <div className="w-full h-1 bg-[#f0ebf3] rounded-full overflow-hidden -mt-2">
           <div
-            className="h-full bg-[#164e3f] rounded-full transition-all duration-75 ease-linear"
+            className="h-full bg-[#5520a5] rounded-full transition-all duration-75 ease-linear"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -212,8 +212,8 @@ export default function BulletCoachCarousel({
             }}
             className={`px-3 py-1 rounded-lg font-semibold transition-all shrink-0 ${
               filter === 'all'
-                ? 'bg-[#164e3f] text-white shadow-sm'
-                : 'bg-[#f4f7f4] text-[#5c6962] hover:text-[#141c18] border border-[#e6e9e4]'
+                ? 'bg-[#5520a5] text-white shadow-sm'
+                : 'bg-[#f6f3fa] text-[#716b79] hover:text-[#201a29] border border-[#e7e2eb]'
             }`}
           >
             All ({allBullets.length})
@@ -256,20 +256,20 @@ export default function BulletCoachCarousel({
         {/* Carousel Stepper Buttons */}
         {viewMode === 'carousel' && filteredBullets.length > 1 && (
           <div className="flex items-center gap-1.5 shrink-0 ml-auto">
-            <span className="text-[11px] font-semibold text-[#5c6962]">
+            <span className="text-[11px] font-semibold text-[#716b79]">
               {currentIndex + 1} / {filteredBullets.length}
             </span>
             <button
               onClick={handlePrev}
               aria-label="Previous bullet"
-              className="p-1 rounded-lg bg-[#f4f7f4] hover:bg-[#eaf1ec] border border-[#dce5df] text-[#164e3f] transition-colors"
+              className="p-1 rounded-lg bg-[#f6f3fa] hover:bg-[#eaf1ec] border border-[#dce5df] text-[#5520a5] transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={handleNext}
               aria-label="Next bullet"
-              className="p-1 rounded-lg bg-[#f4f7f4] hover:bg-[#eaf1ec] border border-[#dce5df] text-[#164e3f] transition-colors"
+              className="p-1 rounded-lg bg-[#f6f3fa] hover:bg-[#eaf1ec] border border-[#dce5df] text-[#5520a5] transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -288,8 +288,8 @@ export default function BulletCoachCarousel({
                 onClick={() => handleSelectBullet(idx)}
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all shrink-0 flex items-center gap-1 ${
                   isActive
-                    ? 'bg-[#164e3f] text-white shadow-sm ring-2 ring-[#164e3f]/20'
-                    : 'bg-[#f7f9f7] text-[#5c6962] hover:bg-[#edf2ed] hover:text-[#141c18] border border-[#e6e9e4]'
+                    ? 'bg-[#5520a5] text-white shadow-sm ring-2 ring-[#5520a5]/20'
+                    : 'bg-[#f7f9f7] text-[#716b79] hover:bg-[#edf2ed] hover:text-[#201a29] border border-[#e7e2eb]'
                 }`}
               >
                 <span>#{idx + 1}</span>
@@ -320,7 +320,7 @@ export default function BulletCoachCarousel({
             />
           </div>
         ) : (
-          <p className="text-xs text-[#5c6962] text-center py-6">No matching bullets in this filter.</p>
+          <p className="text-xs text-[#716b79] text-center py-6">No matching bullets in this filter.</p>
         )
       ) : (
         /* List Mode Fallback */

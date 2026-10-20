@@ -575,15 +575,15 @@ ${eduLatex}
 
   if (loading || (!resumeData && !latexCode)) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex-1 flex flex-col items-center justify-center gap-4 text-[#5c6962]">
-        <Loader2 className="w-8 h-8 animate-spin text-[#164e3f]" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex-1 flex flex-col items-center justify-center gap-4 text-[#716b79]">
+        <Loader2 className="w-8 h-8 animate-spin text-[#5520a5]" />
         <span className="font-semibold text-sm">Initializing Overleaf Dual Code Studio...</span>
       </div>
     );
   }
 
   const getScoreColor = (s) => {
-    if (s >= 80) return 'text-[#164e3f]';
+    if (s >= 80) return 'text-[#5520a5]';
     if (s >= 65) return 'text-amber-700';
     return 'text-rose-700';
   };
@@ -593,17 +593,17 @@ ${eduLatex}
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 flex flex-col">
       {/* Top Studio Bar & Navigation Controls */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-[#e6e9e4] mb-6">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-[#e7e2eb] mb-6">
         <div>
-          <Link to="/templates" className="text-xs font-semibold text-[#5c6962] hover:text-[#164e3f] flex items-center gap-1 mb-1.5 transition-colors">
+          <Link to="/templates" className="text-xs font-semibold text-[#716b79] hover:text-[#5520a5] flex items-center gap-1 mb-1.5 transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Famous Templates Library
           </Link>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-xl sm:text-2xl font-extrabold text-[#141c18] tracking-tight flex items-center gap-2">
-              <Code className="w-6 h-6 text-[#164e3f] shrink-0" />
+            <h1 className="text-xl sm:text-2xl font-extrabold text-[#201a29] tracking-tight flex items-center gap-2">
+              <Code className="w-6 h-6 text-[#5520a5] shrink-0" />
               <span>Overleaf Code Studio & ATS Editor</span>
             </h1>
-            <span className="px-3 py-0.5 rounded-full bg-[#e6f0ea] border border-[#d2e2d8] text-[#164e3f] text-xs font-semibold uppercase">
+            <span className="px-3 py-0.5 rounded-full bg-[#f0e8fa] border border-[#dfd1f0] text-[#5520a5] text-xs font-semibold uppercase">
               100% Single-Column Linear Parsing
             </span>
           </div>
@@ -614,7 +614,7 @@ ${eduLatex}
           <button
             onClick={handleRunAiAutoFixCode}
             disabled={optimizingCode}
-            className="px-4 py-2.5 rounded-xl bg-[#164e3f] hover:bg-[#124235] text-white font-semibold text-xs shadow-sm flex items-center gap-1.5 transition-all disabled:opacity-50"
+            className="px-4 py-2.5 rounded-xl bg-[#5520a5] hover:bg-[#3f167b] text-white font-semibold text-xs shadow-sm flex items-center gap-1.5 transition-all disabled:opacity-50"
           >
             {optimizingCode ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
             <span>✨ AI Auto-Fix Verbs & Syntax</span>
@@ -622,7 +622,7 @@ ${eduLatex}
 
           <button
             onClick={handleDownloadLatexFile}
-            className="px-4 py-2.5 rounded-xl bg-[#e6f0ea] hover:bg-[#d8e7de] text-[#164e3f] border border-[#c8ded1] font-semibold text-xs shadow-sm flex items-center gap-1.5 transition-all"
+            className="px-4 py-2.5 rounded-xl bg-[#f0e8fa] hover:bg-[#e7d9f5] text-[#5520a5] border border-[#d9c5ef] font-semibold text-xs shadow-sm flex items-center gap-1.5 transition-all"
           >
             <Download className="w-3.5 h-3.5" />
             <span>📥 Download `.tex`</span>
@@ -631,7 +631,7 @@ ${eduLatex}
           <button
             onClick={() => handleExportPdf('pdf')}
             disabled={exporting}
-            className="px-4 py-2.5 rounded-xl bg-[#164e3f] hover:bg-[#124235] text-white font-semibold text-xs shadow-sm flex items-center gap-1.5 transition-all disabled:opacity-50"
+            className="px-4 py-2.5 rounded-xl bg-[#5520a5] hover:bg-[#3f167b] text-white font-semibold text-xs shadow-sm flex items-center gap-1.5 transition-all disabled:opacity-50"
           >
             {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileCheck className="w-3.5 h-3.5" />}
             <span>📄 Export Compiled PDF</span>
@@ -640,7 +640,7 @@ ${eduLatex}
           <button
             onClick={handleSaveSnapshot}
             disabled={saving}
-            className="px-4 py-2.5 rounded-xl bg-white hover:bg-[#f4f7f4] text-[#141c18] font-semibold text-xs border border-[#e6e9e4] shadow-sm flex items-center gap-1.5 transition-all"
+            className="px-4 py-2.5 rounded-xl bg-white hover:bg-[#f6f3fa] text-[#201a29] font-semibold text-xs border border-[#e7e2eb] shadow-sm flex items-center gap-1.5 transition-all"
           >
             {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
             <span>Save Snapshot</span>
@@ -649,14 +649,14 @@ ${eduLatex}
       </div>
 
       {/* Studio Mode Switcher Tabs */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6 p-2 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6 p-2 rounded-2xl bg-white border border-[#e7e2eb] shadow-sm">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setActiveStudioTab('overleaf')}
             className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 ${
               activeStudioTab === 'overleaf'
-                ? 'bg-[#164e3f] text-white shadow-sm'
-                : 'text-[#5c6962] hover:text-[#141c18] hover:bg-[#f4f7f4]'
+                ? 'bg-[#5520a5] text-white shadow-sm'
+                : 'text-[#716b79] hover:text-[#201a29] hover:bg-[#f6f3fa]'
             }`}
           >
             <Code className="w-4 h-4" />
@@ -667,8 +667,8 @@ ${eduLatex}
             onClick={() => setActiveStudioTab('form')}
             className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 ${
               activeStudioTab === 'form'
-                ? 'bg-[#164e3f] text-white shadow-sm'
-                : 'text-[#5c6962] hover:text-[#141c18] hover:bg-[#f4f7f4]'
+                ? 'bg-[#5520a5] text-white shadow-sm'
+                : 'text-[#716b79] hover:text-[#201a29] hover:bg-[#f6f3fa]'
             }`}
           >
             <Layout className="w-4 h-4" />
@@ -677,15 +677,15 @@ ${eduLatex}
         </div>
 
         {/* Active Template Indicator & Live Score */}
-        <div className="flex items-center gap-4 px-3 py-1.5 rounded-xl bg-[#f7f9f7] border border-[#e6e9e4]">
-          <div className="text-xs font-semibold text-[#5c6962] flex items-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-[#164e3f]" />
+        <div className="flex items-center gap-4 px-3 py-1.5 rounded-xl bg-[#f7f9f7] border border-[#e7e2eb]">
+          <div className="text-xs font-semibold text-[#716b79] flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 text-[#5520a5]" />
             <span className="hidden sm:inline">Active Template:</span>
-            <span className="text-[#141c18] font-bold truncate max-w-[180px]">{currentTplInfo.name.split('/')[0]}</span>
+            <span className="text-[#201a29] font-bold truncate max-w-[180px]">{currentTplInfo.name.split('/')[0]}</span>
           </div>
 
           <div className="pl-3 border-l border-[#dbe0d9] flex items-center gap-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-[#5c6962]">Live ATS Parse Score:</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#716b79]">Live ATS Parse Score:</span>
             <span className={`text-sm font-black ${getScoreColor(liveScore)}`}>{liveScore} / 100</span>
           </div>
         </div>
@@ -707,7 +707,7 @@ ${eduLatex}
                   <Code className="w-3.5 h-3.5 text-[#6ee7b7]" /> main.tex (Overleaf Single-Column Source)
                 </span>
               </div>
-              <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-[#164e3f]/60 text-[#a3d9bc] border border-[#235844]">
+              <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-[#5520a5]/60 text-[#a3d9bc] border border-[#235844]">
                 Live Syntax Sync
               </span>
             </div>
@@ -716,7 +716,7 @@ ${eduLatex}
             <textarea
               value={latexCode}
               onChange={(e) => setLatexCode(e.target.value)}
-              className="w-full flex-1 bg-transparent text-[#6ee7b7] font-mono text-xs sm:text-sm p-2 focus:outline-none resize-none leading-relaxed selection:bg-[#164e3f] overflow-auto border-none"
+              className="w-full flex-1 bg-transparent text-[#6ee7b7] font-mono text-xs sm:text-sm p-2 focus:outline-none resize-none leading-relaxed selection:bg-[#5520a5] overflow-auto border-none"
               spellCheck="false"
             />
             <div className="text-[10px] font-mono text-white/40 flex items-center justify-between border-t border-white/10 pt-2.5">
@@ -726,53 +726,53 @@ ${eduLatex}
           </div>
 
           {/* RIGHT COLUMN: LIVE OVERLEAF DOCUMENT PREVIEW & ATS DIAGNOSTIC CHECKS */}
-          <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm space-y-6 h-[680px] overflow-y-auto flex flex-col justify-between">
+          <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#e7e2eb] shadow-sm space-y-6 h-[680px] overflow-y-auto flex flex-col justify-between">
             <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#eef1ed] pb-3.5 gap-3">
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#164e3f]">
-                  <Eye className="w-4 h-4 shrink-0 text-[#164e3f]" />
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#f0ebf3] pb-3.5 gap-3">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#5520a5]">
+                  <Eye className="w-4 h-4 shrink-0 text-[#5520a5]" />
                   <span>Real-Time Document Preview</span>
                 </div>
                 <div className="flex flex-wrap items-center gap-2.5">
-                  <label className="flex items-center gap-1.5 text-xs font-semibold text-[#5c6962] cursor-pointer select-none">
+                  <label className="flex items-center gap-1.5 text-xs font-semibold text-[#716b79] cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={autoRecompile}
                       onChange={(e) => setAutoRecompile(e.target.checked)}
-                      className="rounded accent-[#164e3f] w-3.5 h-3.5"
+                      className="rounded accent-[#5520a5] w-3.5 h-3.5"
                     />
                     <span>Auto-Recompile</span>
                   </label>
                   <button
                     onClick={() => handleRecompileLatex(true)}
                     disabled={recompiling}
-                    className="px-3.5 py-1.5 rounded-xl bg-[#164e3f] hover:bg-[#124235] text-white font-semibold text-xs shadow-sm flex items-center gap-1.5 transition-all disabled:opacity-50"
+                    className="px-3.5 py-1.5 rounded-xl bg-[#5520a5] hover:bg-[#3f167b] text-white font-semibold text-xs shadow-sm flex items-center gap-1.5 transition-all disabled:opacity-50"
                   >
                     <RefreshCw className={`w-3.5 h-3.5 ${recompiling ? 'animate-spin' : ''}`} />
                     <span>🔄 Recompile Preview</span>
                   </button>
-                  <span className="px-2 py-1 rounded-md bg-[#e6f0ea] border border-[#d2e2d8] text-[#164e3f] text-[10px] font-semibold shrink-0 hidden xl:inline">
+                  <span className="px-2 py-1 rounded-md bg-[#f0e8fa] border border-[#dfd1f0] text-[#5520a5] text-[10px] font-semibold shrink-0 hidden xl:inline">
                     Letterpaper 8.5" x 11"
                   </span>
                 </div>
               </div>
 
               {/* Document Rendering Box (Real-Time Overleaf LaTeX Engine) */}
-              <div className="p-6 sm:p-8 rounded-2xl bg-white text-[#141c18] font-serif border border-[#dbe0d9] shadow-sm text-xs sm:text-sm leading-relaxed max-h-[460px] overflow-y-auto selection:bg-[#e6f0ea]">
+              <div className="p-6 sm:p-8 rounded-2xl bg-white text-[#201a29] font-serif border border-[#dbe0d9] shadow-sm text-xs sm:text-sm leading-relaxed max-h-[460px] overflow-y-auto selection:bg-[#f0e8fa]">
                 {renderOverleafDocumentPreview(latexCode)}
               </div>
             </div>
 
             {/* Quick Diagnostic Audit Footer inside the right card */}
-            <div className="p-4 rounded-xl bg-[#f7f9f7] border border-[#e6e9e4] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div className="p-4 rounded-xl bg-[#f7f9f7] border border-[#e7e2eb] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-[#164e3f] shrink-0" />
-                <span className="font-semibold text-[#141c18]">6-Pillar ATS Verification Passed:</span>
-                <span className="text-[#5c6962]">Zero tables, boxes, or multi-column leaks detected.</span>
+                <CheckCircle2 className="w-4 h-4 text-[#5520a5] shrink-0" />
+                <span className="font-semibold text-[#201a29]">6-Pillar ATS Verification Passed:</span>
+                <span className="text-[#716b79]">Zero tables, boxes, or multi-column leaks detected.</span>
               </div>
               <button
                 onClick={handleRunAiAutoFixCode}
-                className="px-3 py-1.5 rounded-lg bg-[#e6f0ea] hover:bg-[#d8e7de] text-[#164e3f] font-semibold text-[11px] transition-colors shrink-0"
+                className="px-3 py-1.5 rounded-lg bg-[#f0e8fa] hover:bg-[#e7d9f5] text-[#5520a5] font-semibold text-[11px] transition-colors shrink-0"
               >
                 Run Vocabulary Check
               </button>
@@ -781,20 +781,20 @@ ${eduLatex}
         </div>
       ) : (
         /* VISUAL FORM STUDIO TAB */
-        <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#e6e9e4] shadow-sm space-y-8 animate-in fade-in duration-200">
-          <div className="border-b border-[#eef1ed] pb-4 flex items-center justify-between">
+        <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#e7e2eb] shadow-sm space-y-8 animate-in fade-in duration-200">
+          <div className="border-b border-[#f0ebf3] pb-4 flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-bold text-[#141c18] flex items-center gap-2">
-                <Layout className="w-5 h-5 text-[#164e3f]" />
+              <h3 className="text-lg font-bold text-[#201a29] flex items-center gap-2">
+                <Layout className="w-5 h-5 text-[#5520a5]" />
                 <span>Visual Form Section Builder</span>
               </h3>
-              <p className="text-xs text-[#5c6962] mt-0.5">
+              <p className="text-xs text-[#716b79] mt-0.5">
                 Edit fields directly. All updates instantly reflect in the Overleaf LaTeX (`.tex`) Code Studio tab.
               </p>
             </div>
             <button
               onClick={() => setActiveStudioTab('overleaf')}
-              className="px-4 py-2 rounded-xl bg-[#164e3f] hover:bg-[#124235] text-white font-semibold text-xs shadow-sm flex items-center gap-1.5 transition-all"
+              className="px-4 py-2 rounded-xl bg-[#5520a5] hover:bg-[#3f167b] text-white font-semibold text-xs shadow-sm flex items-center gap-1.5 transition-all"
             >
               <Code className="w-3.5 h-3.5" />
               <span>Switch to Overleaf Code (`.tex`)</span>
@@ -803,49 +803,49 @@ ${eduLatex}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#164e3f]">Contact & Header Information</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[#5520a5]">Contact & Header Information</h4>
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div>
-                  <label className="block font-semibold text-[#5c6962] mb-1">Full Name</label>
+                  <label className="block font-semibold text-[#716b79] mb-1">Full Name</label>
                   <input
                     type="text"
                     value={resumeData?.contact?.fullName || ''}
                     onChange={(e) => setResumeData({ ...resumeData, contact: { ...resumeData.contact, fullName: e.target.value } })}
-                    className="w-full px-3 py-2 rounded-xl bg-[#f7f9f7] border border-[#e6e9e4] text-[#141c18] focus:outline-none focus:border-[#164e3f]"
+                    className="w-full px-3 py-2 rounded-xl bg-[#f7f9f7] border border-[#e7e2eb] text-[#201a29] focus:outline-none focus:border-[#5520a5]"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-[#5c6962] mb-1">Email</label>
+                  <label className="block font-semibold text-[#716b79] mb-1">Email</label>
                   <input
                     type="email"
                     value={resumeData?.contact?.email || ''}
                     onChange={(e) => setResumeData({ ...resumeData, contact: { ...resumeData.contact, email: e.target.value } })}
-                    className="w-full px-3 py-2 rounded-xl bg-[#f7f9f7] border border-[#e6e9e4] text-[#141c18] focus:outline-none focus:border-[#164e3f]"
+                    className="w-full px-3 py-2 rounded-xl bg-[#f7f9f7] border border-[#e7e2eb] text-[#201a29] focus:outline-none focus:border-[#5520a5]"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-[#5c6962] mb-1">Phone</label>
+                  <label className="block font-semibold text-[#716b79] mb-1">Phone</label>
                   <input
                     type="text"
                     value={resumeData?.contact?.phone || ''}
                     onChange={(e) => setResumeData({ ...resumeData, contact: { ...resumeData.contact, phone: e.target.value } })}
-                    className="w-full px-3 py-2 rounded-xl bg-[#f7f9f7] border border-[#e6e9e4] text-[#141c18] focus:outline-none focus:border-[#164e3f]"
+                    className="w-full px-3 py-2 rounded-xl bg-[#f7f9f7] border border-[#e7e2eb] text-[#201a29] focus:outline-none focus:border-[#5520a5]"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-[#5c6962] mb-1">LinkedIn / GitHub</label>
+                  <label className="block font-semibold text-[#716b79] mb-1">LinkedIn / GitHub</label>
                   <input
                     type="text"
                     value={resumeData?.contact?.linkedinUrl || ''}
                     onChange={(e) => setResumeData({ ...resumeData, contact: { ...resumeData.contact, linkedinUrl: e.target.value } })}
-                    className="w-full px-3 py-2 rounded-xl bg-[#f7f9f7] border border-[#e6e9e4] text-[#141c18] focus:outline-none focus:border-[#164e3f]"
+                    className="w-full px-3 py-2 rounded-xl bg-[#f7f9f7] border border-[#e7e2eb] text-[#201a29] focus:outline-none focus:border-[#5520a5]"
                   />
                 </div>
               </div>
             </div>
 
             <div className="space-y-4">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#164e3f]">Professional Summary</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[#5520a5]">Professional Summary</h4>
               <textarea
                 value={resumeData?.summary || ''}
                 onChange={(e) => {
@@ -854,15 +854,15 @@ ${eduLatex}
                   generateInitialLatexCode(newData, activeTemplateId);
                 }}
                 rows="4"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-[#f7f9f7] border border-[#e6e9e4] text-xs text-[#141c18] focus:outline-none focus:border-[#164e3f] leading-relaxed resize-none"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#f7f9f7] border border-[#e7e2eb] text-xs text-[#201a29] focus:outline-none focus:border-[#5520a5] leading-relaxed resize-none"
               />
             </div>
           </div>
 
-          <div className="space-y-4 pt-4 border-t border-[#eef1ed]">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[#164e3f]">Work Experience & Quantified Bullets</h4>
+          <div className="space-y-4 pt-4 border-t border-[#f0ebf3]">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#5520a5]">Work Experience & Quantified Bullets</h4>
             {Array.isArray(resumeData?.workExperience) && resumeData.workExperience.map((w, idx) => (
-              <div key={idx} className="p-5 rounded-2xl bg-[#fbfcfb] border border-[#e6e9e4] space-y-3 text-xs">
+              <div key={idx} className="p-5 rounded-2xl bg-[#fcfbfd] border border-[#e7e2eb] space-y-3 text-xs">
                 <div className="grid grid-cols-3 gap-3 font-semibold">
                   <input
                     type="text"
@@ -875,7 +875,7 @@ ${eduLatex}
                       generateInitialLatexCode(newData, activeTemplateId);
                     }}
                     placeholder="Job Title"
-                    className="px-3 py-2 rounded-xl bg-white border border-[#e6e9e4] text-[#141c18] focus:border-[#164e3f] outline-none"
+                    className="px-3 py-2 rounded-xl bg-white border border-[#e7e2eb] text-[#201a29] focus:border-[#5520a5] outline-none"
                   />
                   <input
                     type="text"
@@ -888,18 +888,18 @@ ${eduLatex}
                       generateInitialLatexCode(newData, activeTemplateId);
                     }}
                     placeholder="Company Name"
-                    className="px-3 py-2 rounded-xl bg-white border border-[#e6e9e4] text-[#141c18] focus:border-[#164e3f] outline-none"
+                    className="px-3 py-2 rounded-xl bg-white border border-[#e7e2eb] text-[#201a29] focus:border-[#5520a5] outline-none"
                   />
                   <input
                     type="text"
                     value={`${w.startDate || ''} - ${w.current ? 'Present' : w.endDate || ''}`}
                     readOnly
                     placeholder="Dates"
-                    className="px-3 py-2 rounded-xl bg-[#f4f7f4] border border-[#e6e9e4] text-[#5c6962]"
+                    className="px-3 py-2 rounded-xl bg-[#f6f3fa] border border-[#e7e2eb] text-[#716b79]"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-[#5c6962] mb-1">Bullet Points (One per line)</label>
+                  <label className="block font-semibold text-[#716b79] mb-1">Bullet Points (One per line)</label>
                   <textarea
                     value={Array.isArray(w.bullets) ? w.bullets.join('\n') : ''}
                     onChange={(e) => {
@@ -910,7 +910,7 @@ ${eduLatex}
                       generateInitialLatexCode(newData, activeTemplateId);
                     }}
                     rows="3"
-                    className="w-full px-3 py-2 rounded-xl bg-white border border-[#e6e9e4] text-[#141c18] focus:border-[#164e3f] outline-none leading-relaxed resize-none"
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-[#e7e2eb] text-[#201a29] focus:border-[#5520a5] outline-none leading-relaxed resize-none"
                   />
                 </div>
               </div>
