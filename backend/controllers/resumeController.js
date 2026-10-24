@@ -229,6 +229,47 @@ export const updateResumeVersion = async (req, res) => {
   }
 };
 
+export const createResumeVersion = async (req, res) => {
+  try {
+    const { versionLabel, contentJson, atsScore } = req.body;
+    const { id: resumeId } = req.params;
+
+    if (!mongoose.isValidObjectId(resumeId)) {
+      return res.status(400).json({ error: 'Invalid resume ID.' });
+    }
+    if (!contentJson) {
+      return res.status(400).json({ error: 'Resume snapshot content is required.' });
+    }
+
+    const resume = await Resume.findById(resumeId);
+    if (!resume) {
+      return res.status(404).json({ error: 'Resume not found.' });
+    }
+
+    const currentUserId = req.user?._id?.toString();
+    const ownerId = resume.ownerId?.toString();
+    if (ownerId && ownerId !== currentUserId) {
+      return res.status(403).json({ error: 'You do not have access to save versions for this resume.' });
+    }
+    if (!ownerId && req.user?._id) {
+      resume.ownerId = req.user._id;
+      await resume.save();
+    }
+
+    const version = await ResumeVersion.create({
+      resumeId: resume._id,
+      versionLabel: versionLabel || 'Overleaf LaTeX Studio Snapshot',
+      contentJson: typeof contentJson === 'string' ? contentJson : JSON.stringify(contentJson),
+      atsScore: atsScore ?? null,
+    });
+
+    res.status(201).json({ success: true, version });
+  } catch (error) {
+    console.error('Error creating resume snapshot:', error);
+    res.status(500).json({ error: 'Failed to save resume snapshot.' });
+  }
+};
+
 export const exportResumeVersion = async (req, res) => {
   try {
     const { format } = req.body;

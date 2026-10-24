@@ -140,7 +140,6 @@ export default function ResumeEditor() {
 
       if (!resumeId || resumeId === 'undefined' || resumeId === 'new') {
         setResumeData(defaultBaseline);
-        setVersionLabel('v1.0 - Overleaf Studio Baseline');
         setLiveScore(88);
         generateInitialLatexCode(defaultBaseline, activeTemplateId);
         setLoading(false);
@@ -154,12 +153,15 @@ export default function ResumeEditor() {
           const ver = res.data.versions?.[0];
           if (ver && ver.contentJson) {
             setActiveVersion(ver);
-            setVersionLabel(ver.versionLabel || 'v1.1 - Overleaf Edited');
             setLiveScore(ver.atsScore || 85);
             try {
               const parsed = typeof ver.contentJson === 'string' ? JSON.parse(ver.contentJson) : ver.contentJson;
               setResumeData(parsed);
-              generateInitialLatexCode(parsed, activeTemplateId);
+              if (typeof parsed.rawLatex === 'string' && parsed.rawLatex.trim()) {
+                setLatexCode(parsed.rawLatex);
+              } else {
+                generateInitialLatexCode(parsed, activeTemplateId);
+              }
             } catch (jsonErr) {
               setResumeData(defaultBaseline);
               generateInitialLatexCode(defaultBaseline, activeTemplateId);
@@ -175,7 +177,6 @@ export default function ResumeEditor() {
       } catch (e) {
         console.error('Error fetching resume, opening with fallback baseline:', e);
         setResumeData(defaultBaseline);
-        setVersionLabel('v1.0 - Overleaf Studio Baseline');
         setLiveScore(88);
         generateInitialLatexCode(defaultBaseline, activeTemplateId);
       } finally {
@@ -359,6 +360,7 @@ ${eduLatex}
       if (showToast) {
         toast.success('🔄 Overleaf Document Recompiled! Visual Preview & ATS Score Synchronized!');
       }
+      return parsed;
     } catch (e) {
       console.error(e);
       if (showToast) toast.error('Failed to parse and recompile LaTeX code.');
@@ -837,20 +839,26 @@ ${eduLatex}
   const handleRunAiAutoFixCode = async () => {
     setOptimizingCode(true);
     try {
-      // Perform local + API syntax and verb relocation on LaTeX code
+      // Correct the source currently in the editor so unsaved edits are preserved.
       let updatedCode = latexCode;
       const weakMap = [
-        { regex: /\\item\s+(?:Responsible for|In charge of|Was tasked with|Helped with|Worked on|Assisted in)\s+/gi, replace: '\\item Spearheaded and directed ' },
+        { regex: /\\item\s+(?:Responsible for|In charge of)\s+/gi, replace: '\\item Led ' },
+        { regex: /\\item\s+Was tasked with\s+/gi, replace: '\\item Delivered ' },
+        { regex: /\\item\s+(?:Worked on|Helped with|Assisted in)\s+/gi, replace: '\\item Contributed to ' },
         { regex: /\\item\s+(?:Developed and developed|Built and built)/gi, replace: '\\item Engineered and architected' },
         { regex: /\\item\s+(?:Managed and managed)/gi, replace: '\\item Orchestrated and directed' },
+        { regex: /\\item(?=\S)/g, replace: '\\item ' },
       ];
       weakMap.forEach((m) => {
         updatedCode = updatedCode.replace(m.regex, m.replace);
       });
 
-      // Check if we can also trigger backend word optimization if needed
-      setLatexCode(updatedCode);
-      toast.success('✨ Overleaf Code Optimized! Stripped weak starters & fixed word repetition!');
+      if (updatedCode === latexCode) {
+        toast.info('No weak bullet openers or common LaTeX spacing issues were found.');
+      } else {
+        setLatexCode(updatedCode);
+        toast.success('LaTeX source cleaned up and weak bullet openers improved.');
+      }
     } catch (e) {
       console.error(e);
       toast.error('Optimization failed.');
@@ -860,20 +868,38 @@ ${eduLatex}
   };
 
   const handleSaveSnapshot = async () => {
-    if (!activeVersion) return;
+    if (!resume?._id && !resume?.id) {
+      toast.error('This editor is not linked to a saved resume yet. Open it from the Templates library to save a snapshot.');
+      return;
+    }
+    if (!latexCode.trim()) {
+      toast.error('Add resume content before saving a snapshot.');
+      return;
+    }
+
     setSaving(true);
     try {
-      const res = await axios.put(`/api/resume-versions/${activeVersion._id || activeVersion.id}`, {
-        versionLabel: versionLabel.trim() || 'Overleaf LaTeX Studio Version',
-        contentJson: JSON.stringify(resumeData || { rawLatex: latexCode }),
+      const synchronizedResumeData = handleRecompileLatex(false) || resumeData || {};
+      const snapshotData = { ...synchronizedResumeData, rawLatex: latexCode };
+      const snapshotBaseLabel = String(activeVersion?.versionLabel || 'Overleaf LaTeX Studio').replace(/(?:\s+snapshot)+$/i, '');
+      const res = await axios.post(`/api/resumes/${resume._id || resume.id}/versions`, {
+        versionLabel: `${snapshotBaseLabel} snapshot`,
+        contentJson: JSON.stringify(snapshotData),
         atsScore: liveScore,
       });
-      if (res.data.success) {
+      if (res.data?.success && res.data.version) {
+        setActiveVersion(res.data.version);
+        setResume((current) => ({
+          ...current,
+          versions: [res.data.version, ...(current?.versions || [])],
+        }));
         toast.success(`Saved Overleaf snapshot (${liveScore}/100) successfully!`);
+      } else {
+        throw new Error(res.data?.error || 'The snapshot was not saved.');
       }
     } catch (e) {
       console.error(e);
-      toast.error('Failed to save resume updates.');
+      toast.error(e.response?.data?.error || e.message || 'Failed to save resume snapshot.');
     } finally {
       setSaving(false);
     }
@@ -881,43 +907,61 @@ ${eduLatex}
 
   const handleDownloadLatexFile = () => {
     try {
+      if (!latexCode.trim()) {
+        toast.error('There is no LaTeX source to download yet.');
+        return;
+      }
       const blob = new Blob([latexCode], { type: 'application/x-tex' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      const cleanName = (resumeData?.contact?.fullName || 'Candidate').replace(/\s+/g, '_');
+      const cleanName = (resumeData?.contact?.fullName || 'Candidate').trim().replace(/[^\w-]+/g, '_');
       link.setAttribute('download', `${cleanName}_Overleaf_Resume.tex`);
       document.body.appendChild(link);
       link.click();
       link.remove();
-      toast.success('📥 Downloaded standalone Overleaf `.tex` source file!');
+      window.setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+      toast.success('Downloaded the current Overleaf `.tex` source.');
     } catch (e) {
+      console.error(e);
       toast.error('Download error.');
     }
   };
 
-  const handleExportPdf = async (format = 'pdf') => {
-    if (!activeVersion) return;
+  const handleExportPdf = () => {
+    const preview = document.getElementById('resume-editor-document-preview');
+    if (!preview || !preview.textContent.trim()) {
+      toast.error('Open the Overleaf Code Studio preview before exporting a PDF.');
+      return;
+    }
+
     setExporting(true);
     try {
-      const response = await axios.post(
-        `/api/resume-versions/${activeVersion._id || activeVersion.id}/export`,
-        { format },
-        { responseType: 'blob' }
-      );
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        throw new Error('Allow pop-ups for this site to export the PDF.');
+      }
 
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      const cleanName = (resumeData?.contact?.fullName || 'Candidate').replace(/\s+/g, '_');
-      link.setAttribute('download', `${cleanName}_Overleaf_Compiled.${format}`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      toast.success(`📄 Exported compiled ${format.toUpperCase()} successfully!`);
+      const styles = Array.from(document.head.querySelectorAll('link[rel="stylesheet"], style'))
+        .map((node) => node.outerHTML)
+        .join('\n');
+      const cleanName = (resumeData?.contact?.fullName || 'Resume').replace(/[<>:"/\\|?*]+/g, '').trim();
+      printWindow.document.open();
+      printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${cleanName || 'Resume'} - ResumeIQ</title>${styles}<style>
+        @page { size: letter; margin: 0.45in; }
+        html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+        body { color: #201a29; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        #resume-print-document { width: 100%; max-height: none !important; min-height: 0 !important; overflow: visible !important; padding: 0 !important; margin: 0 auto !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
+        #resume-print-document > div { max-height: none !important; overflow: visible !important; }
+        @media screen { body { max-width: 8.5in; margin: 0 auto !important; padding: 0.45in !important; } }
+      </style></head><body><main id="resume-print-document">${preview.innerHTML}</main></body></html>`);
+      printWindow.onload = () => window.setTimeout(() => printWindow.print(), 350);
+      printWindow.onafterprint = () => printWindow.close();
+      printWindow.document.close();
+      toast.info('Choose “Save as PDF” in the print dialog to download the rendered resume.');
     } catch (error) {
       console.error(error);
-      toast.error(`Failed to export ${format.toUpperCase()} file.`);
+      toast.error(error.message || 'Failed to open the PDF export.');
     } finally {
       setExporting(false);
     }
@@ -1108,7 +1152,7 @@ ${eduLatex}
               </div>
 
               {/* Document Rendering Box (Real-Time Overleaf LaTeX Engine) */}
-              <div className="p-6 sm:p-8 rounded-2xl bg-white text-[#201a29] font-serif border border-[#dbe0d9] shadow-sm text-xs sm:text-sm leading-relaxed max-h-[460px] overflow-y-auto selection:bg-[#f0e8fa]">
+              <div id="resume-editor-document-preview" className="p-6 sm:p-8 rounded-2xl bg-white text-[#201a29] font-serif border border-[#dbe0d9] shadow-sm text-xs sm:text-sm leading-relaxed max-h-[460px] overflow-y-auto selection:bg-[#f0e8fa]">
                 {renderOverleafDocumentPreview(latexCode)}
               </div>
             </div>
