@@ -69,7 +69,9 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="landing-page flex flex-col min-h-screen">
+    <div className="dashboard-outer relative z-10 mx-auto w-full max-w-[1440px] px-3 py-4 sm:px-5 sm:py-6 lg:px-8">
+      <div className="dashboard-reference-frame">
+        <div className="landing-page flex flex-col min-h-screen">
       {/* Hero Section */}
       <section className="landing-hero relative overflow-hidden pt-16 pb-20 md:pt-24 md:pb-28 border-b border-[#e7e2eb]">
         <div className="mx-auto grid max-w-7xl items-center gap-14 px-4 sm:px-6 lg:grid-cols-[0.92fr_1.08fr] lg:px-8">
@@ -328,6 +330,8 @@ export default function LandingPage() {
           </Link>
         </div>
       </section>
+        </div>
+      </div>
     </div>
   );
 }
