@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 const resumeSchema = new mongoose.Schema(
   {
     originalFilename: { type: String, required: true },
+    ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
     rawText: { type: String, default: '' },
     contactJson: { type: String, default: '{}' },
     layoutRisksJson: { type: String, default: '[]' },

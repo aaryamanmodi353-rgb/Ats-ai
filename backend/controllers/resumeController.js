@@ -1,5 +1,8 @@
 import Resume from '../models/Resume.js';
 import ResumeVersion from '../models/ResumeVersion.js';
+import ScoreReport from '../models/ScoreReport.js';
+import Application from '../models/Application.js';
+import mongoose from 'mongoose';
 import { ParserService } from '../services/parserService.js';
 import { ExportService } from '../services/exportService.js';
 
@@ -10,7 +13,29 @@ export const getAllResumes = async (req, res) => {
       options: { sort: { createdAt: -1 } },
     }).sort({ createdAt: -1 });
 
-    res.json(resumes);
+    const currentUserId = req.user?._id?.toString();
+    const currentUserEmail = req.user?.email?.trim().toLowerCase();
+    const resumeResults = resumes.map((resume) => {
+      const resumeData = resume.toJSON();
+      const ownerId = resume.ownerId?.toString();
+      delete resumeData.ownerId;
+      let legacyOwnerEmail = '';
+
+      if (!ownerId && currentUserEmail) {
+        try {
+          legacyOwnerEmail = JSON.parse(resume.contactJson || '{}').email?.trim().toLowerCase() || '';
+        } catch {
+          legacyOwnerEmail = '';
+        }
+      }
+
+      return {
+        ...resumeData,
+        canDelete: Boolean(currentUserId && (ownerId === currentUserId || (!ownerId && legacyOwnerEmail === currentUserEmail))),
+      };
+    });
+
+    res.json(resumeResults);
   } catch (error) {
     console.error('Error fetching resumes:', error);
     res.status(500).json({ error: 'Failed to retrieve resumes.' });
@@ -19,7 +44,7 @@ export const getAllResumes = async (req, res) => {
 
 export const getResumeById = async (req, res) => {
   try {
-    const resume = await Resume.findById(req.params.id).populate({
+    const resume = await Resume.findById(req.params.id).select('-ownerId').populate({
       path: 'versions',
       options: { sort: { createdAt: -1 } },
       populate: { path: 'scoreReports', options: { sort: { createdAt: -1 } } },
@@ -36,8 +61,69 @@ export const getResumeById = async (req, res) => {
   }
 };
 
+export const deleteResume = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const currentUserId = req.user?._id?.toString();
+    const currentUserEmail = req.user?.email?.trim().toLowerCase();
+
+    if (!currentUserId) {
+      return res.status(401).json({ error: 'Not authorized to delete this resume.' });
+    }
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ error: 'Invalid resume ID.' });
+    }
+
+    const resume = await Resume.findById(id);
+    if (!resume) {
+      return res.status(404).json({ error: 'Resume not found.' });
+    }
+
+    const ownerId = resume.ownerId?.toString();
+    let isOwner = ownerId === currentUserId;
+
+    // Older records predate ownership fields. Allow a match only when the stored
+    // resume contact email exactly matches the authenticated account email.
+    if (!ownerId && currentUserEmail) {
+      try {
+        const resumeEmail = JSON.parse(resume.contactJson || '{}').email?.trim().toLowerCase();
+        isOwner = resumeEmail === currentUserEmail;
+      } catch {
+        isOwner = false;
+      }
+    }
+
+    if (!isOwner) {
+      return res.status(404).json({ error: 'Resume not found.' });
+    }
+
+    const versions = await ResumeVersion.find({ resumeId: resume._id }).select('_id');
+    const versionIds = versions.map((version) => version._id);
+
+    if (versionIds.length > 0) {
+      // Preserve job applications while removing links to deleted resume versions.
+      await Application.updateMany(
+        { resumeVersionId: { $in: versionIds } },
+        { $set: { resumeVersionId: null } },
+      );
+      await ScoreReport.deleteMany({ resumeVersionId: { $in: versionIds } });
+      await ResumeVersion.deleteMany({ _id: { $in: versionIds } });
+    }
+
+    await Resume.deleteOne({ _id: resume._id });
+    res.json({ success: true, deletedResumeId: resume._id });
+  } catch (error) {
+    console.error('Error deleting resume:', error);
+    res.status(500).json({ error: 'Failed to delete resume and its saved versions.' });
+  }
+};
+
 export const uploadAndParseResume = async (req, res) => {
   try {
+    if (!req.user?._id) {
+      return res.status(401).json({ error: 'Please sign in before uploading a resume.' });
+    }
+
     let rawText = req.body?.rawText || '';
     let filename = req.file?.originalname || 'Paste_Resume.txt';
 
@@ -83,6 +169,7 @@ export const uploadAndParseResume = async (req, res) => {
     // Create Resume record
     const resume = await Resume.create({
       originalFilename: filename,
+      ownerId: req.user?._id,
       rawText: structuredData.rawText || rawText,
       contactJson: JSON.stringify(structuredData.contact || {}),
       layoutRisksJson: JSON.stringify(structuredData.layoutRiskWarnings || []),

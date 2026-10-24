@@ -3,6 +3,7 @@ import multer from 'multer';
 import {
   getAllResumes,
   getResumeById,
+  deleteResume,
   uploadAndParseResume,
   updateResumeVersion,
   exportResumeVersion,
@@ -14,6 +15,7 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 
 
 router.get('/resumes', optionalAuth, getAllResumes);
 router.get('/resumes/:id', optionalAuth, getResumeById);
+router.delete('/resumes/:id', protect, deleteResume);
 router.post('/resumes', protect, upload.single('file'), uploadAndParseResume);
 router.put('/resume-versions/:versionId', protect, updateResumeVersion);
 router.post('/resume-versions/:versionId/export', protect, exportResumeVersion);

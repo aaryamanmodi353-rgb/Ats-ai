@@ -14,8 +14,10 @@ import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
+  Trash2,
 } from 'lucide-react';
 import axios from 'axios';
+import { toast } from 'sonner';
 
 const RESUMES_PER_PAGE = 5;
 
@@ -24,6 +26,7 @@ export default function Dashboard() {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [deletingResumeId, setDeletingResumeId] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -79,6 +82,36 @@ export default function Dashboard() {
     if (score >= 80) return 'ATS Ready (High Match)';
     if (score >= 65) return 'Moderate Risk';
     return 'High Auto-Rejection Risk';
+  };
+
+  const handleDeleteResume = async (resume) => {
+    const resumeId = resume._id || resume.id;
+    const confirmed = window.confirm(
+      `Permanently delete "${resume.originalFilename}" and its saved versions and ATS reports? Tracked applications will remain, but their resume links will be removed.`,
+    );
+
+    if (!confirmed) return;
+
+    setDeletingResumeId(String(resumeId));
+    try {
+      await axios.delete(`/api/resumes/${resumeId}`);
+      setResumes((currentResumes) => currentResumes.filter((item) => String(item._id || item.id) !== String(resumeId)));
+
+      const versionIds = new Set((resume.versions || []).map((version) => String(version._id || version.id)));
+      setApplications((currentApplications) => currentApplications.map((application) => {
+        const linkedVersionId = application.resumeVersionId?._id || application.resumeVersionId;
+        return versionIds.has(String(linkedVersionId))
+          ? { ...application, resumeVersionId: null }
+          : application;
+      }));
+
+      toast.success('Resume and saved versions deleted.');
+    } catch (error) {
+      console.error('Failed to delete resume:', error);
+      toast.error(error.response?.data?.error || 'Failed to delete resume.');
+    } finally {
+      setDeletingResumeId(null);
+    }
   };
 
   return (
@@ -296,6 +329,23 @@ export default function Dashboard() {
                         >
                           Audit Report
                         </Link>
+                        {r.canDelete && (
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteResume(r)}
+                            disabled={deletingResumeId === String(r._id || r.id)}
+                            aria-label={`Delete ${r.originalFilename}`}
+                            title="Delete resume"
+                            className="px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-semibold text-xs transition-colors disabled:opacity-60 disabled:cursor-wait flex items-center gap-1.5"
+                          >
+                            {deletingResumeId === String(r._id || r.id) ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-3.5 h-3.5" />
+                            )}
+                            <span>{deletingResumeId === String(r._id || r.id) ? 'Deleting…' : 'Delete'}</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
