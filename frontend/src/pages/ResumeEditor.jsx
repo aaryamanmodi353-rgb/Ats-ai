@@ -372,6 +372,356 @@ ${eduLatex}
       return <div className="text-gray-400 italic text-center py-10">Document buffer is empty. Type code on the left to begin...</div>;
     }
 
+    // Parse common resume LaTeX commands rather than leaving source commands visible in the preview.
+    // Markdown continues through the existing renderer below.
+    const looksLikeLatex = /\\(?:documentclass|usepackage|begin\s*\{document\}|section\*?\s*\{)/i.test(code);
+    if (looksLikeLatex) {
+      const escapeHtml = (value) => String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+
+      const readGroup = (source, start, open = '{', close = '}') => {
+        let cursor = start;
+        while (/\s/.test(source[cursor] || '') && cursor < source.length) cursor += 1;
+        if (source[cursor] !== open) return null;
+
+        let depth = 1;
+        const contentStart = cursor + 1;
+        cursor += 1;
+        while (cursor < source.length) {
+          if (source[cursor] === '\\') {
+            cursor += 2;
+            continue;
+          }
+          if (source[cursor] === open) depth += 1;
+          if (source[cursor] === close) {
+            depth -= 1;
+            if (depth === 0) {
+              return { value: source.slice(contentStart, cursor), end: cursor + 1 };
+            }
+          }
+          cursor += 1;
+        }
+        return null;
+      };
+
+      const readOptional = (source, start) => {
+        let cursor = start;
+        while (/\s/.test(source[cursor] || '') && cursor < source.length) cursor += 1;
+        return source[cursor] === '[' ? readGroup(source, cursor, '[', ']') : null;
+      };
+
+      const stripComments = (source) => source.split('\n').map((line) => {
+        for (let cursor = 0; cursor < line.length; cursor += 1) {
+          if (line[cursor] !== '%') continue;
+          let slashes = 0;
+          for (let back = cursor - 1; back >= 0 && line[back] === '\\'; back -= 1) slashes += 1;
+          if (slashes % 2 === 0) return line.slice(0, cursor);
+        }
+        return line;
+      }).join('\n');
+
+      const sourceWithoutComments = stripComments(code.replace(/\r\n?/g, '\n'));
+      const documentStart = sourceWithoutComments.match(/\\begin\s*\{document\}/i);
+      let body = documentStart
+        ? sourceWithoutComments.slice(documentStart.index + documentStart[0].length)
+        : sourceWithoutComments;
+      const documentEnd = body.search(/\\end\s*\{document\}/i);
+      if (documentEnd >= 0) body = body.slice(0, documentEnd);
+      if (!documentStart) {
+        const firstContent = body.search(/\\(?:begin\s*\{(?:center|itemize|enumerate)\}|section\*?\s*\{|subsection\*?\s*\{|Huge\b)/i);
+        if (firstContent >= 0) body = body.slice(firstContent);
+      }
+
+      const hfillMarker = '\uE000';
+      const renderInlineLatex = (input) => {
+        let output = '';
+        let completedOutput = '';
+        let cursor = 0;
+        const scopedClasses = [];
+        const flushStyledOutput = () => {
+          if (!output) return;
+          completedOutput += scopedClasses.length
+            ? `<span class="${scopedClasses.join(' ')}">${output}</span>`
+            : output;
+          output = '';
+        };
+
+        while (cursor < input.length) {
+          const char = input[cursor];
+          if (char === '{') {
+            const group = readGroup(input, cursor);
+            if (group) {
+              output += renderInlineLatex(group.value);
+              cursor = group.end;
+              continue;
+            }
+          }
+
+          if (char === '\\') {
+            if (input[cursor + 1] === '\\') {
+              output += '<br />';
+              cursor += 2;
+              if (input[cursor] === '*') cursor += 1;
+              const breakSpace = readOptional(input, cursor);
+              if (breakSpace) cursor = breakSpace.end;
+              continue;
+            }
+
+            const controlWord = input.slice(cursor + 1).match(/^[A-Za-z]+\*?/);
+            if (!controlWord) {
+              const escaped = input[cursor + 1];
+              const escapedSymbols = { '%': '%', '&': '&amp;', '_': '_', '#': '#', '$': '$', '{': '{', '}': '}', '~': '&nbsp;' };
+              if (escaped in escapedSymbols) {
+                output += escapedSymbols[escaped];
+                cursor += 2;
+                continue;
+              }
+              if (escaped === ',' || escaped === ';' || escaped === ':') {
+                output += escaped === ',' ? '&thinsp;' : '&nbsp;';
+                cursor += 2;
+                continue;
+              }
+              output += escapeHtml(escaped || '');
+              cursor += escaped ? 2 : 1;
+              continue;
+            }
+
+            const command = controlWord[0];
+            const normalizedCommand = command.toLowerCase().replace(/\*$/, '');
+            const argumentStart = cursor + 1 + command.length;
+            const firstArgument = readGroup(input, argumentStart);
+            const nextArgument = firstArgument ? readGroup(input, firstArgument.end) : null;
+
+            if (['textbf', 'textit', 'emph', 'underline', 'textsc', 'texttt', 'textrm', 'textsf', 'textnormal'].includes(normalizedCommand) && firstArgument) {
+              const rendered = renderInlineLatex(firstArgument.value);
+              if (normalizedCommand === 'textbf') output += `<strong class="font-bold text-gray-950">${rendered}</strong>`;
+              else if (normalizedCommand === 'textit' || normalizedCommand === 'emph') output += `<em class="italic text-gray-800">${rendered}</em>`;
+              else if (normalizedCommand === 'underline') output += `<span class="underline">${rendered}</span>`;
+              else if (normalizedCommand === 'textsc') output += `<span class="uppercase tracking-wide">${rendered}</span>`;
+              else if (normalizedCommand === 'texttt') output += `<code class="font-mono">${rendered}</code>`;
+              else if (normalizedCommand === 'textsf') output += `<span class="font-sans">${rendered}</span>`;
+              else output += `<span class="font-serif">${rendered}</span>`;
+              cursor = firstArgument.end;
+              continue;
+            }
+
+            if (normalizedCommand === 'href' && firstArgument && nextArgument) {
+              const rawUrl = firstArgument.value.trim();
+              const safeUrl = /^(https?:\/\/|mailto:|tel:)/i.test(rawUrl) ? rawUrl : '#';
+              output += `<a href="${escapeHtml(safeUrl)}" class="text-blue-700 underline font-medium">${renderInlineLatex(nextArgument.value)}</a>`;
+              cursor = nextArgument.end;
+              continue;
+            }
+
+            if (normalizedCommand === 'url' && firstArgument) {
+              const rawUrl = firstArgument.value.trim();
+              const safeUrl = /^(https?:\/\/|mailto:|tel:)/i.test(rawUrl) ? rawUrl : '#';
+              output += `<a href="${escapeHtml(safeUrl)}" class="text-blue-700 underline font-medium">${escapeHtml(rawUrl)}</a>`;
+              cursor = firstArgument.end;
+              continue;
+            }
+
+            if (['huge', 'large', 'normalsize', 'small', 'footnotesize', 'scriptsize', 'scshape', 'bfseries', 'itshape', 'ttfamily', 'uppercase'].includes(normalizedCommand)) {
+              const classForCommand = {
+                huge: 'text-2xl sm:text-3xl',
+                large: 'text-base',
+                normalsize: 'text-sm',
+                small: 'text-xs',
+                footnotesize: 'text-[11px]',
+                scriptsize: 'text-[10px]',
+                scshape: 'uppercase tracking-wide',
+                bfseries: 'font-bold',
+                itshape: 'italic',
+                ttfamily: 'font-mono',
+                uppercase: 'uppercase',
+              }[normalizedCommand];
+              if (classForCommand) {
+                flushStyledOutput();
+                scopedClasses.push(classForCommand);
+              }
+              cursor = argumentStart;
+              continue;
+            }
+
+            if (['hfill', 'hfil'].includes(normalizedCommand)) {
+              output += hfillMarker;
+              cursor = argumentStart;
+              continue;
+            }
+            if (normalizedCommand === 'vspace' || normalizedCommand === 'vspace*') {
+              if (firstArgument) cursor = firstArgument.end;
+              else cursor = argumentStart;
+              output += '<div class="my-1"></div>';
+              continue;
+            }
+            if (['noindent', 'indent', 'pagestyle', 'thispagestyle', 'parindent', 'sloppy', 'fussy', 'centering'].includes(normalizedCommand)) {
+              cursor = firstArgument ? firstArgument.end : argumentStart;
+              continue;
+            }
+            if (['newline', 'linebreak'].includes(normalizedCommand)) {
+              output += '<br />';
+              cursor = argumentStart;
+              continue;
+            }
+            if (['quad', 'qquad', 'enspace', 'hspace'].includes(normalizedCommand)) {
+              if (normalizedCommand === 'hspace' && firstArgument) cursor = firstArgument.end;
+              else cursor = argumentStart;
+              output += normalizedCommand === 'qquad' ? '&emsp;&emsp;' : '&emsp;';
+              continue;
+            }
+            if (['hrule', 'titlerule'].includes(normalizedCommand)) {
+              output += '<hr class="my-2 border-gray-400 border-t" />';
+              cursor = argumentStart;
+              continue;
+            }
+
+            // Unknown commands are omitted, while their following brace group remains readable.
+            cursor = argumentStart;
+            continue;
+          }
+
+          if (char === '\n' || char === '\r') {
+            let next = cursor + 1;
+            while (input[next] === '\n' || input[next] === '\r' || input[next] === ' ' || input[next] === '\t') next += 1;
+            output += next - cursor > 1 ? '<br />' : ' ';
+            cursor = next;
+            continue;
+          }
+
+          output += escapeHtml(char);
+          cursor += 1;
+        }
+
+        flushStyledOutput();
+        return completedOutput;
+      };
+
+      const renderLatexBody = (documentBody) => {
+        let html = '';
+        let chunk = '';
+        let cursor = 0;
+        const environments = [];
+        const flushChunk = () => {
+          if (chunk) html += renderInlineLatex(chunk);
+          chunk = '';
+        };
+
+        while (cursor < documentBody.length) {
+          if (documentBody[cursor] !== '\\') {
+            chunk += documentBody[cursor];
+            cursor += 1;
+            continue;
+          }
+
+          const structuralCommand = documentBody.slice(cursor + 1).match(/^(begin|end|section|subsection|subsubsection)\*?/i);
+          const itemCommand = documentBody.slice(cursor + 1).match(/^item\b/i);
+          if (!structuralCommand && !itemCommand) {
+            const inlineCommand = documentBody.slice(cursor + 1).match(/^[A-Za-z]+\*?/);
+            chunk += `\\${inlineCommand ? inlineCommand[0] : documentBody[cursor + 1] || ''}`;
+            cursor += inlineCommand ? inlineCommand[0].length + 1 : 2;
+            continue;
+          }
+
+          flushChunk();
+          if (itemCommand) {
+            const list = [...environments].reverse().find((environment) => environment.isList);
+            cursor += itemCommand[0].length + 1;
+            const optionalLabel = readOptional(documentBody, cursor);
+            if (optionalLabel) cursor = optionalLabel.end;
+            if (list) {
+              if (list.itemOpen) html += '</li>';
+              html += '<li>';
+              if (optionalLabel) html += `<span class="font-semibold">${renderInlineLatex(optionalLabel.value)}</span> `;
+              list.itemOpen = true;
+            }
+            continue;
+          }
+
+          const command = structuralCommand[0];
+          const normalizedCommand = command.toLowerCase().replace(/\*$/, '');
+          const argumentStart = cursor + 1 + command.length;
+          const argument = readGroup(documentBody, argumentStart);
+          if (!argument) {
+            chunk += `\\${command}`;
+            cursor = argumentStart;
+            continue;
+          }
+
+          cursor = argument.end;
+          if (normalizedCommand === 'begin') {
+            const environmentName = argument.value.trim().toLowerCase();
+            const options = readOptional(documentBody, cursor);
+            if (options) cursor = options.end;
+            if (environmentName === 'center') {
+              html += '<div class="text-center pb-3 border-b-2 border-gray-800 mb-4 font-sans text-xs sm:text-sm leading-relaxed">';
+              environments.push({ name: environmentName });
+            } else if (environmentName === 'flushright') {
+              html += '<div class="text-right">';
+              environments.push({ name: environmentName });
+            } else if (environmentName === 'itemize' || environmentName === 'enumerate') {
+              const tag = environmentName === 'itemize' ? 'ul' : 'ol';
+              const listClass = environmentName === 'itemize' ? 'list-disc' : 'list-decimal';
+              html += `<${tag} class="${listClass} pl-5 space-y-1 text-gray-800 my-1.5 font-sans text-xs sm:text-sm leading-snug">`;
+              environments.push({ name: environmentName, isList: true, itemOpen: false, tag });
+            } else {
+              environments.push({ name: environmentName, ignored: true });
+            }
+            continue;
+          }
+
+          if (normalizedCommand === 'end') {
+            const environmentName = argument.value.trim().toLowerCase();
+            let index = environments.length - 1;
+            while (index >= 0 && environments[index].name !== environmentName) index -= 1;
+            if (index >= 0) {
+              const [environment] = environments.splice(index, 1);
+              if (environment.isList) {
+                if (environment.itemOpen) html += '</li>';
+                html += `</${environment.tag}>`;
+              } else if (environment.name === 'center' || environment.name === 'flushright') {
+                html += '</div>';
+              }
+            }
+            continue;
+          }
+
+          const headingTag = normalizedCommand === 'section' ? 'h3' : 'h4';
+          const headingClass = headingTag === 'h3'
+            ? 'font-bold text-xs sm:text-sm uppercase tracking-wider border-b border-gray-400 pb-0.5 mt-5 mb-2 text-gray-900 font-sans'
+            : 'font-bold text-xs sm:text-sm text-gray-900 mt-3 mb-1 font-sans';
+          html += `<${headingTag} class="${headingClass}">${renderInlineLatex(argument.value)}</${headingTag}>`;
+        }
+
+        flushChunk();
+        while (environments.length) {
+          const environment = environments.pop();
+          if (environment.isList) {
+            if (environment.itemOpen) html += '</li>';
+            html += `</${environment.tag}>`;
+          } else if (environment.name === 'center' || environment.name === 'flushright') {
+            html += '</div>';
+          }
+        }
+
+        return html.split('<br />').map((line) => {
+          if (!line.includes(hfillMarker)) return line;
+          const [left, ...rightParts] = line.split(hfillMarker);
+          return `<div class="flex items-baseline justify-between gap-4 flex-wrap my-1"><span>${left.trim()}</span><span class="ml-auto text-right">${rightParts.join(hfillMarker).trim()}</span></div>`;
+        }).join('<br />').replaceAll(hfillMarker, '');
+      };
+
+      return (
+        <div
+          className="space-y-3 font-serif text-gray-900 leading-relaxed text-xs sm:text-sm"
+          dangerouslySetInnerHTML={{ __html: renderLatexBody(body) }}
+        />
+      );
+    }
+
     // 1. Strip document wrapper boilerplate (\documentclass, \usepackage, \begin{document}, etc.)
     let clean = code
       .replace(/\\documentclass[^}]*}/gi, '')
