@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Plus, CheckCircle2, XCircle, Clock, Award, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
+import CompanyLogo from '../components/CompanyLogo';
 
 const COLUMNS = [
   { id: 'applied', label: 'Applied / In Review', icon: Clock, color: 'text-[#5520a5] border-[#dfd1f0] bg-[#f0e8fa]' },
@@ -129,9 +130,7 @@ export default function Applications() {
                   colApps.map((app) => (
                     <div key={app._id || app.id} className="tracker-application-card p-4 rounded-xl border transition-all space-y-3 shadow-xs">
                       <div className="tracker-company-row flex items-start gap-3">
-                        <span className="tracker-company-mark shrink-0" aria-hidden="true">
-                          {app.companyName?.trim().charAt(0).toUpperCase() || 'C'}
-                        </span>
+                        <CompanyLogo companyName={app.companyName || ''} />
                         <div className="min-w-0">
                           <h4 className="tracker-role-title font-bold text-sm leading-tight">{app.roleTitle}</h4>
                           <p className="tracker-company-name text-xs mt-0.5">{app.companyName}</p>
