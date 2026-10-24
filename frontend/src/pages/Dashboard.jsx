@@ -47,10 +47,10 @@ export default function Dashboard() {
   const interviewRate = totalApps > 0 ? Math.round((interviews / totalApps) * 100) : 0;
 
   const getScoreColor = (score) => {
-    if (score === null || score === undefined) return 'text-[#716b79]';
-    if (score >= 80) return 'text-[#5520a5]';
-    if (score >= 65) return 'text-amber-700';
-    return 'text-rose-700';
+    if (score === null || score === undefined) return 'text-white/60';
+    if (score >= 80) return 'text-violet-200';
+    if (score >= 65) return 'text-amber-300';
+    return 'text-rose-300';
   };
 
   const getScoreBadgeClass = (score) => {
@@ -68,7 +68,8 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 flex-1 space-y-8">
+    <div className="dashboard-page relative isolate flex-1">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-8">
       {/* Top Breadcrumb & Status */}
       <div className="flex items-center justify-between text-xs text-[#716b79] border-b border-[#e7e2eb] pb-3">
         <div className="flex items-center gap-2">
@@ -112,35 +113,35 @@ export default function Dashboard() {
       </div>
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="p-6 rounded-2xl bg-white border border-[#e7e2eb] shadow-sm">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 xl:gap-5">
+        <div className="dashboard-score-feature p-6 rounded-2xl border border-white/10 shadow-lg">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#716b79]">Latest ATS Score</span>
-            <div className="w-8 h-8 rounded-lg bg-[#f0e8fa] text-[#5520a5] flex items-center justify-center">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-violet-100/70">Latest ATS Score</span>
+            <div className="w-9 h-9 rounded-xl border border-white/10 bg-white/10 text-violet-100 flex items-center justify-center">
               <Sparkles className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={`text-4xl font-black ${getScoreColor(latestScore)}`}>
+            <span className={`text-5xl font-semibold tracking-tight ${getScoreColor(latestScore)}`}>
               {latestScore !== null ? latestScore : '-'}
             </span>
-            <span className="text-sm text-[#716b79]">/ 100</span>
+            <span className="text-sm text-violet-100/65">/ 100</span>
           </div>
-          <div className="mt-3 flex items-center gap-1.5 text-xs text-[#716b79] font-semibold">
-            <TrendingUp className="w-3.5 h-3.5 text-[#5520a5]" />
+          <div className="mt-3 flex items-center gap-1.5 text-xs text-violet-100/75 font-medium">
+            <TrendingUp className="w-3.5 h-3.5 text-violet-200" />
             <span>{latestScore !== null ? 'ATS audit score calculated' : 'Upload resume to scan'}</span>
           </div>
         </div>
 
-        <div className="p-6 rounded-2xl bg-white border border-[#e7e2eb] shadow-sm">
+        <div className="dashboard-stat p-6 rounded-2xl border">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#716b79]">Saved Profiles</span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#716b79]">Saved Profiles</span>
             <div className="w-8 h-8 rounded-lg bg-[#f3eff7] text-[#201a29] flex items-center justify-center">
               <FileText className="w-4 h-4 text-[#5520a5]" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black text-[#201a29]">{totalResumes}</span>
+            <span className="text-4xl font-semibold tracking-tight text-[#201a29]">{totalResumes}</span>
             <span className="text-sm text-[#716b79]">Active Profiles</span>
           </div>
           <p className="mt-3 text-xs text-[#716b79] truncate">
@@ -148,15 +149,15 @@ export default function Dashboard() {
           </p>
         </div>
 
-        <div className="p-6 rounded-2xl bg-white border border-[#e7e2eb] shadow-sm">
+        <div className="dashboard-stat p-6 rounded-2xl border">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#716b79]">Applications Tracked</span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#716b79]">Applications Tracked</span>
             <div className="w-8 h-8 rounded-lg bg-[#f3eff7] text-[#201a29] flex items-center justify-center">
               <Kanban className="w-4 h-4 text-[#5520a5]" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black text-[#201a29]">{totalApps}</span>
+            <span className="text-4xl font-semibold tracking-tight text-[#201a29]">{totalApps}</span>
             <span className="text-sm text-[#716b79]">Active Roles</span>
           </div>
           <p className="mt-3 text-xs text-[#716b79]">
@@ -164,15 +165,15 @@ export default function Dashboard() {
           </p>
         </div>
 
-        <div className="p-6 rounded-2xl bg-white border border-[#e7e2eb] shadow-sm">
+        <div className="dashboard-stat p-6 rounded-2xl border">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#716b79]">Interview Conversion</span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#716b79]">Interview Conversion</span>
             <div className="w-8 h-8 rounded-lg bg-[#f0e8fa] text-[#5520a5] flex items-center justify-center">
               <BarChart3 className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black text-[#5520a5]">{interviewRate}%</span>
+            <span className="text-4xl font-semibold tracking-tight text-[#5520a5]">{interviewRate}%</span>
             <span className="text-sm text-[#716b79]">Call Rate</span>
           </div>
           <p className="mt-3 text-xs text-[#716b79] flex items-center gap-1">
@@ -196,12 +197,12 @@ export default function Dashboard() {
           </div>
 
           {loading ? (
-            <div className="p-12 rounded-2xl bg-white border border-[#e7e2eb] flex items-center justify-center text-[#716b79] gap-3">
+            <div className="dashboard-panel p-12 rounded-2xl flex items-center justify-center text-[#716b79] gap-3">
               <Loader2 className="w-5 h-5 animate-spin text-[#5520a5]" />
               <span>Loading workspace resumes...</span>
             </div>
           ) : resumes.length === 0 ? (
-            <div className="p-12 rounded-2xl bg-white border border-[#e7e2eb] text-center space-y-4 shadow-sm">
+            <div className="dashboard-panel p-12 rounded-2xl text-center space-y-4">
               <div className="w-12 h-12 rounded-full bg-[#f0e8fa] flex items-center justify-center mx-auto text-[#5520a5]">
                 <FileText className="w-6 h-6" />
               </div>
@@ -225,7 +226,7 @@ export default function Dashboard() {
                 return (
                   <div
                     key={r._id || r.id}
-                    className="p-5 sm:p-6 rounded-2xl bg-white border border-[#e7e2eb] hover:border-[#5520a5]/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
+                    className="dashboard-resume-row p-5 sm:p-6 rounded-2xl bg-white border border-[#e7e2eb] hover:border-[#5520a5]/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
                   >
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2.5">
@@ -289,7 +290,7 @@ export default function Dashboard() {
             </Link>
           </div>
 
-          <div className="p-6 rounded-2xl bg-white border border-[#e7e2eb] space-y-4 shadow-sm">
+          <div className="dashboard-panel p-6 rounded-2xl space-y-4">
             {applications.length === 0 ? (
               <p className="text-xs text-[#716b79] py-6 text-center">No tracked applications yet.</p>
             ) : (
@@ -301,7 +302,7 @@ export default function Dashboard() {
                   offer: 'bg-[#f0e8fa] text-[#5520a5] border-[#dfd1f0]',
                 };
                 return (
-                  <div key={app._id || app.id} className="p-3.5 rounded-xl bg-[#f9faf8] border border-[#e8ece7] flex items-center justify-between gap-3">
+                  <div key={app._id || app.id} className="dashboard-application-row p-3.5 rounded-xl bg-[#f9faf8] border border-[#e8ece7] flex items-center justify-between gap-3">
                     <div className="min-w-0">
                       <h4 className="font-bold text-[#201a29] text-sm truncate">{app.roleTitle}</h4>
                       <p className="text-xs text-[#716b79] truncate">{app.companyName}</p>
@@ -324,6 +325,7 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

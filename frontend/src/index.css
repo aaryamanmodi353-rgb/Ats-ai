@@ -114,6 +114,88 @@
   pointer-events: none;
 }
 
+.dashboard-page {
+  min-height: 100%;
+  background:
+    radial-gradient(ellipse at 91% 5%, rgba(139, 79, 195, 0.13), transparent 30%),
+    radial-gradient(ellipse at 4% 42%, rgba(194, 167, 217, 0.16), transparent 28%),
+    linear-gradient(180deg, #fbfaff 0%, #f6f3fa 58%, #fbfaff 100%);
+}
+
+.dashboard-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(89, 47, 124, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(89, 47, 124, 0.025) 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: linear-gradient(to bottom, black, transparent 76%);
+}
+
+.dashboard-score-feature {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 88% 0%, rgba(180, 122, 244, 0.34), transparent 43%),
+    radial-gradient(ellipse at 0% 100%, rgba(101, 50, 173, 0.45), transparent 48%),
+    linear-gradient(145deg, #211333, #34204d 60%, #211431);
+  box-shadow: 0 16px 36px rgba(52, 28, 77, 0.18);
+}
+
+.dashboard-score-feature::after {
+  content: "";
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  top: -76px;
+  right: -42px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  box-shadow: 0 0 0 18px rgba(255, 255, 255, 0.025), 0 0 0 38px rgba(255, 255, 255, 0.018);
+  pointer-events: none;
+}
+
+.dashboard-stat,
+.dashboard-panel,
+.dashboard-resume-row {
+  border-color: #e7e2eb;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 24px rgba(39, 20, 58, 0.045);
+  backdrop-filter: blur(14px);
+}
+
+.dashboard-stat {
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.dashboard-stat:hover {
+  transform: translateY(-2px);
+  border-color: #d7c4e8;
+  box-shadow: 0 14px 30px rgba(58, 29, 83, 0.085);
+}
+
+.dashboard-panel {
+  border: 1px solid #e7e2eb;
+}
+
+.dashboard-resume-row {
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.dashboard-resume-row:hover {
+  transform: translateY(-1px);
+  border-color: rgba(85, 32, 165, 0.35);
+  box-shadow: 0 12px 28px rgba(39, 20, 58, 0.075);
+}
+
+.dashboard-application-row {
+  background: rgba(248, 247, 250, 0.9);
+  border-color: #ebe6ef;
+}
+
 .landing-cta h2 {
   color: #fff;
 }
