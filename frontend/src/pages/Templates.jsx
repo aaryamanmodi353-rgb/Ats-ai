@@ -14,6 +14,8 @@ import {
   Briefcase,
   Layers,
   Search,
+  ChevronLeft,
+  ChevronRight,
   Code,
   Database,
   LineChart,
@@ -27,6 +29,8 @@ import {
 import axios from 'axios';
 import { toast } from 'sonner';
 import { useAuth } from '../context/AuthContext.jsx';
+
+const TEMPLATES_PER_PAGE = 4;
 
 const ROLE_RECOMMENDATIONS = [
   {
@@ -333,6 +337,20 @@ export default function Templates() {
   const [creatingProfileId, setCreatingProfileId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('All');
+  const [currentTemplatePage, setCurrentTemplatePage] = useState(1);
+
+  const totalTemplatePages = Math.ceil(FAMOUS_TEMPLATES.length / TEMPLATES_PER_PAGE);
+  const safeTemplatePage = Math.min(currentTemplatePage, Math.max(totalTemplatePages, 1));
+  const templateStartIndex = (safeTemplatePage - 1) * TEMPLATES_PER_PAGE;
+  const visibleTemplates = FAMOUS_TEMPLATES.slice(
+    templateStartIndex,
+    templateStartIndex + TEMPLATES_PER_PAGE,
+  );
+  const templatePageNumbers = totalTemplatePages <= 5
+    ? Array.from({ length: totalTemplatePages }, (_, index) => index + 1)
+    : [...new Set([1, safeTemplatePage - 1, safeTemplatePage, safeTemplatePage + 1, totalTemplatePages])]
+      .filter((page) => page >= 1 && page <= totalTemplatePages)
+      .sort((left, right) => left - right);
 
   const categories = ['All', ...Array.from(new Set(ROLE_RECOMMENDATIONS.map((r) => r.category)))];
 
@@ -758,7 +776,7 @@ Results-driven ${targetRole.title} specializing in building high-concurrency, sc
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {FAMOUS_TEMPLATES.map((tpl) => (
+            {visibleTemplates.map((tpl) => (
               <div
                 key={tpl.id}
                 className="templates-template-card p-6 sm:p-8 rounded-2xl bg-white border border-[#e7e2eb] shadow-sm flex flex-col justify-between gap-6 group"
@@ -827,6 +845,54 @@ Results-driven ${targetRole.title} specializing in building high-concurrency, sc
                 </div>
               </div>
             ))}
+          </div>
+
+          <div className="dashboard-pagination-bar">
+            <span className="dashboard-pagination-caption">
+              Showing {templateStartIndex + 1}–{Math.min(templateStartIndex + TEMPLATES_PER_PAGE, FAMOUS_TEMPLATES.length)} of {FAMOUS_TEMPLATES.length} templates
+            </span>
+            {totalTemplatePages > 1 && (
+              <nav className="dashboard-pagination" aria-label="Template pages">
+                <button
+                  type="button"
+                  className="dashboard-page-step"
+                  onClick={() => setCurrentTemplatePage(Math.max(1, safeTemplatePage - 1))}
+                  disabled={safeTemplatePage === 1}
+                  aria-label="Previous page"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  <span>Previous</span>
+                </button>
+                <div className="dashboard-page-numbers">
+                  {templatePageNumbers.map((page, index) => (
+                    <React.Fragment key={page}>
+                      {index > 0 && page - templatePageNumbers[index - 1] > 1 && (
+                        <span className="dashboard-page-ellipsis" aria-hidden="true">…</span>
+                      )}
+                      <button
+                        type="button"
+                        className={`dashboard-page-button ${page === safeTemplatePage ? 'is-active' : ''}`}
+                        onClick={() => setCurrentTemplatePage(page)}
+                        aria-current={page === safeTemplatePage ? 'page' : undefined}
+                        aria-label={`Go to page ${page}`}
+                      >
+                        {page}
+                      </button>
+                    </React.Fragment>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  className="dashboard-page-step"
+                  onClick={() => setCurrentTemplatePage(Math.min(totalTemplatePages, safeTemplatePage + 1))}
+                  disabled={safeTemplatePage === totalTemplatePages}
+                  aria-label="Next page"
+                >
+                  <span>Next</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </nav>
+            )}
           </div>
         </section>
 
