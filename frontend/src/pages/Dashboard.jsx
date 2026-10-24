@@ -285,18 +285,18 @@ export default function Dashboard() {
                 return (
                   <div
                     key={r._id || r.id}
-                    className="dashboard-resume-row p-5 sm:p-6 rounded-2xl bg-white border border-[#e7e2eb] hover:border-[#5520a5]/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
+                    className="dashboard-resume-row grid grid-cols-1 gap-4 rounded-2xl border border-[#e7e2eb] bg-white p-5 shadow-sm transition-all hover:border-[#5520a5]/40 sm:p-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,520px)] xl:items-center"
                   >
-                    <div className="min-w-0 flex-1 space-y-1.5">
-                      <div className="flex items-center gap-2.5">
+                    <div className="min-w-0 space-y-2">
+                      <div className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1">
                         <FileText className="w-5 h-5 text-[#5520a5] shrink-0" />
-                        <h3 className="font-bold text-[#201a29] text-base">{r.originalFilename}</h3>
-                        <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#f3eff7] text-[#716b79] font-semibold border border-[#e6e0eb]">
+                        <h3 className="min-w-0 flex-1 break-all text-base font-bold text-[#201a29]">{r.originalFilename}</h3>
+                        <span className="shrink-0 whitespace-nowrap rounded-full border border-[#e6e0eb] bg-[#f3eff7] px-2.5 py-0.5 text-[11px] font-semibold text-[#716b79]">
                           {r.versions?.length || 1} {r.versions?.length === 1 ? 'version' : 'versions'}
                         </span>
                       </div>
-                      <div className="flex items-center gap-4 text-xs text-[#716b79]">
-                        <span className="flex items-center gap-1">
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#716b79]">
+                        <span className="inline-flex items-center gap-1">
                           <Calendar className="w-3.5 h-3.5" />
                           <span>Added {new Date(r.createdAt).toLocaleDateString()}</span>
                         </span>
@@ -305,10 +305,10 @@ export default function Dashboard() {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-end gap-4 flex-wrap">
-                      <div className="text-left sm:text-right">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-semibold text-[#716b79]">ATS Score:</span>
+                    <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between xl:justify-end">
+                      <div className="min-w-0 text-left sm:min-w-[150px] sm:text-right">
+                        <div className="flex flex-wrap items-center gap-1.5 sm:justify-end">
+                          <span className="whitespace-nowrap text-xs font-semibold text-[#716b79]">ATS Score:</span>
                           <span className={`px-2.5 py-0.5 rounded-lg border text-xs font-black ${getScoreBadgeClass(score)}`}>
                             {score !== null ? `${score}/100` : '- / 100'}
                           </span>
@@ -316,7 +316,7 @@ export default function Dashboard() {
                         <span className="text-[10px] text-[#716b79] block mt-0.5">{getScoreLabel(score)}</span>
                       </div>
 
-                      <div className="flex items-center justify-end gap-2 flex-wrap">
+                      <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                         <Link
                           to={`/resume/${r._id || r.id}/editor`}
                           className="px-3.5 py-2 rounded-xl bg-[#f3eff7] hover:bg-[#e8ece7] text-[#201a29] border border-[#e3e7e2] font-semibold text-xs transition-colors"
@@ -344,6 +344,11 @@ export default function Dashboard() {
                           )}
                           <span>{deletingResumeId === String(r._id || r.id) ? 'Deleting…' : 'Delete'}</span>
                         </button>
+                        {!r.canDelete && (
+                          <span className="basis-full text-right text-[10px] leading-4 text-[#8a8291]">
+                            Ownership not verified for this older resume
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
