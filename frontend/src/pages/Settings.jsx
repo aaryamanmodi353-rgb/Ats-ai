@@ -13,7 +13,9 @@ export default function Settings() {
 
   return (
     <main className="settings-page relative isolate flex-1 overflow-hidden">
-      <div className="settings-shell relative z-10 mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+      <div className="dashboard-outer relative z-10 mx-auto w-full max-w-[1440px] px-3 py-4 sm:px-5 sm:py-6 lg:px-8">
+        <div className="dashboard-reference-frame">
+          <div className="settings-shell relative z-10 mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
         <header className="settings-header mb-9 sm:mb-11">
           <div className="settings-eyebrow">
             <SlidersHorizontal className="h-3.5 w-3.5" />
@@ -157,6 +159,8 @@ export default function Settings() {
             </button>
           </div>
         </section>
+          </div>
+        </div>
       </div>
     </main>
   );

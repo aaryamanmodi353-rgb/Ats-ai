@@ -74,16 +74,24 @@ export default function Applications() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex-1 flex flex-col items-center justify-center gap-4 text-[#716b79]">
-        <Loader2 className="w-8 h-8 animate-spin text-[#5520a5]" />
-        <span className="font-semibold text-sm">Loading Kanban Application Tracker...</span>
+      <div className="tracker-page relative isolate flex-1">
+        <div className="dashboard-outer relative z-10 mx-auto w-full max-w-[1440px] px-3 py-4 sm:px-5 sm:py-6 lg:px-8">
+          <div className="dashboard-reference-frame">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex-1 flex flex-col items-center justify-center gap-4 text-[#716b79]">
+              <Loader2 className="w-8 h-8 animate-spin text-[#5520a5]" />
+              <span className="font-semibold text-sm">Loading Kanban Application Tracker...</span>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="tracker-page relative isolate flex-1">
-      <div className="tracker-shell relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 flex flex-col">
+      <div className="dashboard-outer relative z-10 mx-auto w-full max-w-[1440px] px-3 py-4 sm:px-5 sm:py-6 lg:px-8">
+        <div className="dashboard-reference-frame">
+          <div className="tracker-shell relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 flex flex-col">
       <div className="tracker-heading-row flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
           <div className="tracker-eyebrow">APPLICATIONS / PIPELINE</div>
@@ -220,6 +228,8 @@ export default function Applications() {
           </div>
         </div>
       )}
+          </div>
+        </div>
       </div>
     </div>
   );
