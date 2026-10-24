@@ -2,19 +2,31 @@ import Resume from '../models/Resume.js';
 import ResumeVersion from '../models/ResumeVersion.js';
 import ScoreReport from '../models/ScoreReport.js';
 import Application from '../models/Application.js';
+import User from '../models/User.js';
 import mongoose from 'mongoose';
 import { ParserService } from '../services/parserService.js';
 import { ExportService } from '../services/exportService.js';
 
 export const getAllResumes = async (req, res) => {
   try {
+    const currentUserId = req.user?._id?.toString();
+    const currentUserEmail = req.user?.email?.trim().toLowerCase();
+
+    // Before ownership tracking was added, resumes belonged to the app's only
+    // account. Claim those legacy records only when the database still has a
+    // single account; in multi-account databases ownership must be explicit.
+    if (currentUserId && await User.countDocuments() === 1) {
+      await Resume.updateMany(
+        { $or: [{ ownerId: { $exists: false } }, { ownerId: null }] },
+        { $set: { ownerId: req.user._id } },
+      );
+    }
+
     const resumes = await Resume.find().populate({
       path: 'versions',
       options: { sort: { createdAt: -1 } },
     }).sort({ createdAt: -1 });
 
-    const currentUserId = req.user?._id?.toString();
-    const currentUserEmail = req.user?.email?.trim().toLowerCase();
     const resumeResults = resumes.map((resume) => {
       const resumeData = resume.toJSON();
       const ownerId = resume.ownerId?.toString();
