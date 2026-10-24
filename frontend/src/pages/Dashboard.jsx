@@ -69,51 +69,63 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-page relative isolate flex-1">
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-8">
-      {/* Top Breadcrumb & Status */}
-      <div className="flex items-center justify-between text-xs text-[#716b79] border-b border-[#e7e2eb] pb-3">
-        <div className="flex items-center gap-2">
-          <span>Workspace</span>
-          <span>/</span>
-          <span className="text-[#201a29] font-medium">Dashboard</span>
-        </div>
-        <div className="text-xs text-[#716b79] hidden sm:block">
-          Personal workspace
-        </div>
-      </div>
+      <div className="dashboard-outer relative z-10 mx-auto w-full max-w-[1440px] px-3 py-4 sm:px-5 sm:py-6 lg:px-8">
+        <div className="dashboard-reference-frame">
+          <section className="dashboard-hero">
+            <div className="dashboard-hero-kicker">
+              <span className="dashboard-kicker-mark"><Sparkles className="w-3.5 h-3.5" /></span>
+              <span>Resume intelligence for your next move</span>
+            </div>
+            <h1 className="dashboard-hero-title">
+              Build a stronger resume.<br className="hidden sm:block" /> Find your <span>next opportunity.</span>
+            </h1>
+            <p className="dashboard-hero-copy">
+              Track your ATS score across tailored versions and keep every application moving forward.
+            </p>
+            <div className="dashboard-hero-actions">
+              <Link
+                to="/resume/new"
+                className="dashboard-hero-primary"
+              >
+                <Plus className="w-4 h-4" />
+                <span>New ATS Scan</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                to="/applications"
+                className="dashboard-hero-secondary"
+              >
+                <Kanban className="w-4 h-4" />
+                <span>Application Tracker</span>
+              </Link>
+            </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="text-[11px] font-bold uppercase tracking-wider text-[#5520a5] mb-1">
-            OVERVIEW & ANALYTICS
-          </div>
-          <h1 className="text-3xl font-extrabold text-[#201a29] tracking-tight">
-            Resume Intelligence Dashboard
-          </h1>
-          <p className="text-sm text-[#716b79] mt-1">
-            Track your ATS score across tailored versions and monitor application conversion.
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link
-            to="/applications"
-            className="px-4 py-2.5 rounded-xl border border-[#e3e7e2] bg-white hover:bg-[#f3eff7] text-[#201a29] font-semibold text-xs sm:text-sm flex items-center gap-2 transition-colors shadow-sm"
-          >
-            <Kanban className="w-4 h-4 text-[#5520a5]" />
-            <span>Application Tracker</span>
-          </Link>
-          <Link
-            to="/resume/new"
-            className="px-5 py-2.5 rounded-xl bg-[#5520a5] hover:bg-[#3f167b] text-white font-semibold text-xs sm:text-sm shadow-sm flex items-center gap-2 transition-all active:scale-[0.99]"
-          >
-            <Plus className="w-4 h-4" />
-            <span>New ATS Scan</span>
-          </Link>
-        </div>
-      </div>
+            <div className="dashboard-floating-metrics" aria-hidden="true">
+              <div className="dashboard-float-card dashboard-float-card-left">
+                <div className="dashboard-float-label"><Sparkles className="w-3.5 h-3.5" /> Latest ATS score</div>
+                <div className="dashboard-float-value">{latestScore ?? '—'} <span>/ 100</span></div>
+                <div className="dashboard-float-foot"><TrendingUp className="w-3 h-3" /> Resume health</div>
+              </div>
+              <div className="dashboard-float-card dashboard-float-card-right">
+                <div className="dashboard-float-label"><Kanban className="w-3.5 h-3.5" /> Applications tracked</div>
+                <div className="dashboard-float-value">{totalApps} <span>active roles</span></div>
+                <div className="dashboard-float-foot"><CheckCircle2 className="w-3 h-3" /> Your progress at a glance</div>
+              </div>
+            </div>
+          </section>
+
+          <section className="dashboard-workspace">
+            <div className="dashboard-workspace-top">
+              <div className="flex items-center gap-2 text-xs text-[#716b79]">
+                <span>Workspace</span>
+                <span>/</span>
+                <span className="font-semibold text-[#201a29]">Dashboard</span>
+              </div>
+              <span className="dashboard-workspace-status"><span /> Personal workspace</span>
+            </div>
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 xl:gap-5">
+      <div className="dashboard-overview-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 xl:gap-5">
         <div className="dashboard-score-feature p-6 rounded-2xl border border-white/10 shadow-lg">
           <div className="flex items-center justify-between mb-4">
             <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-violet-100/70">Latest ATS Score</span>
@@ -184,8 +196,8 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="dashboard-main-grid grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="dashboard-resume-column lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-[#201a29] flex items-center gap-2">
               <FileCheck className="w-5 h-5 text-[#5520a5]" />
@@ -279,7 +291,7 @@ export default function Dashboard() {
           )}
         </div>
 
-        <div className="space-y-6">
+        <div className="dashboard-applications-column space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-[#201a29] flex items-center gap-2">
               <Kanban className="w-5 h-5 text-[#5520a5]" />
@@ -325,7 +337,9 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-    </div>
+          </section>
+        </div>
+      </div>
     </div>
   );
 }
