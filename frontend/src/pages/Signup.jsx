@@ -23,7 +23,7 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-[#f7f6f9]">
+    <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 p-8 sm:p-10 rounded-2xl bg-white border border-[#e7e2eb] shadow-sm relative z-10">
         <div className="text-center space-y-2">
           <div className="w-12 h-12 rounded-xl bg-[#f0e8fa] border border-[#dfd1f0] flex items-center justify-center text-[#5520a5] mx-auto mb-4">

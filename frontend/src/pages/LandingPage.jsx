@@ -69,7 +69,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f7f6f9]">
+    <div className="landing-page flex flex-col min-h-screen">
       {/* Hero Section */}
       <section className="landing-hero relative overflow-hidden pt-16 pb-20 md:pt-24 md:pb-28 border-b border-[#e7e2eb]">
         <div className="mx-auto grid max-w-7xl items-center gap-14 px-4 sm:px-6 lg:grid-cols-[0.92fr_1.08fr] lg:px-8">

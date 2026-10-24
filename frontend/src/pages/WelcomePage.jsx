@@ -48,7 +48,7 @@ export default function WelcomePage() {
   ];
 
   return (
-    <div className="welcome-shell min-h-screen flex flex-col overflow-hidden bg-[#f7f6f9] text-[#201a29]">
+    <div className="welcome-shell min-h-screen flex flex-col overflow-hidden text-[#201a29]">
       <header className="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-5 sm:px-8 lg:px-10">
         <div className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#5520a5] text-white shadow-sm">

@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx';
+import { BackgroundScene } from './components/BackgroundScene.jsx';
 import LandingPage from './pages/LandingPage.jsx';
 import WelcomePage from './pages/WelcomePage.jsx';
 import Dashboard from './pages/Dashboard.jsx';
@@ -19,7 +20,7 @@ function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) {
     return (
-      <div className="min-h-[75vh] flex flex-col items-center justify-center gap-3 bg-background">
+      <div className="min-h-[75vh] flex flex-col items-center justify-center gap-3">
         <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
         <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Verifying Account & Security...</span>
       </div>
@@ -87,81 +88,84 @@ function MainContent() {
   const isWelcome = location.pathname === '/welcome';
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
-      {!isWelcome && <Navbar />}
-      <main className="flex-1 flex flex-col">
-        <Routes>
-          <Route path="/welcome" element={<WelcomePage />} />
-          <Route
-            path="/"
-            element={
-              <BufferCheck>
-                <LandingPage />
-              </BufferCheck>
-            }
-          />
-          <Route path="/templates" element={<Templates />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/resume/new"
-            element={
-              <ProtectedRoute>
-                <NewScan />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/resume/:id/score/:reportId"
-            element={
-              <ProtectedRoute>
-                <ScoreReport />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/resume/:id/editor"
-            element={
-              <ProtectedRoute>
-                <ResumeEditor />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/editor/:id"
-            element={
-              <ProtectedRoute>
-                <ResumeEditor />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/applications"
-            element={
-              <ProtectedRoute>
-                <Applications />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute>
-                <Settings />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </main>
-      {!isWelcome && <Footer />}
+    <div className="app-shell">
+      <BackgroundScene />
+      <div className="app-content min-h-screen flex flex-col text-foreground">
+        {!isWelcome && <Navbar />}
+        <main className="flex-1 flex flex-col">
+          <Routes>
+            <Route path="/welcome" element={<WelcomePage />} />
+            <Route
+              path="/"
+              element={
+                <BufferCheck>
+                  <LandingPage />
+                </BufferCheck>
+              }
+            />
+            <Route path="/templates" element={<Templates />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/resume/new"
+              element={
+                <ProtectedRoute>
+                  <NewScan />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/resume/:id/score/:reportId"
+              element={
+                <ProtectedRoute>
+                  <ScoreReport />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/resume/:id/editor"
+              element={
+                <ProtectedRoute>
+                  <ResumeEditor />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/editor/:id"
+              element={
+                <ProtectedRoute>
+                  <ResumeEditor />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/applications"
+              element={
+                <ProtectedRoute>
+                  <Applications />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </main>
+        {!isWelcome && <Footer />}
+      </div>
     </div>
   );
 }

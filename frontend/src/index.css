@@ -42,7 +42,6 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background-color: #f7f6f9;
     color: #201a29;
   }
 }
@@ -1976,6 +1975,270 @@ select {
   content: "";
   mask-image: linear-gradient(to bottom, #000 0%, transparent 92%);
   pointer-events: none;
+}
+
+/* Shared 3D lavender scene */
+.app-shell {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 48% 7%, rgb(255 255 255 / 92%) 0 20%, transparent 48%),
+    linear-gradient(135deg, #f8f5fc 0%, #f4effb 46%, #fbf8ff 100%);
+}
+
+.app-content {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+
+.background-scene {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  perspective: 1100px;
+}
+
+.background-scene::before {
+  content: "";
+  position: absolute;
+  inset: 80px 0 0;
+  opacity: 0.3;
+  background-image:
+    linear-gradient(rgb(105 49 180 / 6%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(105 49 180 / 6%) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(to bottom, #000, transparent 72%);
+}
+
+.aurora {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(6px);
+}
+
+.aurora-left {
+  width: 650px;
+  height: 650px;
+  top: 130px;
+  left: -310px;
+  background: radial-gradient(circle at 60% 45%, rgb(133 58 216 / 18%), rgb(180 104 255 / 4%) 58%, transparent 72%);
+}
+
+.aurora-right {
+  width: 780px;
+  height: 780px;
+  top: -20px;
+  right: -360px;
+  background: radial-gradient(circle at 38% 45%, rgb(145 65 232 / 17%), rgb(101 48 185 / 4%) 57%, transparent 72%);
+}
+
+.perspective-grid {
+  position: absolute;
+  width: 110%;
+  height: 46%;
+  left: -5%;
+  bottom: -17%;
+  transform: rotateX(68deg);
+  transform-origin: center top;
+  background-image:
+    linear-gradient(rgb(91 37 170 / 10%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(91 37 170 / 10%) 1px, transparent 1px);
+  background-size: 58px 58px;
+  mask-image: radial-gradient(ellipse at center, #000 5%, transparent 67%);
+}
+
+.orb {
+  position: absolute;
+  top: 250px;
+  left: clamp(-120px, -5vw, -30px);
+  width: 190px;
+  height: 190px;
+  transform-style: preserve-3d;
+  transform: rotateX(65deg) rotateZ(-18deg);
+  animation: float-orb 8s ease-in-out infinite;
+}
+
+.orb-ring {
+  position: absolute;
+  inset: 0;
+  border: 24px solid rgb(120 48 202 / 18%);
+  border-radius: 50%;
+  box-shadow: inset 10px 12px 18px rgb(255 255 255 / 80%), 12px 24px 28px rgb(90 35 161 / 12%);
+}
+
+.orb-core {
+  position: absolute;
+  inset: 48px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 28%, #fff, #d8bbf9 54%, #8650ca 100%);
+  box-shadow: 0 18px 40px rgb(81 33 146 / 20%);
+}
+
+.document-stack {
+  position: absolute;
+  top: 265px;
+  right: clamp(-98px, -4.4vw, -30px);
+  width: 210px;
+  height: 280px;
+  transform-style: preserve-3d;
+  transform: rotateY(-24deg) rotateX(8deg) rotateZ(9deg);
+  animation: float-document 9s ease-in-out infinite;
+}
+
+.document-sheet {
+  position: absolute;
+  width: 154px;
+  height: 205px;
+  border: 1px solid rgb(255 255 255 / 80%);
+  border-radius: 17px;
+  background: linear-gradient(145deg, rgb(255 255 255 / 92%), rgb(226 210 247 / 82%));
+  box-shadow: 18px 24px 38px rgb(67 29 118 / 15%);
+  backdrop-filter: blur(10px);
+}
+
+.document-sheet-back {
+  top: 40px;
+  left: 2px;
+  opacity: 0.68;
+  transform: translateZ(-28px) rotate(-8deg);
+}
+
+.document-sheet-front {
+  top: 10px;
+  left: 28px;
+  transform: translateZ(18px);
+}
+
+.document-avatar {
+  position: absolute;
+  top: 31px;
+  left: 24px;
+  width: 38px;
+  height: 38px;
+  border-radius: 13px;
+  background: linear-gradient(145deg, #a757ed, #6230bd);
+  box-shadow: 0 10px 18px rgb(92 41 166 / 22%);
+}
+
+.document-line {
+  position: absolute;
+  left: 24px;
+  height: 7px;
+  border-radius: 99px;
+  background: rgb(100 57 152 / 14%);
+}
+
+.line-one { top: 88px; width: 99px; }
+.line-two { top: 109px; width: 80px; }
+.line-three { top: 148px; width: 106px; }
+
+.document-shadow {
+  position: absolute;
+  left: 22px;
+  bottom: 5px;
+  width: 160px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgb(82 33 144 / 16%);
+  filter: blur(16px);
+  transform: rotateX(75deg);
+}
+
+.floating-gem {
+  position: absolute;
+  width: 21px;
+  height: 21px;
+  border-radius: 6px;
+  background: linear-gradient(145deg, rgb(255 255 255 / 90%), rgb(161 101 222 / 45%));
+  box-shadow: 4px 8px 14px rgb(82 34 143 / 13%);
+  transform: rotate(45deg);
+}
+
+.gem-one {
+  top: 68%;
+  left: 8%;
+  animation: gem-float 7s ease-in-out infinite;
+}
+
+.gem-two {
+  top: 19%;
+  right: 8%;
+  width: 14px;
+  height: 14px;
+  animation: gem-float 8s 1s ease-in-out infinite;
+}
+
+.gem-three {
+  right: 13%;
+  bottom: 8%;
+  width: 27px;
+  height: 27px;
+  animation: gem-float 9s 2s ease-in-out infinite;
+}
+
+@keyframes float-orb {
+  0%, 100% { transform: rotateX(65deg) rotateZ(-18deg) translate3d(0, 0, 0); }
+  50% { transform: rotateX(65deg) rotateZ(-12deg) translate3d(8px, -18px, 12px); }
+}
+
+@keyframes float-document {
+  0%, 100% { transform: rotateY(-24deg) rotateX(8deg) rotateZ(9deg) translateY(0); }
+  50% { transform: rotateY(-19deg) rotateX(11deg) rotateZ(6deg) translateY(-18px); }
+}
+
+@keyframes gem-float {
+  0%, 100% { transform: rotate(45deg) translateY(0); }
+  50% { transform: rotate(65deg) translate(-8px, -15px); }
+}
+
+/* Keep the shared scene visible behind every page's outer surface. */
+.app-shell .landing-page,
+.app-shell .welcome-shell,
+.app-shell .auth-shell,
+.app-shell .dashboard-page,
+.app-shell .newscan-page,
+.app-shell .templates-page,
+.app-shell .tracker-page,
+.app-shell .settings-page {
+  background: transparent;
+}
+
+.app-shell .landing-page > section:not(.landing-cta) {
+  background: transparent;
+}
+
+.app-shell .dashboard-page::before,
+.app-shell .dashboard-page::after,
+.app-shell .newscan-page::before,
+.app-shell .newscan-page::after,
+.app-shell .tracker-page::before,
+.app-shell .tracker-page::after,
+.app-shell .settings-page::before {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .document-stack {
+    right: -135px;
+    opacity: 0.55;
+  }
+
+  .orb {
+    left: -145px;
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orb,
+  .document-stack,
+  .floating-gem {
+    animation: none;
+  }
 }
 
 .settings-shell {
