@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/texlive/:path*",
+      "destination": "https://texlive.corca.ai/snapshots/2026-ba38749b8714505a/2026/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

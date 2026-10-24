@@ -16,6 +16,11 @@ export default defineConfig({
         target: 'http://localhost:5000',
         changeOrigin: true,
       },
+      '/texlive': {
+        target: 'https://texlive.corca.ai/snapshots/2026-ba38749b8714505a/2026/',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/texlive/, ''),
+      },
     },
   },
 });

@@ -394,6 +394,9 @@ ${eduLatex}
         const { WasmTexCompiler } = await import('wasmtex/headless');
         const compiler = new WasmTexCompiler({
           assetBaseUrl: '/',
+          // Proxy package lookups through this app's origin; the mirror does not
+          // expose CORS headers, so browser workers cannot fetch classes directly.
+          texliveUrl: '/texlive/',
           texliveVersion: '2026',
           engine: 'pdflatex',
           persistentCache: true,
