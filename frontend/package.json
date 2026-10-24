@@ -9,12 +9,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "axios": "^1.7.9",
+    "lucide-react": "^0.474.0",
+    "pdfjs-dist": "5.4.624",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.1",
-    "lucide-react": "^0.474.0",
     "sonner": "^1.7.2",
-    "axios": "^1.7.9"
+    "wasmtex": "https://codeload.github.com/corca-ai/wasmtex/tar.gz/9c9e1cb07d88e2a94651a603ebd68ad275d7c951"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",

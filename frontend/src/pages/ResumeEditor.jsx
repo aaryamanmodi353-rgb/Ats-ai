@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import {
   Save,
@@ -23,6 +23,9 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
+import LatexPdfPreview from '../components/LatexPdfPreview.jsx';
+
+const isLatexSource = (source) => /\\(?:documentclass|usepackage|begin\s*\{document\}|section\*?\s*\{)/i.test(source || '');
 
 const FAMOUS_TEMPLATES_MAP = {
   'jakes-harvard': {
@@ -78,6 +81,22 @@ export default function ResumeEditor() {
   const [optimizingCode, setOptimizingCode] = useState(false);
   const [recompiling, setRecompiling] = useState(false);
   const [autoRecompile, setAutoRecompile] = useState(true);
+  const [compiledPdf, setCompiledPdf] = useState(null);
+  const [compileIssue, setCompileIssue] = useState('');
+  const [compilerProgress, setCompilerProgress] = useState('');
+  const compilerRef = useRef(null);
+  const compilerInitPromiseRef = useRef(null);
+  const compilerQueueRef = useRef(Promise.resolve());
+  const compileRevisionRef = useRef(0);
+  const compiledPdfRef = useRef(null);
+  const compiledSourceRef = useRef('');
+
+  useEffect(() => () => {
+    compileRevisionRef.current += 1;
+    compilerRef.current?.dispose();
+    compilerRef.current = null;
+    compilerInitPromiseRef.current = null;
+  }, []);
 
   useEffect(() => {
     async function loadResume() {
@@ -272,17 +291,17 @@ ${eduLatex}
 
     setLiveScore(Math.min(100, Math.max(10, Math.round(base))));
 
-    if (autoRecompile) {
+    if (autoRecompile && isLatexSource(latexCode)) {
       const timer = setTimeout(() => {
         handleRecompileLatex(false);
+        compileLatexSource(latexCode);
       }, 500);
       return () => clearTimeout(timer);
     }
   }, [latexCode, autoRecompile]);
 
-  const handleRecompileLatex = (showToast = true) => {
+  const handleRecompileLatex = (showToast = false) => {
     if (!latexCode) return;
-    if (showToast) setRecompiling(true);
     try {
       const parsed = { ...resumeData };
 
@@ -358,14 +377,126 @@ ${eduLatex}
 
       setResumeData(parsed);
       if (showToast) {
-        toast.success('🔄 Overleaf Document Recompiled! Visual Preview & ATS Score Synchronized!');
+        toast.success('Resume details synchronized from the source.');
       }
       return parsed;
     } catch (e) {
       console.error(e);
-      if (showToast) toast.error('Failed to parse and recompile LaTeX code.');
-    } finally {
-      if (showToast) setRecompiling(false);
+      if (showToast) toast.error('Failed to sync resume details from the source.');
+    }
+  };
+
+  const initializeLatexCompiler = () => {
+    if (compilerRef.current) return Promise.resolve(compilerRef.current);
+
+    if (!compilerInitPromiseRef.current) {
+      const initPromise = (async () => {
+        const { WasmTexCompiler } = await import('wasmtex/headless');
+        const compiler = new WasmTexCompiler({
+          assetBaseUrl: '/',
+          texliveVersion: '2026',
+          engine: 'pdflatex',
+          persistentCache: true,
+          files: { 'main.tex': '' },
+          onLoadProgress: (progress) => {
+            if (progress.phase === 'format') {
+              setCompilerProgress(`Loading pdfLaTeX runtime (${Math.round(progress.percent || 0)}%)…`);
+            } else if (progress.file) {
+              setCompilerProgress(`Loading LaTeX package: ${progress.file}`);
+            }
+          },
+        });
+        compilerRef.current = compiler;
+
+        try {
+          await compiler.init();
+          return compiler;
+        } catch (error) {
+          compiler.dispose();
+          compilerRef.current = null;
+          throw error;
+        }
+      })();
+
+      compilerInitPromiseRef.current = initPromise;
+      initPromise.catch(() => {
+        if (compilerInitPromiseRef.current === initPromise) compilerInitPromiseRef.current = null;
+      });
+    }
+
+    return compilerInitPromiseRef.current;
+  };
+
+  const compileLatexSource = (source) => {
+    const revision = ++compileRevisionRef.current;
+    setRecompiling(true);
+    setCompileIssue('');
+    setCompilerProgress('Starting pdfLaTeX…');
+
+    const compileTask = compilerQueueRef.current.catch(() => undefined).then(async () => {
+      if (revision !== compileRevisionRef.current) return { stale: true };
+
+      try {
+        const compiler = await initializeLatexCompiler();
+        if (revision !== compileRevisionRef.current) return { stale: true };
+
+        compiler.setFile('main.tex', source);
+        setCompilerProgress('Compiling document with pdfLaTeX…');
+        const result = await compiler.compile();
+
+        if (revision !== compileRevisionRef.current) return { ...result, stale: true };
+        if (!result.success || !result.pdf) {
+          const diagnostics = (result.errors || [])
+            .map((item) => `${item.line ? `Line ${item.line}: ` : ''}${item.message}`)
+            .filter(Boolean)
+            .join('\n');
+          const failureMessage = (diagnostics || result.log || 'pdfLaTeX could not compile this source.')
+            .trim()
+            .slice(-1200);
+          setCompileIssue(failureMessage);
+          setCompilerProgress('Compile failed. The last successful PDF is still shown.');
+          return { ...result, success: false, failureMessage };
+        }
+
+        const pdfBytes = new Uint8Array(result.pdf);
+        compiledPdfRef.current = pdfBytes;
+        compiledSourceRef.current = source;
+        setCompiledPdf(pdfBytes);
+        setCompileIssue('');
+        setCompilerProgress('');
+        return { ...result, pdf: pdfBytes };
+      } catch (error) {
+        if (revision !== compileRevisionRef.current) return { stale: true };
+        const failureMessage = error?.message || 'Could not start the pdfLaTeX compiler.';
+        setCompileIssue(failureMessage);
+        setCompilerProgress('Compile failed. The last successful PDF is still shown.');
+        return { success: false, failureMessage, error };
+      } finally {
+        if (revision === compileRevisionRef.current) setRecompiling(false);
+      }
+    });
+
+    compilerQueueRef.current = compileTask.then(() => undefined, () => undefined);
+    return compileTask;
+  };
+
+  const handleRecompilePreview = async () => {
+    if (!latexCode.trim()) {
+      toast.error('Add LaTeX source before recompiling the preview.');
+      return;
+    }
+
+    handleRecompileLatex(false);
+    if (!isLatexSource(latexCode)) {
+      toast.success('Resume details synchronized from the source.');
+      return;
+    }
+
+    const result = await compileLatexSource(latexCode);
+    if (result?.success && result.pdf) {
+      toast.success('LaTeX compiled with pdfLaTeX.');
+    } else if (!result?.stale) {
+      toast.error(result?.failureMessage || 'LaTeX compilation failed. Check the source and try again.');
     }
   };
 
@@ -928,15 +1059,36 @@ ${eduLatex}
     }
   };
 
-  const handleExportPdf = () => {
-    const preview = document.getElementById('resume-editor-document-preview');
-    if (!preview || !preview.textContent.trim()) {
-      toast.error('Open the Overleaf Code Studio preview before exporting a PDF.');
-      return;
-    }
-
+  const handleExportPdf = async () => {
     setExporting(true);
     try {
+      if (isLatexSource(latexCode)) {
+        const result = compiledSourceRef.current === latexCode && compiledPdfRef.current
+          ? { success: true, pdf: compiledPdfRef.current }
+          : await compileLatexSource(latexCode);
+        if (!result?.success || !result.pdf) {
+          throw new Error(result?.failureMessage || 'The current LaTeX source did not compile.');
+        }
+
+        const cleanName = (resumeData?.contact?.fullName || 'Resume').replace(/[<>:"/\\|?*]+/g, '').trim();
+        const blob = new Blob([new Uint8Array(result.pdf)], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${cleanName || 'Resume'}_ResumeIQ.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+        toast.success('Downloaded the pdfLaTeX-compiled resume.');
+        return;
+      }
+
+      const preview = document.getElementById('resume-editor-document-preview');
+      if (!preview || !preview.textContent.trim()) {
+        throw new Error('Open the Overleaf Code Studio preview before exporting a PDF.');
+      }
+
       const printWindow = window.open('', '_blank');
       if (!printWindow) {
         throw new Error('Allow pop-ups for this site to export the PDF.');
@@ -1138,7 +1290,7 @@ ${eduLatex}
                     <span>Auto-Recompile</span>
                   </label>
                   <button
-                    onClick={() => handleRecompileLatex(true)}
+                    onClick={handleRecompilePreview}
                     disabled={recompiling}
                     className="px-3.5 py-1.5 rounded-xl bg-[#5520a5] hover:bg-[#3f167b] text-white font-semibold text-xs shadow-sm flex items-center gap-1.5 transition-all disabled:opacity-50"
                   >
@@ -1153,7 +1305,21 @@ ${eduLatex}
 
               {/* Document Rendering Box (Real-Time Overleaf LaTeX Engine) */}
               <div id="resume-editor-document-preview" className="p-6 sm:p-8 rounded-2xl bg-white text-[#201a29] font-serif border border-[#dbe0d9] shadow-sm text-xs sm:text-sm leading-relaxed max-h-[460px] overflow-y-auto selection:bg-[#f0e8fa]">
-                {renderOverleafDocumentPreview(latexCode)}
+                {isLatexSource(latexCode) ? (
+                  <div className="space-y-3">
+                    {compilerProgress && (
+                      <div className="rounded-lg border border-[#e7e2eb] bg-[#fbf9fd] px-3 py-2 text-[11px] text-[#716b79]">
+                        {compilerProgress}
+                      </div>
+                    )}
+                    {compileIssue && (
+                      <div className="max-h-24 overflow-y-auto whitespace-pre-wrap rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-[11px] text-rose-800">
+                        {compileIssue}
+                      </div>
+                    )}
+                    <LatexPdfPreview pdfData={compiledPdf} />
+                  </div>
+                ) : renderOverleafDocumentPreview(latexCode)}
               </div>
             </div>
 
@@ -1163,6 +1329,9 @@ ${eduLatex}
                 <CheckCircle2 className="w-4 h-4 text-[#5520a5] shrink-0" />
                 <span className="font-semibold text-[#201a29]">6-Pillar ATS Verification Passed:</span>
                 <span className="text-[#716b79]">Zero tables, boxes, or multi-column leaks detected.</span>
+                <a href="/wasmtex/2026/OPEN_SOURCE_NOTICES.md" target="_blank" rel="noreferrer" className="whitespace-nowrap text-[10px] font-medium text-[#716b79] hover:text-[#5520a5]">
+                  Compiler notices
+                </a>
               </div>
               <button
                 onClick={handleRunAiAutoFixCode}
