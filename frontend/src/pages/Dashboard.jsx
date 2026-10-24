@@ -12,13 +12,18 @@ import {
   Loader2,
   FileText,
   ArrowRight,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import axios from 'axios';
+
+const RESUMES_PER_PAGE = 5;
 
 export default function Dashboard() {
   const [resumes, setResumes] = useState([]);
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     async function fetchData() {
@@ -39,6 +44,15 @@ export default function Dashboard() {
   }, []);
 
   const totalResumes = resumes.length;
+  const totalResumePages = Math.ceil(totalResumes / RESUMES_PER_PAGE);
+  const safeCurrentPage = Math.min(currentPage, Math.max(totalResumePages, 1));
+  const resumeStartIndex = (safeCurrentPage - 1) * RESUMES_PER_PAGE;
+  const visibleResumes = resumes.slice(resumeStartIndex, resumeStartIndex + RESUMES_PER_PAGE);
+  const pageNumbers = totalResumePages <= 5
+    ? Array.from({ length: totalResumePages }, (_, index) => index + 1)
+    : [...new Set([1, safeCurrentPage - 1, safeCurrentPage, safeCurrentPage + 1, totalResumePages])]
+      .filter((page) => page >= 1 && page <= totalResumePages)
+      .sort((left, right) => left - right);
   const latestResume = resumes[0];
   const latestScore = latestResume?.versions?.[0]?.atsScore ?? null;
 
@@ -232,7 +246,7 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="space-y-4">
-              {resumes.map((r) => {
+              {visibleResumes.map((r) => {
                 const latestVer = r.versions?.[0];
                 const score = latestVer?.atsScore ?? null;
                 return (
@@ -287,6 +301,53 @@ export default function Dashboard() {
                   </div>
                 );
               })}
+              <div className="dashboard-pagination-bar">
+                <span className="dashboard-pagination-caption">
+                  Showing {resumeStartIndex + 1}–{Math.min(resumeStartIndex + RESUMES_PER_PAGE, totalResumes)} of {totalResumes} resumes
+                </span>
+                {totalResumePages > 1 && (
+                  <nav className="dashboard-pagination" aria-label="Resume pages">
+                    <button
+                      type="button"
+                      className="dashboard-page-step"
+                      onClick={() => setCurrentPage(Math.max(1, safeCurrentPage - 1))}
+                      disabled={safeCurrentPage === 1}
+                      aria-label="Previous page"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      <span>Previous</span>
+                    </button>
+                    <div className="dashboard-page-numbers">
+                      {pageNumbers.map((page, index) => (
+                        <React.Fragment key={page}>
+                          {index > 0 && page - pageNumbers[index - 1] > 1 && (
+                            <span className="dashboard-page-ellipsis" aria-hidden="true">…</span>
+                          )}
+                          <button
+                            type="button"
+                            className={`dashboard-page-button ${page === safeCurrentPage ? 'is-active' : ''}`}
+                            onClick={() => setCurrentPage(page)}
+                            aria-current={page === safeCurrentPage ? 'page' : undefined}
+                            aria-label={`Go to page ${page}`}
+                          >
+                            {page}
+                          </button>
+                        </React.Fragment>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      className="dashboard-page-step"
+                      onClick={() => setCurrentPage(Math.min(totalResumePages, safeCurrentPage + 1))}
+                      disabled={safeCurrentPage === totalResumePages}
+                      aria-label="Next page"
+                    >
+                      <span>Next</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </nav>
+                )}
+              </div>
             </div>
           )}
         </div>
