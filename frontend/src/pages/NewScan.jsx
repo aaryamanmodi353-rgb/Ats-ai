@@ -92,9 +92,10 @@ export default function NewScan() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 flex-1 space-y-8">
+    <div className="newscan-page relative isolate flex-1">
+      <div className="newscan-shell relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-8">
       {/* Top Breadcrumb & Status */}
-      <div className="flex items-center justify-between text-xs text-[#716b79] border-b border-[#e7e2eb] pb-3">
+      <div className="newscan-breadcrumb flex items-center justify-between text-xs text-[#716b79] border-b border-[#e7e2eb] pb-3">
         <div className="flex items-center gap-2">
           <span>Workspace</span>
           <span>/</span>
@@ -106,24 +107,24 @@ export default function NewScan() {
       </div>
 
       {/* Hero Heading */}
-      <div className="max-w-3xl space-y-2">
+      <div className="newscan-heading max-w-4xl space-y-2">
         <div className="text-[11px] font-bold uppercase tracking-wider text-[#5520a5]">
           YOUR NEXT CHAPTER STARTS HERE
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-[#201a29] tracking-tight">
+        <h1 className="newscan-title text-3xl sm:text-4xl font-extrabold text-[#201a29] tracking-tight">
           A stronger resume. A better first impression.
         </h1>
-        <p className="text-sm sm:text-base text-[#716b79] leading-relaxed">
+        <p className="newscan-subtitle text-sm sm:text-base text-[#716b79] leading-relaxed">
           See your resume the way hiring systems do. Get a clear score and a focused plan to improve it.
         </p>
       </div>
 
       {/* Main Workspace Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="newscan-layout grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: 01 / Resume Check & Job Description (7 cols) */}
-        <div className="lg:col-span-7 space-y-6">
+        <div className="newscan-form-column lg:col-span-7 space-y-6">
           {/* Card 01: Resume Check */}
-          <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#e7e2eb] shadow-sm space-y-6">
+          <div className="newscan-form-card p-6 sm:p-8 rounded-2xl bg-white border border-[#e7e2eb] shadow-sm space-y-6">
             <div className="space-y-1">
               <div className="text-[11px] font-bold uppercase tracking-wider text-[#716b79]">
                 01 / RESUME CHECK
@@ -137,9 +138,9 @@ export default function NewScan() {
             </div>
 
             {/* Upload or Paste Tab Switcher */}
-            <div className="flex items-center justify-between border-b border-[#f0ebf3] pb-3">
+            <div className="newscan-mode-switcher flex items-center justify-between border-b border-[#f0ebf3] pb-3">
               <span className="text-xs font-semibold text-[#716b79]">Resume Input Mode</span>
-              <div className="flex rounded-lg bg-[#f3eff7] p-1 text-xs font-semibold">
+              <div className="newscan-mode-tabs flex rounded-lg bg-[#f3eff7] p-1 text-xs font-semibold">
                 <button
                   type="button"
                   onClick={() => setActiveTab('upload')}
@@ -167,7 +168,7 @@ export default function NewScan() {
 
             {activeTab === 'upload' ? (
               <div className="space-y-4">
-                <label className="border border-dashed border-[#dce2dc] hover:border-[#5520a5] rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all bg-[#f9faf8] hover:bg-[#f6f3fa] min-h-[200px]">
+                <label className="newscan-upload-drop border border-dashed border-[#dce2dc] hover:border-[#5520a5] rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all bg-[#f9faf8] hover:bg-[#f6f3fa] min-h-[200px]">
                   <input
                     type="file"
                     accept=".pdf,.docx,.txt"
@@ -209,12 +210,12 @@ export default function NewScan() {
               </div>
             ) : (
               <div className="space-y-3">
-                <textarea
+                  <textarea
                   rows={8}
                   placeholder="Paste raw text of your resume here..."
                   value={rawResumeText}
                   onChange={(e) => setRawResumeText(e.target.value)}
-                  className="w-full p-4 rounded-xl bg-white border border-[#e7e2eb] text-sm text-[#201a29] placeholder:text-[#716b79]/60 focus:outline-none focus:border-[#5520a5] transition-colors resize-none font-mono leading-relaxed"
+                  className="newscan-control w-full p-4 rounded-xl bg-white border border-[#e7e2eb] text-sm text-[#201a29] placeholder:text-[#716b79]/60 focus:outline-none focus:border-[#5520a5] transition-colors resize-none font-mono leading-relaxed"
                 />
               </div>
             )}
@@ -236,7 +237,7 @@ export default function NewScan() {
                   placeholder="Paste the full requirements, skills, and qualifications from the target job posting..."
                   value={jdText}
                   onChange={(e) => setJdText(e.target.value)}
-                  className="w-full p-3.5 rounded-xl bg-white border border-[#e7e2eb] text-xs sm:text-sm text-[#201a29] placeholder:text-[#716b79]/60 focus:outline-none focus:border-[#5520a5] transition-colors resize-none leading-relaxed"
+                  className="newscan-control w-full p-3.5 rounded-xl bg-white border border-[#e7e2eb] text-xs sm:text-sm text-[#201a29] placeholder:text-[#716b79]/60 focus:outline-none focus:border-[#5520a5] transition-colors resize-none leading-relaxed"
                 />
               </div>
 
@@ -254,7 +255,7 @@ export default function NewScan() {
                     placeholder="https://linkedin.com/jobs/view/... (Optional)"
                     value={jdUrl}
                     onChange={(e) => setJdUrl(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-[#e7e2eb] text-xs text-[#201a29] placeholder:text-[#716b79]/60 focus:outline-none focus:border-[#5520a5] transition-colors"
+                    className="newscan-control w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-[#e7e2eb] text-xs text-[#201a29] placeholder:text-[#716b79]/60 focus:outline-none focus:border-[#5520a5] transition-colors"
                   />
                 </div>
               </div>
@@ -266,7 +267,7 @@ export default function NewScan() {
                 type="button"
                 onClick={handleRunScan}
                 disabled={loading}
-                className="w-full py-3.5 rounded-xl bg-[#5520a5] hover:bg-[#3f167b] text-white font-semibold text-sm shadow-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-60"
+                className="newscan-submit w-full py-3.5 rounded-xl bg-[#5520a5] hover:bg-[#3f167b] text-white font-semibold text-sm shadow-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-60"
               >
                 {loading ? (
                   <>
@@ -289,14 +290,14 @@ export default function NewScan() {
         </div>
 
         {/* Right Column: Preview of the Report (5 cols) */}
-        <div className="lg:col-span-5 space-y-6">
-          <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#e7e2eb] shadow-sm space-y-6">
+        <div className="newscan-report-column lg:col-span-5 space-y-6">
+          <div className="newscan-report-card p-6 sm:p-8 rounded-2xl bg-white border border-[#e7e2eb] shadow-sm space-y-6">
             <div className="text-[11px] font-bold uppercase tracking-wider text-[#201a29]">
               A LOOK INSIDE YOUR REPORT
             </div>
 
             {/* Preview Score Card */}
-            <div className="p-6 rounded-2xl bg-[#f6f3fa] border border-[#e2ece5] text-center space-y-3">
+            <div className="newscan-score-preview p-6 rounded-2xl bg-[#f6f3fa] border border-[#e2ece5] text-center space-y-3">
               {/* Circular Gauge */}
               <div className="relative w-32 h-32 mx-auto flex items-center justify-center">
                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
@@ -305,7 +306,7 @@ export default function NewScan() {
                     cy="50"
                     r="40"
                     fill="transparent"
-                    stroke="#dbe5dd"
+                    stroke="#e5deeb"
                     strokeWidth="8"
                   />
                   <circle
@@ -343,8 +344,8 @@ export default function NewScan() {
                   <span className="text-[#201a29]">ATS readability</span>
                   <span className="text-[#5520a5] font-bold">92 / 100</span>
                 </div>
-                <div className="w-full h-2 rounded-full bg-[#e8ede7] overflow-hidden">
-                  <div className="h-full bg-[#5520a5] rounded-full" style={{ width: '92%' }}></div>
+                <div className="newscan-metric-track w-full h-2 rounded-full bg-[#e8ede7] overflow-hidden">
+                  <div className="newscan-metric-fill h-full bg-[#5520a5] rounded-full" style={{ width: '92%' }}></div>
                 </div>
               </div>
 
@@ -353,8 +354,8 @@ export default function NewScan() {
                   <span className="text-[#201a29]">Keyword alignment</span>
                   <span className="text-[#5520a5] font-bold">71 / 100</span>
                 </div>
-                <div className="w-full h-2 rounded-full bg-[#e8ede7] overflow-hidden">
-                  <div className="h-full bg-[#5520a5] rounded-full" style={{ width: '71%' }}></div>
+                <div className="newscan-metric-track w-full h-2 rounded-full bg-[#e8ede7] overflow-hidden">
+                  <div className="newscan-metric-fill h-full bg-[#5520a5] rounded-full" style={{ width: '71%' }}></div>
                 </div>
               </div>
 
@@ -363,8 +364,8 @@ export default function NewScan() {
                   <span className="text-[#201a29]">Content quality</span>
                   <span className="text-[#5520a5] font-bold">83 / 100</span>
                 </div>
-                <div className="w-full h-2 rounded-full bg-[#e8ede7] overflow-hidden">
-                  <div className="h-full bg-[#5520a5] rounded-full" style={{ width: '83%' }}></div>
+                <div className="newscan-metric-track w-full h-2 rounded-full bg-[#e8ede7] overflow-hidden">
+                  <div className="newscan-metric-fill h-full bg-[#5520a5] rounded-full" style={{ width: '83%' }}></div>
                 </div>
               </div>
             </div>
@@ -383,13 +384,14 @@ export default function NewScan() {
       </div>
 
       {/* Bottom Clarity Banner */}
-      <div className="rounded-2xl bg-[#ebf3ee] border border-[#d8e5dc] p-4 sm:p-5 flex items-center gap-3.5 shadow-sm">
+      <div className="newscan-bottom-note rounded-2xl border p-4 sm:p-5 flex items-center gap-3.5 shadow-sm">
         <div className="w-9 h-9 rounded-xl bg-[#5520a5] text-[#f0e8fa] flex items-center justify-center shrink-0">
           <Sparkles className="w-5 h-5" />
         </div>
         <div className="text-xs sm:text-sm text-[#5520a5]">
           <span className="font-bold">Clarity, not just a score.</span> Every report covers parsing, keyword alignment, and the strength of your experience.
         </div>
+      </div>
       </div>
     </div>
   );
