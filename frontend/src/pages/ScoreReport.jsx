@@ -19,6 +19,88 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import BulletCoachCarousel from '../components/BulletCoachCarousel.jsx';
 
+const escapeLatexText = (value) => [...String(value)].map((character) => ({
+  '\\': '\\textbackslash{}',
+  '#': '\\#',
+  '$': '\\$',
+  '%': '\\%',
+  '&': '\\&',
+  '_': '\\_',
+  '{': '\\{',
+  '}': '\\}',
+  '~': '\\textasciitilde{}',
+  '^': '\\textasciicircum{}',
+}[character] || character)).join('');
+
+const addSkillsToOriginalLatex = (source, skills) => {
+  if (typeof source !== 'string' || !source.trim()) return source;
+
+  const uniqueSkills = [...new Map(
+    skills
+      .filter((skill) => typeof skill === 'string' && skill.trim())
+      .map((skill) => [skill.trim().toLocaleLowerCase(), skill.trim()]),
+  ).values()];
+  if (uniqueSkills.length === 0) return source;
+
+  const sectionPattern = /\\([A-Za-z@]*section)\*?\s*(?:\[[^\]]*\]\s*)?\{([^{}]*)\}/gi;
+  const sections = [];
+  let match;
+  while ((match = sectionPattern.exec(source)) !== null) {
+    const lineStart = source.lastIndexOf('\n', match.index - 1) + 1;
+    const commentStart = source.indexOf('%', lineStart);
+    if (commentStart >= 0 && commentStart < match.index) {
+      let slashCount = 0;
+      for (let i = commentStart - 1; i >= lineStart && source[i] === '\\'; i -= 1) slashCount += 1;
+      if (slashCount % 2 === 0) continue;
+    }
+    sections.push({
+      start: match.index,
+      end: sectionPattern.lastIndex,
+      command: match[1],
+      title: match[2].replace(/\\&/g, '&'),
+      starred: match[0].slice(match[1].length + 1).startsWith('*'),
+    });
+  }
+
+  const skillsSectionIndex = sections.findIndex(({ title }) => /skills?|tools?|competenc|proficienc|technolog/i.test(title));
+  const escapedSkills = uniqueSkills.map(escapeLatexText).join(', ');
+
+  if (skillsSectionIndex >= 0) {
+    const section = sections[skillsSectionIndex];
+    const nextSection = sections[skillsSectionIndex + 1];
+    const documentEnd = source.search(/\\end\s*\{\s*document\s*\}/i);
+    const sectionEnd = Math.min(
+      nextSection?.start ?? source.length,
+      documentEnd >= section.end ? documentEnd : source.length,
+    );
+    const bodyStart = section.end;
+    const body = source.slice(bodyStart, sectionEnd);
+    const normalizedBody = body
+      .replace(/%.*$/gm, '')
+      .replace(/\\([#$%&_{}])/g, '$1')
+      .toLocaleLowerCase();
+    const additions = uniqueSkills.filter((skill) => {
+      const normalizedSkill = skill.replace(/\\([#$%&_{}])/g, '$1').toLocaleLowerCase();
+      return !normalizedBody.includes(normalizedSkill);
+    });
+    if (additions.length === 0) return source;
+
+    const trailingWhitespace = body.match(/\s*$/)?.[0].length || 0;
+    const insertAt = sectionEnd - trailingWhitespace;
+    const addition = `\n\\par\\smallskip\n\\noindent\\textbf{Additional Skills:} ${additions.map(escapeLatexText).join(', ')}\\par\n`;
+    return `${source.slice(0, insertAt)}${addition}${source.slice(insertAt)}`;
+  }
+
+  const insertionPoint = sections.find(({ title }) => /experience|employment|work history/i.test(title))?.start
+    ?? source.search(/\\end\s*\{\s*document\s*\}/i);
+  const target = insertionPoint >= 0 ? insertionPoint : source.length;
+  const heading = sections[0]
+    ? `\\${sections[0].command}${sections[0].starred ? '*' : ''}`
+    : '\\section';
+  const addition = `\n${heading}{Technical Skills}\n\\noindent ${escapedSkills}\n\n`;
+  return `${source.slice(0, target)}${addition}${source.slice(target)}`;
+};
+
 export default function ScoreReport() {
   const { id: resumeId, reportId } = useParams();
   const [report, setReport] = useState(null);
@@ -132,7 +214,13 @@ export default function ScoreReport() {
         hardSkills: Array.from(new Set([...(currentResumeData.skills?.hardSkills || []), ...missingReq, ...missingPref])),
         tools: Array.from(new Set([...(currentResumeData.skills?.tools || []), ...missingTools])),
       };
-      const updatedResumeData = { ...currentResumeData, skills: updatedSkills };
+      const updatedResumeData = {
+        ...currentResumeData,
+        skills: updatedSkills,
+        ...(typeof currentResumeData.rawLatex === 'string'
+          ? { rawLatex: addSkillsToOriginalLatex(currentResumeData.rawLatex, allMissing) }
+          : {}),
+      };
 
       await axios.put(`/api/resume-versions/${latestVer._id || latestVer.id}`, {
         versionLabel: `${latestVer.versionLabel || 'v1.0'} + Pro Optimized & Keywords`,
@@ -219,7 +307,13 @@ export default function ScoreReport() {
         hardSkills: Array.from(new Set([...(currentResumeData.skills?.hardSkills || []), ...missingReq, ...missingPref])),
         tools: Array.from(new Set([...(currentResumeData.skills?.tools || []), ...missingTools])),
       };
-      const updatedResumeData = { ...currentResumeData, skills: updatedSkills };
+      const updatedResumeData = {
+        ...currentResumeData,
+        skills: updatedSkills,
+        ...(typeof currentResumeData.rawLatex === 'string'
+          ? { rawLatex: addSkillsToOriginalLatex(currentResumeData.rawLatex, allMissing) }
+          : {}),
+      };
 
       await axios.put(`/api/resume-versions/${latestVer._id || latestVer.id}`, {
         versionLabel: `${latestVer.versionLabel || 'v1.0'} + LaTeX & Pro Words`,

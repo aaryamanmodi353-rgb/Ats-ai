@@ -192,6 +192,12 @@ export class ExportService {
   }
 
   static generateProfessionalLatex(resumeData) {
+    // If the resume was authored in LaTeX, keep its original class, macros,
+    // section order, and layout instead of replacing it with the default template.
+    if (typeof resumeData.rawLatex === 'string' && resumeData.rawLatex.trim()) {
+      return resumeData.rawLatex;
+    }
+
     const contact = resumeData.contact || {};
     const skills = resumeData.skills || {};
     const workExperience = resumeData.workExperience || [];
