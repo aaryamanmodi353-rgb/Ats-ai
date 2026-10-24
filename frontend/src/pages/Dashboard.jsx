@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   FileCheck,
@@ -15,6 +15,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Trash2,
+  AlertTriangle,
+  X,
 } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -27,6 +29,14 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [deletingResumeId, setDeletingResumeId] = useState(null);
+  const [resumeToDelete, setResumeToDelete] = useState(null);
+  const deleteDialogRef = useRef(null);
+
+  useEffect(() => {
+    if (resumeToDelete && deleteDialogRef.current && !deleteDialogRef.current.open) {
+      deleteDialogRef.current.showModal();
+    }
+  }, [resumeToDelete]);
 
   useEffect(() => {
     async function fetchData() {
@@ -84,13 +94,11 @@ export default function Dashboard() {
     return 'High Auto-Rejection Risk';
   };
 
-  const handleDeleteResume = async (resume) => {
-    const resumeId = resume._id || resume.id;
-    const confirmed = window.confirm(
-      `Permanently delete "${resume.originalFilename}" and its saved versions and ATS reports? Tracked applications will remain, but their resume links will be removed.`,
-    );
+  const handleDeleteResume = async () => {
+    const resume = resumeToDelete;
+    if (!resume) return;
 
-    if (!confirmed) return;
+    const resumeId = resume._id || resume.id;
 
     setDeletingResumeId(String(resumeId));
     try {
@@ -105,6 +113,7 @@ export default function Dashboard() {
           : application;
       }));
 
+      setResumeToDelete(null);
       toast.success('Resume and saved versions deleted.');
     } catch (error) {
       console.error('Failed to delete resume:', error);
@@ -285,12 +294,12 @@ export default function Dashboard() {
                 return (
                   <div
                     key={r._id || r.id}
-                    className="dashboard-resume-row grid grid-cols-1 gap-4 rounded-2xl border border-[#e7e2eb] bg-white p-5 shadow-sm transition-all hover:border-[#5520a5]/40 sm:p-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,520px)] xl:items-center"
+                    className="dashboard-resume-row flex flex-col gap-4 rounded-2xl border border-[#e7e2eb] bg-white p-5 shadow-sm transition-all hover:border-[#5520a5]/40 sm:p-6"
                   >
                     <div className="min-w-0 space-y-2">
                       <div className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1">
                         <FileText className="w-5 h-5 text-[#5520a5] shrink-0" />
-                        <h3 className="min-w-0 flex-1 break-all text-base font-bold text-[#201a29]">{r.originalFilename}</h3>
+                        <h3 className="min-w-0 flex-1 break-words text-base font-bold text-[#201a29]">{r.originalFilename}</h3>
                         <span className="shrink-0 whitespace-nowrap rounded-full border border-[#e6e0eb] bg-[#f3eff7] px-2.5 py-0.5 text-[11px] font-semibold text-[#716b79]">
                           {r.versions?.length || 1} {r.versions?.length === 1 ? 'version' : 'versions'}
                         </span>
@@ -331,7 +340,7 @@ export default function Dashboard() {
                         </Link>
                         <button
                           type="button"
-                          onClick={() => handleDeleteResume(r)}
+                          onClick={() => setResumeToDelete(r)}
                           disabled={!r.canDelete || deletingResumeId === String(r._id || r.id)}
                           aria-label={`Delete ${r.originalFilename}`}
                           title={r.canDelete ? 'Delete resume' : 'This older resume is not linked to your account, so it cannot be deleted safely.'}
@@ -454,6 +463,73 @@ export default function Dashboard() {
           </section>
         </div>
       </div>
+      {resumeToDelete && (
+        <dialog
+          ref={deleteDialogRef}
+          aria-labelledby="delete-resume-title"
+          aria-describedby="delete-resume-description"
+          aria-busy={deletingResumeId === String(resumeToDelete._id || resumeToDelete.id)}
+          onCancel={(event) => {
+            event.preventDefault();
+            if (!deletingResumeId) setResumeToDelete(null);
+          }}
+          onClick={(event) => {
+            if (event.target === event.currentTarget && !deletingResumeId) setResumeToDelete(null);
+          }}
+          className="m-auto w-[min(92vw,480px)] max-w-none overflow-hidden rounded-[1.75rem] border border-[#eee7f3] bg-white p-0 text-[#201a29] shadow-[0_32px_90px_rgba(28,12,45,0.28)] backdrop:bg-[#1b1025]/55 backdrop:backdrop-blur-sm"
+        >
+          <div className="p-6 sm:p-7">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-4">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-rose-100 bg-rose-50 text-rose-600">
+                  <AlertTriangle className="h-5 w-5" />
+                </span>
+                <div className="pt-0.5">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-rose-600">Permanent action</p>
+                  <h2 id="delete-resume-title" className="mt-1 text-xl font-bold tracking-tight text-[#201a29]">Delete this resume?</h2>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setResumeToDelete(null)}
+                disabled={Boolean(deletingResumeId)}
+                aria-label="Close delete confirmation"
+                className="rounded-lg p-2 text-[#8a8291] transition-colors hover:bg-[#f5f1f8] hover:text-[#201a29] disabled:opacity-50"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="mt-5 rounded-2xl border border-[#eee8f2] bg-[#faf8fc] p-4">
+              <p className="break-words text-sm font-semibold leading-5 text-[#352b40]">{resumeToDelete.originalFilename}</p>
+              <p id="delete-resume-description" className="mt-2 text-xs leading-5 text-[#716b79]">
+                This removes the resume, its saved versions, and ATS reports. Tracked applications will stay, but links to this resume will be cleared.
+              </p>
+            </div>
+
+            <div className="mt-6 flex flex-col-reverse gap-2.5 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                autoFocus
+                onClick={() => setResumeToDelete(null)}
+                disabled={Boolean(deletingResumeId)}
+                className="rounded-xl border border-[#e7e2eb] bg-white px-4 py-2.5 text-sm font-semibold text-[#51485b] transition-colors hover:bg-[#f8f6fa] disabled:opacity-60"
+              >
+                Keep resume
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteResume}
+                disabled={Boolean(deletingResumeId)}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-rose-700 disabled:cursor-wait disabled:opacity-70"
+              >
+                {deletingResumeId ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                {deletingResumeId ? 'Deleting resume…' : 'Delete resume'}
+              </button>
+            </div>
+          </div>
+        </dialog>
+      )}
     </div>
   );
 }
